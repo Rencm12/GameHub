@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [mostrarLogin, setMostrarLogin] = useState(false);
@@ -59,9 +60,9 @@ const Header = () => {
                   hover:after:w-full
                 "
               >
-                <a href="#">
+                <Link to={item === "Inicio" ? "/" : `/${item.toLowerCase()}`}>
                   {item}
-                </a>
+                </Link>
               </li>
             ))}
 

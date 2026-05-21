@@ -1,18 +1,29 @@
-import { useState } from 'react'
-import Caruselconsola from './paginas/consola/Carrusel'
-import Header from './components/Header'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Header from "./components/Header";
+import Juegos from "./paginas/juegos/Juegos";
 
+import "./App.css";
+
+function Home() {
   return (
-    <>  
-    <Header/>    
-     <div> <Caruselconsola /> </div>
-  </>
-
-  )
+    <div>
+      <h1>Inicio</h1>
+    </div>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter>
+      <Header />
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/juegos" element={<Juegos />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
