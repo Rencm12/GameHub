@@ -1,3 +1,54 @@
 @import "tailwindcss";
 
 
+@layer base {
+  body {
+    @apply bg-black m-0 font-sans antialiased;
+  }
+
+  code {
+    @apply font-mono;
+  }
+}@layer components {
+
+  .btn-primary {
+    @apply
+    bg-[#00ffc3]
+    text-black
+    px-[14px]
+    py-[8px]
+    rounded-lg
+    font-bold
+    hover:bg-[#00d9a8]
+    transition;
+  }
+
+  .btn-secondary {
+    @apply
+    w-full
+    mt-3
+    p-3
+    rounded-xl
+    border
+    border-[#00ffc3]
+    text-[#00ffc3]
+    hover:bg-[#00ffc3]
+    hover:text-black
+    transition;
+  }
+
+  .modal-input {
+    @apply
+    w-full
+    p-3
+    rounded-xl
+    bg-slate-950
+    text-white
+    border
+    border-slate-800
+    outline-none
+    focus:border-[#00ffc3]
+    focus:shadow-[0_0_10px_#00ffc3];
+  }
+
+}
