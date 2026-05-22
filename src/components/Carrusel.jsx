@@ -40,25 +40,10 @@ const Carousel = ({ slides = [] }) => {
             <img
               src={slide}
               alt={`Slide ${index + 1}`}
-              className="w-full h-[700px] object-cover"
+              className="w-full h-screen object-cover"
             />
           </div>
         ))}
-      </div>
-
-      {/* Caption (opcional) */}
-      <div
-        className="
-          absolute
-          bottom-5
-          left-5
-          text-white
-          bg-black/60
-          p-[10px]
-          rounded-md
-        "
-      >
-        Texto aquí
       </div>
 
       {/* Botón anterior */}
