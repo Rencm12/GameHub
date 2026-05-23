@@ -53,16 +53,12 @@ const Header = () => {
   return (
     <>
       <header className="bg-black px-10 py-4 flex items-center justify-between border-b-2 border-[#00ffc3]">
-
         {/* Logo */}
-        <div className="text-[24px] text-[#00ffc3] font-bold">
-          GameHub
-        </div>
+        <div className="text-[24px] text-[#00ffc3] font-bold">GameHub</div>
 
         {/* Navegación */}
         <nav>
           <ul className="flex gap-8 text-white">
-
             {["Inicio", "Consolas", "Juegos", "Accesorios"].map((item) => (
               <li
                 key={item}
@@ -84,13 +80,11 @@ const Header = () => {
                 </Link>
               </li>
             ))}
-
           </ul>
         </nav>
 
         {/* Botones */}
         <div className="flex items-center gap-4">
-
           <button
             className="btn-primary"
             onClick={() => setMostrarRegistro(true)}
@@ -98,10 +92,7 @@ const Header = () => {
             Registrarse
           </button>
 
-          <button
-            className="btn-primary"
-            onClick={() => setMostrarLogin(true)}
-          >
+          <button className="btn-primary" onClick={() => setMostrarLogin(true)}>
             Iniciar sesión
           </button>
 
@@ -140,20 +131,14 @@ const Header = () => {
               </span>
             )}
           </div>
-
         </div>
-
       </header>
 
       {/* LOGIN */}
       {mostrarLogin && (
         <div className="modal-overlay">
-
           <div className="modal-box">
-
-            <h2 className="modal-title">
-              Login
-            </h2>
+            <h2 className="modal-title">Login</h2>
 
             <input
               className="modal-input"
@@ -171,10 +156,7 @@ const Header = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <button
-              className="btn-primary w-full mt-3"
-              onClick={iniciarSesion}
-            >
+            <button className="btn-primary w-full mt-3" onClick={iniciarSesion}>
               Ingresar
             </button>
 
@@ -184,21 +166,15 @@ const Header = () => {
             >
               Cerrar
             </button>
-
           </div>
-
         </div>
       )}
 
       {/* REGISTRO */}
       {mostrarRegistro && (
         <div className="modal-overlay">
-
           <div className="modal-box">
-
-            <h2 className="modal-title">
-              Registro
-            </h2>
+            <h2 className="modal-title">Registro</h2>
 
             <input
               className="modal-input"
@@ -229,9 +205,7 @@ const Header = () => {
             >
               Cerrar
             </button>
-
           </div>
-
         </div>
       )}
 

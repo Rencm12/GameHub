@@ -3,23 +3,17 @@ import { CarritoContext } from "../context/CarritoContext";
 import { ShoppingCart } from "lucide-react";
 
 function CarritoSidebar({ abierto, cerrar }) {
+  const { carrito, aumentarCantidad, disminuirCantidad, eliminarProducto } =
+    useContext(CarritoContext);
 
-    const {
-        carrito,
-        aumentarCantidad,
-        disminuirCantidad,
-        eliminarProducto,
-    } = useContext(CarritoContext);
+  const total = carrito.reduce(
+    (acc, juego) => acc + juego.precio * juego.cantidad,
+    0,
+  );
 
-    const total = carrito.reduce(
-        (acc, juego) => acc + juego.precio * juego.cantidad,
-        0
-    );
-
-    return (
-
-        <div
-            className={`
+  return (
+    <div
+      className={`
         fixed
         top-0
         right-0
@@ -32,11 +26,10 @@ function CarritoSidebar({ abierto, cerrar }) {
         duration-300
         ${abierto ? "translate-x-0" : "translate-x-full"}
       `}
-        >
-
-            {/* HEADER */}
-            <div
-                className="
+    >
+      {/* HEADER */}
+      <div
+        className="
           flex
           items-center
           justify-between
@@ -44,38 +37,28 @@ function CarritoSidebar({ abierto, cerrar }) {
           border-b
           border-[#00ffc3]
         "
-            >
+      >
+        <h2 className="text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
+          <ShoppingCart size={22} className="text-[#00ffc3]" />
+          Tu carrito
+        </h2>
 
-                <h2 className="text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
-                    <ShoppingCart size={22} className="text-[#00ffc3]" />
-                    Tu carrito
-                </h2>
+        <button onClick={cerrar} className="text-white text-2xl">
+          ✕
+        </button>
+      </div>
 
-                <button
-                    onClick={cerrar}
-                    className="text-white text-2xl"
-                >
-                    ✕
-                </button>
-
-            </div>
-
-            {/* PRODUCTOS */}
-            <div className="p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
-
-                {carrito.length === 0 ? (
-
-                    <p className="text-gray-400 text-center mt-10">
-                        Tu carrito está vacío
-                    </p>
-
-                ) : (
-
-                    carrito.map((juego, index) => (
-
-                        <div
-                            key={index}
-                            className="
+      {/* PRODUCTOS */}
+      <div className="p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
+        {carrito.length === 0 ? (
+          <p className="text-gray-400 text-center mt-10">
+            Tu carrito está vacío
+          </p>
+        ) : (
+          carrito.map((juego, index) => (
+            <div
+              key={index}
+              className="
                 bg-[#1e293b]
                 rounded-xl
                 p-3
@@ -83,34 +66,29 @@ function CarritoSidebar({ abierto, cerrar }) {
                 gap-3
                 items-center
               "
-                        >
-
-                            <img
-                                src={juego.imagen}
-                                alt={juego.nombre}
-                                className="
+            >
+              <img
+                src={juego.imagen}
+                alt={juego.nombre}
+                className="
                   w-20
                   h-20
                   object-cover
                   rounded-lg
                 "
-                            />
+              />
 
-                            <div className="flex-1">
+              <div className="flex-1">
+                <h3 className="text-white font-bold">{juego.nombre}</h3>
 
-                                <h3 className="text-white font-bold">
-                                    {juego.nombre}
-                                </h3>
+                <p className="text-[#00ffc3] font-bold">
+                  S/ {(juego.precio * juego.cantidad).toFixed(2)}
+                </p>
 
-                                <p className="text-[#00ffc3] font-bold">
-                                    S/ {(juego.precio * juego.cantidad).toFixed(2)}
-                                </p>
-
-                                <div className="flex items-center gap-2 mt-2">
-
-                                    <button
-                                        onClick={() => disminuirCantidad(juego.id)}
-                                        className="
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() => disminuirCantidad(juego.id)}
+                    className="
       bg-red-500
       w-7
       h-7
@@ -120,17 +98,15 @@ function CarritoSidebar({ abierto, cerrar }) {
       items-center
       justify-center
     "
-                                    >
-                                        -
-                                    </button>
+                  >
+                    -
+                  </button>
 
-                                    <span className="text-white font-bold">
-                                        {juego.cantidad}
-                                    </span>
+                  <span className="text-white font-bold">{juego.cantidad}</span>
 
-                                    <button
-                                        onClick={() => aumentarCantidad(juego.id)}
-                                        className="
+                  <button
+                    onClick={() => aumentarCantidad(juego.id)}
+                    className="
       bg-[#00ffc3]
       w-7
       h-7
@@ -140,35 +116,29 @@ function CarritoSidebar({ abierto, cerrar }) {
       items-center
       justify-center
     "
-                                    >
-                                        +
-                                    </button>
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
 
-                                </div>
-
-                            </div>
-
-                            <button
-                                onClick={() => eliminarProducto(juego.id)}
-                                className="
+              <button
+                onClick={() => eliminarProducto(juego.id)}
+                className="
                   text-red-500
                   text-xl
                 "
-                            >
-                                🗑️
-                            </button>
-
-                        </div>
-
-                    ))
-
-                )}
-
+              >
+                🗑️
+              </button>
             </div>
+          ))
+        )}
+      </div>
 
-            {/* FOOTER */}
-            <div
-                className="
+      {/* FOOTER */}
+      <div
+        className="
           absolute
           bottom-0
           left-0
@@ -178,20 +148,17 @@ function CarritoSidebar({ abierto, cerrar }) {
           border-[#00ffc3]
           bg-[#111827]
         "
-            >
+      >
+        <div className="flex justify-between text-white text-xl mb-4">
+          <span>Total:</span>
 
-                <div className="flex justify-between text-white text-xl mb-4">
+          <span className="text-[#00ffc3] font-bold">
+            S/ {total.toFixed(2)}
+          </span>
+        </div>
 
-                    <span>Total:</span>
-
-                    <span className="text-[#00ffc3] font-bold">
-                        S/ {total.toFixed(2)}
-                    </span>
-
-                </div>
-
-                <button
-                    className="
+        <button
+          className="
             w-full
             bg-[#00ffc3]
             text-black
@@ -201,16 +168,12 @@ function CarritoSidebar({ abierto, cerrar }) {
             hover:bg-[#00d7aa]
             transition
           "
-                >
-                    Finalizar compra
-                </button>
-
-            </div>
-
-        </div>
-
-    );
-
+        >
+          Finalizar compra
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default CarritoSidebar;

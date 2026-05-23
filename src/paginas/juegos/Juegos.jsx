@@ -28,11 +28,9 @@ function Juegos() {
   }
   return (
     <div className="bg-[#0f172a] min-h-screen">
-
       <Carrusel />
 
       <section className="p-10">
-
         <h2
           className="
             text-center
@@ -55,7 +53,6 @@ function Juegos() {
     mb-10
   "
         >
-
           {/* BUSCADOR */}
           <input
             type="text"
@@ -146,7 +143,6 @@ function Juegos() {
           >
             Limpiar
           </button>
-
         </div>
 
         <div
@@ -159,10 +155,7 @@ function Juegos() {
           "
         >
           {juegosFiltrados.map((juego) => (
-            <CardJuego
-              key={juego.id}
-              juego={juego}
-            />
+            <CardJuego key={juego.id} juego={juego} />
           ))}
         </div>
         {juegosFiltrados.length === 0 && (
@@ -171,9 +164,7 @@ function Juegos() {
           </p>
         )}
       </section>
-
     </div>
-
   );
 }
 

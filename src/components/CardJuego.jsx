@@ -2,16 +2,13 @@ import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 
 function CardJuego({ juego }) {
-
   const [favorito, setFavorito] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [mostrarModal, setMostrarModal] = useState(false);
   const { agregarAlCarrito } = useContext(CarritoContext);
 
   return (
-
     <>
-
       {/* CARD */}
       <div
         className="
@@ -25,12 +22,9 @@ function CardJuego({ juego }) {
           hover:shadow-[0_0_15px_#00ffc3]
         "
       >
-
         {/* FAVORITOS */}
         <button
-
           onClick={() => {
-
             const nuevoEstado = !favorito;
 
             setFavorito(nuevoEstado);
@@ -44,9 +38,7 @@ function CardJuego({ juego }) {
             setTimeout(() => {
               setMensaje("");
             }, 2000);
-
           }}
-
           className="
             absolute
             top-3
@@ -69,7 +61,6 @@ function CardJuego({ juego }) {
 
         {/* MENSAJE FAVORITOS */}
         {mensaje && (
-
           <div
             className="
               absolute
@@ -87,29 +78,16 @@ function CardJuego({ juego }) {
               z-50
             "
           >
-
             <div className="flex items-center gap-3">
-
-              <div className="text-2xl">
-                {favorito ? "❤️" : "💔"}
-              </div>
+              <div className="text-2xl">{favorito ? "❤️" : "💔"}</div>
 
               <div>
+                <p className="font-bold text-[#00ffc3]">Favoritos</p>
 
-                <p className="font-bold text-[#00ffc3]">
-                  Favoritos
-                </p>
-
-                <p className="text-sm text-gray-300">
-                  {mensaje}
-                </p>
-
+                <p className="text-sm text-gray-300">{mensaje}</p>
               </div>
-
             </div>
-
           </div>
-
         )}
 
         {/* IMAGEN */}
@@ -125,9 +103,7 @@ function CardJuego({ juego }) {
         />
 
         {/* NOMBRE */}
-        <h3 className="text-white text-xl mt-3 font-bold">
-          {juego.nombre}
-        </h3>
+        <h3 className="text-white text-xl mt-3 font-bold">{juego.nombre}</h3>
 
         {/* INFO */}
         <p className="text-gray-300">
@@ -135,9 +111,7 @@ function CardJuego({ juego }) {
         </p>
 
         {/* ESTRELLAS */}
-        <div className="mt-2 text-yellow-400 text-lg">
-          {juego.estrellas}
-        </div>
+        <div className="mt-2 text-yellow-400 text-lg">{juego.estrellas}</div>
 
         {/* PRECIO */}
         <p className="text-[#00ffc3] text-xl font-bold mt-2">
@@ -163,9 +137,7 @@ function CardJuego({ juego }) {
 
         {/* BOTÓN VER MÁS */}
         <button
-
           onClick={() => setMostrarModal(true)}
-
           className="
             w-full
             mt-3
@@ -182,12 +154,10 @@ function CardJuego({ juego }) {
         >
           Ver más
         </button>
-
       </div>
 
       {/* MODAL */}
       {mostrarModal && (
-
         <div
           className="
             fixed
@@ -200,7 +170,6 @@ function CardJuego({ juego }) {
             p-5
           "
         >
-
           <div
             className="
               bg-[#111827]
@@ -212,12 +181,9 @@ function CardJuego({ juego }) {
               shadow-[0_0_30px_rgba(0,255,195,0.5)]
             "
           >
-
             {/* BOTÓN CERRAR */}
             <button
-
               onClick={() => setMostrarModal(false)}
-
               className="
                 absolute
                 top-4
@@ -245,7 +211,6 @@ function CardJuego({ juego }) {
 
             {/* CONTENIDO */}
             <div className="p-6">
-
               <h2
                 className="
                   text-3xl
@@ -260,9 +225,7 @@ function CardJuego({ juego }) {
                 {juego.plataforma} | {juego.categoria}
               </p>
 
-              <div className="mt-3 text-xl">
-                {juego.estrellas}
-              </div>
+              <div className="mt-3 text-xl">{juego.estrellas}</div>
 
               <p className="text-gray-400 mt-4 leading-7">
                 {juego.descripcion}
@@ -294,19 +257,12 @@ function CardJuego({ juego }) {
               >
                 Agregar al carrito
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </>
-
   );
-
 }
 
 export default CardJuego;
