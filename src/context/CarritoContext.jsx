@@ -6,7 +6,23 @@ export function CarritoProvider({ children }) {
   const [carrito, setCarrito] = useState(() => {
     const carritoGuardado = localStorage.getItem("carrito");
 
-    return carritoGuardado ? JSON.parse(carritoGuardado) : [];
+    if (!carritoGuardado) return [];
+
+    try {
+      const parsed = JSON.parse(carritoGuardado);
+
+      // Ensure older items have a normalized _key and nombre
+      return parsed.map((item) => {
+        const nombre = item.nombre || item.titulo || "";
+        return {
+          ...item,
+          _key: item._key || `${item.id}-${nombre}`,
+          nombre: item.nombre || item.titulo || item.nombre || "",
+        };
+      });
+    } catch (e) {
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -14,45 +30,51 @@ export function CarritoProvider({ children }) {
   }, [carrito]);
 
   const agregarAlCarrito = (juego) => {
-    const existe = carrito.find((item) => item.id === juego.id);
+    // Normalize product fields and create a unique key to avoid id collisions
+    const nombre = juego.nombre || juego.titulo || "";
+    const key = `${juego.id}-${nombre}`;
+
+    const existe = carrito.find((item) => item._key === key);
 
     if (existe) {
       const nuevoCarrito = carrito.map((item) =>
-        item.id === juego.id ? { ...item, cantidad: item.cantidad + 1 } : item,
+        item._key === key ? { ...item, cantidad: item.cantidad + 1 } : item,
       );
 
       setCarrito(nuevoCarrito);
     } else {
-      setCarrito([
-        ...carrito,
-        {
-          ...juego,
-          cantidad: 1,
-        },
-      ]);
+      const nuevoProducto = {
+        _key: key,
+        id: juego.id,
+        nombre: nombre,
+        titulo: juego.titulo,
+        imagen: juego.imagen,
+        precio: juego.precio ?? juego.price ?? 0,
+        exclusivo: juego.exclusivo,
+        limitada: juego.limitada,
+        cantidad: 1,
+      };
+
+      setCarrito([...carrito, nuevoProducto]);
     }
   };
 
-  const aumentarCantidad = (id) => {
+  const aumentarCantidad = (key) => {
     setCarrito(
-      carrito.map((item) =>
-        item.id === id ? { ...item, cantidad: item.cantidad + 1 } : item,
-      ),
+      carrito.map((item) => (item._key === key ? { ...item, cantidad: item.cantidad + 1 } : item)),
     );
   };
 
-  const disminuirCantidad = (id) => {
+  const disminuirCantidad = (key) => {
     const nuevoCarrito = carrito
-      .map((item) =>
-        item.id === id ? { ...item, cantidad: item.cantidad - 1 } : item,
-      )
+      .map((item) => (item._key === key ? { ...item, cantidad: item.cantidad - 1 } : item))
       .filter((item) => item.cantidad > 0);
 
     setCarrito(nuevoCarrito);
   };
 
-  const eliminarProducto = (id) => {
-    setCarrito(carrito.filter((item) => item.id !== id));
+  const eliminarProducto = (key) => {
+    setCarrito(carrito.filter((item) => item._key !== key));
   };
 
   return (

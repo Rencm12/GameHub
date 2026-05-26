@@ -55,9 +55,9 @@ function CarritoSidebar({ abierto, cerrar }) {
             Tu carrito está vacío
           </p>
         ) : (
-          carrito.map((juego, index) => (
+          carrito.map((juego) => (
             <div
-              key={index}
+              key={juego._key}
               className="
                 bg-[#1e293b]
                 rounded-xl
@@ -79,7 +79,7 @@ function CarritoSidebar({ abierto, cerrar }) {
               />
 
               <div className="flex-1">
-                <h3 className="text-white font-bold">{juego.nombre}</h3>
+                <h3 className="text-white font-bold">{juego.nombre || juego.titulo}</h3>
 
                 <p className="text-[#00ffc3] font-bold">
                   S/ {(juego.precio * juego.cantidad).toFixed(2)}
@@ -87,7 +87,7 @@ function CarritoSidebar({ abierto, cerrar }) {
 
                 <div className="flex items-center gap-2 mt-2">
                   <button
-                    onClick={() => disminuirCantidad(juego.id)}
+                    onClick={() => disminuirCantidad(juego._key)}
                     className="
       bg-red-500
       w-7
@@ -105,7 +105,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                   <span className="text-white font-bold">{juego.cantidad}</span>
 
                   <button
-                    onClick={() => aumentarCantidad(juego.id)}
+                    onClick={() => aumentarCantidad(juego._key)}
                     className="
       bg-[#00ffc3]
       w-7
@@ -123,7 +123,7 @@ function CarritoSidebar({ abierto, cerrar }) {
               </div>
 
               <button
-                onClick={() => eliminarProducto(juego.id)}
+                onClick={() => eliminarProducto(juego._key)}
                 className="
                   text-red-500
                   text-xl

@@ -188,7 +188,7 @@ function CardJuego({ juego }) {
                 absolute
                 top-4
                 right-4
-                text-white
+                text-[#00ffc3]
                 text-xl
                 font-bold
                 z-50
