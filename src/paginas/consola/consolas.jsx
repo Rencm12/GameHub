@@ -3,7 +3,7 @@ import Consolas from "./Cards";
 function Consolaspag() {
   return (
     <>
-    <div className="text-white p-10">
+    <div className="bg-[#0f172a] min-h-screen">
       <Carrusel />
     </div>
     <div>
