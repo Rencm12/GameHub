@@ -63,7 +63,7 @@ function CardJuego({ juego, addToast }) {
 
         {/* INFO */}
         <p className="text-gray-300">
-          {juego.plataforma} | {juego.categoria}
+          {juego.plataforma} | {juego.categoria} | {juego.anio}
         </p>
 
         {/* ESTRELLAS */}
@@ -123,7 +123,7 @@ function CardJuego({ juego, addToast }) {
               </h2>
 
               <p className="text-gray-300 mt-2">
-                {juego.plataforma} | {juego.categoria}
+                {juego.plataforma} | {juego.categoria} | {juego.anio}
               </p>
 
               <p className="text-gray-400 mt-4">{juego.descripcion}</p>
