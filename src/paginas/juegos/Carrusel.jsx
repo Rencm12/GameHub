@@ -9,7 +9,7 @@ function Carrusel() {
   const slides = [img1, img2, img3];
 
   return (
-    <div className="mt-10">
+    <div>
       <Carousel slides={slides} />
     </div>
   );
