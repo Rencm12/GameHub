@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Trash2, Minus, Plus, X } from "lucide-react";
 import CheckoutModal from "./CheckoutModal";
 
 function CarritoSidebar({ abierto, cerrar }) {
@@ -22,7 +22,7 @@ function CarritoSidebar({ abierto, cerrar }) {
           top-0
           right-0
           h-full
-          w-[380px]
+          w-full sm:w-[380px]
           bg-[#0f172a]
           shadow-[-5px_0_20px_rgba(0,0,0,0.5)]
           z-[999]
@@ -37,23 +37,26 @@ function CarritoSidebar({ abierto, cerrar }) {
             flex
             items-center
             justify-between
-            p-5
+            p-4 md:p-5
             border-b
             border-[#00ffc3]
           "
         >
-          <h2 className="text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
+          <h2 className="text-xl md:text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
             <ShoppingCart size={22} className="text-[#00ffc3]" />
             Tu carrito
           </h2>
 
-          <button onClick={cerrar} className="text-white text-2xl">
-            ✕
+          <button
+            onClick={cerrar}
+            className="text-gray-400 hover:text-white text-2xl"
+          >
+            <X size={24} />
           </button>
         </div>
 
         {/* PRODUCTOS */}
-        <div className="p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
+        <div className="p-4 md:p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
           {carrito.length === 0 ? (
             <p className="text-gray-400 text-center mt-10">
               Tu carrito está vacío
@@ -75,8 +78,10 @@ function CarritoSidebar({ abierto, cerrar }) {
                   src={juego.imagen}
                   alt={juego.nombre}
                   className="
-                    w-20
-                    h-20
+                    w-16
+                    h-16
+                    md:w-20
+                    md:h-20
                     object-cover
                     rounded-lg
                   "
@@ -103,7 +108,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                         justify-center
                       "
                     >
-                      -
+                      <Minus size={16} />
                     </button>
 
                     <span className="text-white font-bold">
@@ -123,7 +128,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                         justify-center
                       "
                     >
-                      +
+                      <Plus size={16} />
                     </button>
                   </div>
                 </div>
@@ -135,7 +140,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                     text-xl
                   "
                 >
-                  🗑️
+                  <Trash2 size={20} className="text-red-500" />
                 </button>
               </div>
             ))
@@ -149,13 +154,13 @@ function CarritoSidebar({ abierto, cerrar }) {
             bottom-0
             left-0
             w-full
-            p-5
+            p-4 md:p-5
             border-t
             border-[#00ffc3]
             bg-[#111827]
           "
         >
-          <div className="flex justify-between text-white text-xl mb-4">
+          <div className="flex justify-between text-white text-lg md:text-xl mb-4">
             <span>Total:</span>
 
             <span className="text-[#00ffc3] font-bold">

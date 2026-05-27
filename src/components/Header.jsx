@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
@@ -23,6 +23,7 @@ const Header = () => {
   const { favoritos } = useContext(FavoritosContext);
 
   const [animarCarrito, setAnimarCarrito] = useState(false);
+  const [mostrarBotonFlotante, setMostrarBotonFlotante] = useState(false);
 
   useEffect(() => {
     if (carrito.length > 0) {
@@ -35,6 +36,22 @@ const Header = () => {
       return () => clearTimeout(timer);
     }
   }, [carrito.length]);
+
+  useEffect(() => {
+    const manejarScroll = () => {
+      if (window.scrollY > 300) {
+        setMostrarBotonFlotante(true);
+      } else {
+        setMostrarBotonFlotante(false);
+      }
+    };
+
+    window.addEventListener("scroll", manejarScroll);
+
+    return () => {
+      window.removeEventListener("scroll", manejarScroll);
+    };
+  }, []);
 
   const iniciarSesion = () => {
     if (!usuario || !password) {
@@ -60,13 +77,41 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-black px-10 py-4 flex items-center justify-between border-b-2 border-[#00ffc3]">
+      <header
+        className="
+    bg-black
+    px-4
+    md:px-10
+    py-4
+    flex
+    flex-col
+    md:flex-row
+    items-center
+    justify-between
+    gap-4
+    border-b-2
+    border-[#00ffc3]
+  "
+      >
         {/* LOGO */}
-        <div className="text-[24px] text-[#00ffc3] font-bold">GameHub</div>
+        <div className="text-[20px] md:text-[24px] text-[#00ffc3] font-bold">
+          GameHub
+        </div>
 
         {/* NAVEGACIÓN */}
         <nav>
-          <ul className="flex gap-8 text-white">
+          <ul
+            className="
+    flex
+    flex-wrap
+    justify-center
+    gap-4
+    md:gap-8
+    text-white
+    text-sm
+    md:text-base
+  "
+          >
             {["Inicio", "Consolas", "Juegos", "Accesorios"].map((item) => (
               <li
                 key={item}
@@ -92,7 +137,15 @@ const Header = () => {
         </nav>
 
         {/* BOTONES */}
-        <div className="flex items-center gap-4">
+        <div
+          className="
+    flex
+    flex-wrap
+    items-center
+    justify-center
+    gap-3
+  "
+        >
           <button
             className="btn-primary"
             onClick={() => setMostrarRegistro(true)}
@@ -109,12 +162,12 @@ const Header = () => {
             to="/favoritos"
             className="
               relative
-              text-3xl
+              text-2xl md:text-3xl
               hover:scale-110
               transition
             "
           >
-            ❤️
+            <Heart size={28} className="text-red-500 fill-red-500" />
             {favoritos.length > 0 && (
               <span
                 className="
@@ -144,11 +197,12 @@ const Header = () => {
             className={`
               relative
               text-white
-              text-3xl
+              text-2xl 
+              md:text-3xl
               cursor-pointer
               hover:scale-110
               transition
-              ${animarCarrito ? "scale-125" : ""}
+              ${animarCarrito ? "animate-bounceCart" : ""}
             `}
           >
             <ShoppingCart size={28} />
@@ -258,6 +312,55 @@ const Header = () => {
         abierto={mostrarCarrito}
         cerrar={() => setMostrarCarrito(false)}
       />
+
+      {/* BOTÓN FLOTANTE CARRITO */}
+      {mostrarBotonFlotante && !mostrarCarrito && (
+        <button
+          onClick={() => setMostrarCarrito(true)}
+          className="
+      fixed
+      bottom-6
+      right-6
+      z-[999]
+      bg-[#00ffc3]
+      text-black
+      w-16
+      h-16
+      rounded-full
+      flex
+      items-center
+      justify-center
+      shadow-[0_0_25px_rgba(0,255,195,0.7)]
+      hover:scale-110
+      transition
+      animate-fadeIn
+    "
+        >
+          <ShoppingCart size={30} />
+
+          {carrito.length > 0 && (
+            <span
+              className="
+          absolute
+          -top-1
+          -right-1
+          bg-red-500
+          text-white
+          text-xs
+          font-bold
+          w-6
+          h-6
+          rounded-full
+          flex
+          items-center
+          justify-center
+        "
+            >
+              {carrito.length}
+            </span>
+          )}
+        </button>
+      )}
     </>
   );
 };

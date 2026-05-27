@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Toast from "../../components/Toast";
 import Carrusel from "./Carrusel";
 import juegos from "../../data/juegos";
 import CardJuego from "../../components/CardJuego";
@@ -8,6 +9,24 @@ function Juegos() {
   const [plataforma, setPlataforma] = useState("");
   const [categoria, setCategoria] = useState("");
   const [orden, setOrden] = useState("");
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = (mensaje, juegoId) => {
+    const id = Date.now();
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        juegoId,
+        mensaje,
+      },
+    ]);
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2000);
+  };
 
   let juegosFiltrados = [...juegos];
 
@@ -155,7 +174,7 @@ function Juegos() {
           "
         >
           {juegosFiltrados.map((juego) => (
-            <CardJuego key={juego.id} juego={juego} />
+            <CardJuego key={juego.id} juego={juego} addToast={addToast} />
           ))}
         </div>
         {juegosFiltrados.length === 0 && (
@@ -164,6 +183,7 @@ function Juegos() {
           </p>
         )}
       </section>
+      <Toast toasts={toasts} />
     </div>
   );
 }

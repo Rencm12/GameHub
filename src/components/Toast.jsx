@@ -1,51 +1,32 @@
-function Toast({ mensaje }) {
+import { ShoppingCart } from "lucide-react";
 
-  if (!mensaje) return null;
+function Toast({ toasts = [] }) {
+  if (!toasts.length) return null;
 
   return (
-
-    <div
-      className="
-        fixed
-        top-5
-        right-5
-        bg-[#111827]
-        border
-        border-[#00ffc3]
-        text-white
-        px-5
-        py-4
-        rounded-xl
-        shadow-[0_0_20px_rgba(0,255,195,0.5)]
-        z-[9999]
-        animate-[fadeIn_0.3s_ease]
-      "
-    >
-
-      <div className="flex items-center gap-3">
-
-        <span className="text-2xl">
-          🛒
-        </span>
-
-        <div>
-
-          <p className="font-bold text-[#00ffc3]">
-            Carrito
-          </p>
-
-          <p className="text-sm text-gray-300">
-            {mensaje}
-          </p>
-
+    <div className="fixed top-5 right-5 flex flex-col gap-3 z-[9999]">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className="
+            w-[260px]
+            bg-[#111827]
+            border border-[#00ffc3]
+            text-white
+            px-4 py-3
+            rounded-xl
+            shadow-lg
+            transition-all duration-300
+          "
+        >
+          <div className="flex items-center gap-3">
+            <ShoppingCart size={20} className="text-[#00ffc3]" />
+            <p className="text-sm text-gray-300">{t.mensaje}</p>
+          </div>
         </div>
-
-      </div>
-
+      ))}
     </div>
-
   );
-
 }
 
 export default Toast;

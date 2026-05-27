@@ -1,67 +1,65 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
-import Toast from "./Toast";
+import { X, Heart } from "lucide-react";
 
-function CardJuego({ juego }) {
+function CardJuego({ juego, addToast }) {
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [toast, setToast] = useState("");
+
   const { agregarAlCarrito } = useContext(CarritoContext);
   const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
+
   const favorito = esFavorito(juego.id);
+
+  // CARRITO
+  const handleCarrito = (data) => {
+    agregarAlCarrito(data);
+    addToast(`${data.nombre} agregado al carrito`, data.id);
+  };
+
+  // FAVORITOS
+  const handleFavorito = () => {
+    agregarFavorito(juego);
+
+    addToast(
+      favorito
+        ? `${juego.nombre} eliminado de favoritos`
+        : `${juego.nombre} agregado a favoritos`,
+      juego.id,
+    );
+  };
 
   return (
     <>
       {/* CARD */}
-      <div
-        className="
-          relative
-          bg-[#1a1a1a]
-          p-4
-          rounded-xl
-          text-center
-          transition
-          hover:scale-105
-          hover:shadow-[0_0_15px_#00ffc3]
-        "
-      >
+      <div className="relative bg-[#1a1a1a] p-3 md:p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#00ffc3]">
         {/* FAVORITOS */}
         <button
-          onClick={() => agregarFavorito(juego)}
-          className="
-            absolute
-            top-3
-            right-3
-            w-10
-            h-10
-            rounded-full
-            bg-white/90
-            text-md
-            flex
-            items-center
-            justify-center
-            transition
-            hover:scale-110
-            z-40
-          "
+          onClick={handleFavorito}
+          className={`
+            absolute top-3 right-3 w-10 h-10 rounded-full
+            flex items-center justify-center transition-all duration-200
+            hover:scale-110 active:scale-90
+            ${favorito ? "bg-white/90 text-gray-500" : "bg-gray-200 text-gray-500"}
+          `}
         >
-          {favorito ? "❤️" : "🤍"}
+          <Heart
+            size={20}
+            className={favorito ? "text-red-500 fill-red-500" : "text-gray-400"}
+          />
         </button>
 
         {/* IMAGEN */}
         <img
           src={juego.imagen}
           alt={juego.nombre}
-          className="
-            w-full
-            h-[300px]
-            object-cover
-            rounded-lg
-          "
+          className="w-full h-[220px] md:h-[300px] object-cover rounded-lg"
         />
 
         {/* NOMBRE */}
-        <h3 className="text-white text-xl mt-3 font-bold">{juego.nombre}</h3>
+        <h3 className="text-white text-lg md:text-xl mt-3 font-bold">
+          {juego.nombre}
+        </h3>
 
         {/* INFO */}
         <p className="text-gray-300">
@@ -72,31 +70,14 @@ function CardJuego({ juego }) {
         <div className="mt-2 text-yellow-400 text-lg">{juego.estrellas}</div>
 
         {/* PRECIO */}
-        <p className="text-[#00ffc3] text-xl font-bold mt-2">
+        <p className="text-[#00ffc3] text-lg md:text-xl font-bold mt-2">
           S/ {juego.precio}
         </p>
 
         {/* BOTÓN CARRITO */}
         <button
-          onClick={() => {
-            agregarAlCarrito(juego);
-
-            setToast(`${juego.nombre} agregado al carrito`);
-
-            setTimeout(() => {
-              setToast("");
-            }, 2500);
-          }}
-          className="
-    w-full
-    bg-[#00ffc3]
-    text-black
-    py-2
-    rounded-lg
-    font-bold
-    transition
-    hover:bg-[#00d7aa]
-  "
+          onClick={() => handleCarrito(juego)}
+          className="w-full bg-[#00ffc3] text-black py-2 rounded-lg font-bold transition hover:bg-[#00d7aa]"
         >
           Agregar al carrito
         </button>
@@ -104,19 +85,7 @@ function CardJuego({ juego }) {
         {/* BOTÓN VER MÁS */}
         <button
           onClick={() => setMostrarModal(true)}
-          className="
-            w-full
-            mt-3
-            border
-            border-[#00ffc3]
-            text-[#00ffc3]
-            py-2
-            rounded-lg
-            font-bold
-            hover:bg-[#00ffc3]
-            hover:text-black
-            transition
-          "
+          className="w-full mt-3 border border-[#00ffc3] text-[#00ffc3] py-2 rounded-lg font-bold hover:bg-[#00ffc3] hover:text-black transition"
         >
           Ver más
         </button>
@@ -125,65 +94,31 @@ function CardJuego({ juego }) {
       {/* MODAL */}
       {mostrarModal && (
         <div
-          className="
-            fixed
-            inset-0
-            bg-black/80
-            flex
-            items-center
-            justify-center
-            z-[999]
-            p-5
-          "
+          onClick={() => setMostrarModal(false)}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[999] p-5"
         >
           <div
-            className="
-              bg-[#111827]
-              w-full
-              max-w-[380px]
-              rounded-2xl
-              overflow-hidden
-              relative
-              shadow-[0_0_30px_rgba(0,255,195,0.5)]
-            "
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#111827] w-full max-w-[380px] rounded-2xl overflow-hidden relative"
           >
-            {/* BOTÓN CERRAR */}
+            {/* CERRAR */}
             <button
               onClick={() => setMostrarModal(false)}
-              className="
-                absolute
-                top-4
-                right-4
-                text-[#00ffc3]
-                text-xl
-                font-bold
-                z-50
-              "
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
             >
-              ✕
+              <X size={26} />
             </button>
 
             {/* IMAGEN */}
             <img
               src={juego.imagen}
               alt={juego.nombre}
-              className="
-                w-full
-                h-[250px]
-                object-contain
-                bg-black
-            "
+              className="w-full h-[200px] object-contain bg-black"
             />
 
             {/* CONTENIDO */}
-            <div className="p-6">
-              <h2
-                className="
-                  text-3xl
-                  font-bold
-                  text-[#00ffc3]
-                "
-              >
+            <div className="p-4">
+              <h2 className="text-2xl font-bold text-[#00ffc3]">
                 {juego.nombre}
               </h2>
 
@@ -191,35 +126,16 @@ function CardJuego({ juego }) {
                 {juego.plataforma} | {juego.categoria}
               </p>
 
-              <div className="mt-3 text-xl">{juego.estrellas}</div>
+              <p className="text-gray-400 mt-4">{juego.descripcion}</p>
 
-              <p className="text-gray-400 mt-4 leading-7">
-                {juego.descripcion}
-              </p>
-
-              <p
-                className="
-                  text-[#00ffc3]
-                  text-3xl
-                  font-bold
-                  mt-6
-                "
-              >
+              <p className="text-[#00ffc3] text-2xl font-bold mt-4">
                 S/ {juego.precio}
               </p>
 
+              {/* BOTÓN MODAL */}
               <button
-                className="
-                  mt-6
-                  w-full
-                  bg-[#00ffc3]
-                  text-black
-                  py-3
-                  rounded-xl
-                  font-bold
-                  hover:bg-[#00d9a8]
-                  transition
-                "
+                onClick={() => handleCarrito(juego)}
+                className="mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition"
               >
                 Agregar al carrito
               </button>
@@ -227,7 +143,6 @@ function CardJuego({ juego }) {
           </div>
         </div>
       )}
-      <Toast mensaje={toast} />
     </>
   );
 }
