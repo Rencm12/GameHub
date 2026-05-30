@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
-import { X, Heart } from "lucide-react";
+import { X, Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
 
 function CardJuego({ juego, addToast }) {
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -13,8 +13,13 @@ function CardJuego({ juego, addToast }) {
 
   // CARRITO
   const handleCarrito = (data) => {
-    agregarAlCarrito(data);
-    addToast(`${data.nombre} agregado al carrito`, data.id);
+    const agregado = agregarAlCarrito(data);
+
+    if (agregado) {
+      addToast(`${data.nombre} agregado al carrito`, data.id);
+    } else {
+      addToast("No hay más unidades disponibles", data.id);
+    }
   };
 
   // FAVORITOS
@@ -74,12 +79,51 @@ function CardJuego({ juego, addToast }) {
           S/ {juego.precio}
         </p>
 
+        {/* STOCK */}
+        <div className="mt-2 mb-4 flex justify-center">
+          {juego.stock > 5 && (
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+              <CircleCheck size={14} />
+              Disponible
+            </span>
+          )}
+
+          {juego.stock > 0 && juego.stock <= 5 && (
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+              <TriangleAlert size={14} />
+              Últimas unidades
+            </span>
+          )}
+
+          {juego.stock === 0 && (
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+              <CircleX size={14} />
+              Agotado
+            </span>
+          )}
+        </div>
+
         {/* BOTÓN CARRITO */}
         <button
+          disabled={juego.stock === 0}
           onClick={() => handleCarrito(juego)}
-          className="w-full bg-[#00ffc3] text-black py-2 rounded-lg font-bold transition hover:bg-[#00d7aa]"
+          className={`
+            w-full 
+            bg-[#00ffc3] 
+            text-black 
+            py-2 
+            rounded-lg 
+            font-bold 
+            transition 
+            hover:bg-[#00d7aa]
+            ${
+              juego.stock === 0
+                ? "bg-gray-500 cursor-not-allowed text-white"
+                : "bg-[#00ffc3] text-black hover:bg-[#00d7aa]"
+            }
+          `}
         >
-          Agregar al carrito
+          {juego.stock === 0 ? "Sin stock" : "Agregar al carrito"}
         </button>
 
         {/* BOTÓN VER MÁS */}
@@ -134,10 +178,14 @@ function CardJuego({ juego, addToast }) {
 
               {/* BOTÓN MODAL */}
               <button
+                disabled={juego.stock === 0}
                 onClick={() => handleCarrito(juego)}
-                className="mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition"
+                className={`
+                  mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition
+                  ${juego.stock === 0 ? "bg-gray-500 cursor-not-allowed text-white" : ""}
+                `}
               >
-                Agregar al carrito
+                {juego.stock === 0 ? "Sin stock" : "Agregar al carrito"}
               </button>
             </div>
           </div>

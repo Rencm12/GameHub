@@ -1,4 +1,4 @@
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, TriangleAlert, CheckCircle } from "lucide-react";
 
 function Toast({ toasts = [] }) {
   if (!toasts.length) return null;
@@ -20,7 +20,11 @@ function Toast({ toasts = [] }) {
           "
         >
           <div className="flex items-center gap-3">
-            <ShoppingCart size={20} className="text-[#00ffc3]" />
+            {t.mensaje.includes("No hay más") ? (
+              <TriangleAlert size={20} className="text-yellow-400" />
+            ) : (
+              <CheckCircle size={20} className="text-[#00ffc3]" />
+            )}
             <p className="text-sm text-gray-300">{t.mensaje}</p>
           </div>
         </div>

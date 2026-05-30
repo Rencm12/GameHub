@@ -1,6 +1,13 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
-import { ShoppingCart, Trash2, Minus, Plus, X } from "lucide-react";
+import {
+  ShoppingCart,
+  Trash2,
+  Minus,
+  Plus,
+  X,
+  TriangleAlert,
+} from "lucide-react";
 import CheckoutModal from "./CheckoutModal";
 
 function CarritoSidebar({ abierto, cerrar }) {
@@ -88,6 +95,31 @@ function CarritoSidebar({ abierto, cerrar }) {
                 />
 
                 <div className="flex-1">
+                  {juego.cantidad >= juego.stock && (
+                    <div
+                      className="
+                      mt-2
+                      flex
+                      items-center
+                      gap-1
+                      px-2
+                      py-1
+                      rounded-lg
+                      bg-yellow-500/10
+                      border
+                      border-yellow-400/40
+                      text-yellow-300
+                      text-xs
+                      font-medium
+                      w-fit
+                    "
+                    >
+                      <TriangleAlert size={14} />
+                      <span>
+                        Límite alcanzado ({juego.cantidad}/{juego.stock})
+                      </span>
+                    </div>
+                  )}
                   <h3 className="text-white font-bold">{juego.nombre}</h3>
 
                   <p className="text-[#00ffc3] font-bold">
@@ -116,8 +148,9 @@ function CarritoSidebar({ abierto, cerrar }) {
                     </span>
 
                     <button
+                      disabled={juego.cantidad >= juego.stock}
                       onClick={() => aumentarCantidad(juego._key)}
-                      className="
+                      className={`
                         bg-[#00ffc3]
                         w-7
                         h-7
@@ -126,7 +159,12 @@ function CarritoSidebar({ abierto, cerrar }) {
                         flex
                         items-center
                         justify-center
-                      "
+                      ${
+                        juego.cantidad >= juego.stock
+                          ? "bg-gray-500 text-white cursor-not-allowed"
+                          : "bg-[#00ffc3] text-black"
+                      }
+                    `}
                     >
                       <Plus size={16} />
                     </button>
