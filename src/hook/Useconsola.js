@@ -17,13 +17,13 @@ import { getConsolasFiltradas } from "../service/Consolaservice";
 export function useConsolas() {
   const [filtros, setFiltrosState] = useState({
     busqueda: "",
-    consolas: [],   // marcas seleccionadas
+    consolas: [], // marcas seleccionadas
     tipo: "default",
   });
 
   const [productos, setProductos] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchProductos = useCallback(async (filtrosActuales) => {
     setLoading(true);

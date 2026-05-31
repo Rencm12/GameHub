@@ -39,7 +39,9 @@ function transformar(row) {
 // ── READ ──────────────────────────────────────────────────────────────────────
 
 export async function getConsolas() {
-  const { data, error } = await baseQuery().order("creado_en", { ascending: true });
+  const { data, error } = await baseQuery().order("creado_en", {
+    ascending: true,
+  });
   return { data: data ? data.map(transformar) : null, error };
 }
 
@@ -72,7 +74,7 @@ export async function getConsolasFiltradas({
   }
 
   if (tipo === "exclusivos") query = query.eq("exclusivo", true);
-  if (tipo === "limitados")  query = query.eq("limitada",  true);
+  if (tipo === "limitados") query = query.eq("limitada", true);
 
   const ascending = tipo !== "recientes";
   query = query.order("creado_en", { ascending });
@@ -168,7 +170,7 @@ export async function setConsolaMedia(consolaId, mediaItems) {
   const rows = mediaItems.map((item, i) => ({
     consola_id: consolaId,
     tipo: item.tipo ?? "imagen",
-    src:  item.src,
+    src: item.src,
     orden: item.orden ?? i,
   }));
 

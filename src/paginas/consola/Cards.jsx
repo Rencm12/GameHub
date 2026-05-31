@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Card from "./Card-consola";
 import FiltroConsolas from "./Filtro-consola";
-import { useConsolas } from "../../../backend/hook/Useconsola";
+import { useConsolas } from "../../hook/Useconsola";
 
 const ITEMS_POR_PAGINA = 8; // ajusta según necesites
 
@@ -19,7 +19,7 @@ function Consolas() {
   const totalPaginas = Math.ceil(productos.length / ITEMS_POR_PAGINA);
   const productosPaginados = productos.slice(
     (paginaActual - 1) * ITEMS_POR_PAGINA,
-    paginaActual * ITEMS_POR_PAGINA
+    paginaActual * ITEMS_POR_PAGINA,
   );
 
   return (
@@ -31,7 +31,6 @@ function Consolas() {
       />
 
       <div className="flex-1">
-
         {/* Estado de carga */}
         {loading && (
           <div className="flex items-center justify-center h-64">
@@ -70,7 +69,9 @@ function Consolas() {
             {totalPaginas > 1 && (
               <div className="flex justify-center items-center gap-3 mt-10">
                 <button
-                  onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+                  onClick={() =>
+                    setPaginaActual((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={paginaActual === 1}
                   className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
                 >
@@ -95,7 +96,9 @@ function Consolas() {
                 })}
 
                 <button
-                  onClick={() => setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))}
+                  onClick={() =>
+                    setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
+                  }
                   disabled={paginaActual === totalPaginas}
                   className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
                 >
@@ -105,7 +108,6 @@ function Consolas() {
             )}
           </>
         )}
-
       </div>
     </div>
   );
