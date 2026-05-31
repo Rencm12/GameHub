@@ -1,8 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
+import { supabase } from "../../supabase/client";
 import { Link } from "react-router-dom";
+import { CircleCheck, TriangleAlert, CircleX } from "lucide-react";
 
-function CardConsolaHome({ producto }) {
+function CardConsolaHome({ producto, addToast }) {
 
     const { agregarAlCarrito } = useContext(CarritoContext);
 
@@ -15,6 +17,44 @@ function CardConsolaHome({ producto }) {
     } = producto;
 
     const [mostrarModal, setMostrarModal] = useState(false);
+    const [stock, setStock] = useState(producto.stock ?? undefined);
+
+    useEffect(() => {
+        const obtenerStock = async () => {
+            if (!producto?.id) return;
+
+            const { data, error } = await supabase
+                .from("consolas")
+                .select("stock")
+                .eq("id", producto.id)
+                .single();
+
+            if (error) {
+                console.error("Error al obtener stock de Supabase:", error);
+                return;
+            }
+
+            setStock(data?.stock ?? 0);
+        };
+
+        obtenerStock();
+    }, [producto?.id]);
+
+    const handleCarrito = (data) => {
+        const productoConStock = {
+            ...data,
+            stock: stock ?? data.stock ?? 0,
+        };
+
+        const agregado = agregarAlCarrito(productoConStock);
+        const nombreProducto = productoConStock.nombre || productoConStock.titulo || "Producto";
+
+        if (agregado) {
+            addToast(`${nombreProducto} agregado al carrito`, productoConStock.id);
+        } else {
+            addToast("No hay más unidades disponibles", productoConStock.id);
+        }
+    };
 
     return (
         <>
@@ -71,9 +111,35 @@ function CardConsolaHome({ producto }) {
                         S/ {precio}
                     </p>
 
+                    {stock !== undefined && (
+                        <div className="mt-2 mb-4 flex justify-center gap-2">
+                            {stock > 5 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                                    <CircleCheck size={14} />
+                                    Disponible
+                                </span>
+                            )}
+
+                            {stock > 0 && stock <= 5 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                                    <TriangleAlert size={14} />
+                                    Últimas unidades
+                                </span>
+                            )}
+
+                            {stock === 0 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                                    <CircleX size={14} />
+                                    Agotado
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     <button
-                        onClick={() => agregarAlCarrito(producto)}
-                        className="
+                        disabled={stock === 0 || stock === undefined}
+                        onClick={() => handleCarrito(producto)}
+                        className={`
               w-full
               mt-4
               bg-[#00ffc3]
@@ -82,10 +148,10 @@ function CardConsolaHome({ producto }) {
               rounded-lg
               font-bold
               transition
-              hover:bg-[#00d7aa]
-            "
+              ${stock === 0 || stock === undefined ? "opacity-60 cursor-not-allowed" : "hover:bg-[#00d7aa]"}
+            `}
                     >
-                        Agregar al carrito
+                        {stock === 0 ? "Sin stock" : stock === undefined ? "Cargando stock..." : "Agregar al carrito"}
                     </button>
 
                     <button
@@ -185,6 +251,31 @@ function CardConsolaHome({ producto }) {
                                 {descripcion}
                             </p>
 
+                            {stock !== undefined && (
+                                <div className="mt-4 flex justify-center gap-2">
+                                    {stock > 5 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                                            <CircleCheck size={14} />
+                                            Disponible
+                                        </span>
+                                    )}
+
+                                    {stock > 0 && stock <= 5 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                                            <TriangleAlert size={14} />
+                                            Últimas unidades
+                                        </span>
+                                    )}
+
+                                    {stock === 0 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                                            <CircleX size={14} />
+                                            Agotado
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
                             <p
                                 className="
                   text-[#00ffc3]
@@ -197,8 +288,9 @@ function CardConsolaHome({ producto }) {
                             </p>
 
                             <button
-                                onClick={() => agregarAlCarrito(producto)}
-                                className="
+                                disabled={stock === 0 || stock === undefined}
+                                onClick={() => handleCarrito(producto)}
+                                className={`
                   mt-6
                   w-full
                   bg-[#00ffc3]
@@ -206,11 +298,11 @@ function CardConsolaHome({ producto }) {
                   py-3
                   rounded-xl
                   font-bold
-                  hover:bg-[#00d9a8]
                   transition
-                "
+                  ${stock === 0 || stock === undefined ? "bg-gray-500 cursor-not-allowed text-white" : "hover:bg-[#00d9a8]"}
+                `}
                             >
-                                Agregar al carrito
+                                {stock === 0 ? "Sin stock" : stock === undefined ? "Cargando stock..." : "Agregar al carrito"}
                             </button>
 
                         </div>

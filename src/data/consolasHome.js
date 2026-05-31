@@ -17,15 +17,15 @@ const consolasHome = [
   },
   {
     id: 3,
-    titulo: "Nintendo Switch OLED",
+    titulo: "Nintendo Switch",
     consola: "Nintendo",
     descripcion: "Versión OLED de Switch",
     precio: 1499,
     imagen: "https://promart.vteximg.com.br/arquivos/ids/2853299-1000-1000/image-daeee9d08d01440d8644d7b17b7d5ab1.jpg?v=637720751780500000"
   },
   {
-    id: 4,
-    titulo: "Xbox Series S",
+    id: 5,
+    titulo: "Xbox One",
     consola: "Microsoft",
     descripcion: "Potencia de Ultima generacion en un tamaño compacto",
     precio: 2199,

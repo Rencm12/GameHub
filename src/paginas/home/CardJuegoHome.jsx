@@ -1,8 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
+import { supabase } from "../../supabase/client";
 import { Link } from "react-router-dom";
+import { CircleCheck, TriangleAlert, CircleX } from "lucide-react";
 
-function CardJuegoHome({ juego }) {
+function CardJuegoHome({ juego, addToast }) {
 
     const { agregarAlCarrito } = useContext(CarritoContext);
 
@@ -14,6 +16,45 @@ function CardJuegoHome({ juego }) {
     } = juego;
 
     const [mostrarModal, setMostrarModal] = useState(false);
+    const [stock, setStock] = useState(juego.stock ?? undefined);
+
+    useEffect(() => {
+        const obtenerStock = async () => {
+            if (!juego?.id) return;
+
+            const { data, error } = await supabase
+                .from("juegos")
+                .select("stock")
+                .eq("id", juego.id)
+                .single();
+
+            if (error) {
+                console.error("Error al obtener stock de Supabase:", error);
+                return;
+            }
+
+            setStock(data?.stock ?? 0);
+        };
+
+        obtenerStock();
+    }, [juego?.id]);
+
+    // CARRITO
+    const handleCarrito = (data) => {
+        const productoConStock = {
+            ...data,
+            stock: stock ?? data.stock ?? 0,
+        };
+
+        const agregado = agregarAlCarrito(productoConStock);
+        const nombreProducto = productoConStock.nombre || productoConStock.titulo || "Producto";
+
+        if (agregado) {
+            addToast(`${nombreProducto} agregado al carrito`, productoConStock.id);
+        } else {
+            addToast("No hay más unidades disponibles", productoConStock.id);
+        }
+    };
 
     return (
         <>
@@ -56,9 +97,35 @@ function CardJuegoHome({ juego }) {
                         S/ {precio}
                     </p>
 
+                    {stock !== undefined && (
+                        <div className="mt-2 mb-4 flex justify-center gap-2">
+                            {stock > 5 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                                    <CircleCheck size={14} />
+                                    Disponible
+                                </span>
+                            )}
+
+                            {stock > 0 && stock <= 5 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                                    <TriangleAlert size={14} />
+                                    Últimas unidades
+                                </span>
+                            )}
+
+                            {stock === 0 && (
+                                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                                    <CircleX size={14} />
+                                    Agotado
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     <button
-                        onClick={() => agregarAlCarrito(juego)}
-                        className="
+                        disabled={stock === 0 || stock === undefined}
+                        onClick={() => handleCarrito(juego)}
+                        className={`
               w-full
               mt-4
               bg-[#00ffc3]
@@ -66,9 +133,11 @@ function CardJuegoHome({ juego }) {
               py-2
               rounded-lg
               font-bold
-            "
+              transition
+              ${stock === 0 || stock === undefined ? "opacity-60 cursor-not-allowed" : "hover:bg-[#00d7aa]"}
+            `}
                     >
-                        Agregar al carrito
+                        {stock === 0 ? "Sin stock" : stock === undefined ? "Cargando stock..." : "Agregar al carrito"}
                     </button>
 
                     <button
@@ -152,6 +221,31 @@ function CardJuegoHome({ juego }) {
                             <p className="mt-4 text-gray-400">
                                 {descripcion}
                             </p>
+
+                            {stock !== undefined && (
+                                <div className="mt-4 flex justify-center gap-2">
+                                    {stock > 5 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                                            <CircleCheck size={14} />
+                                            Disponible
+                                        </span>
+                                    )}
+
+                                    {stock > 0 && stock <= 5 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                                            <TriangleAlert size={14} />
+                                            Últimas unidades
+                                        </span>
+                                    )}
+
+                                    {stock === 0 && (
+                                        <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                                            <CircleX size={14} />
+                                            Agotado
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                             <p className="text-[#00ffc3] text-3xl font-bold mt-5">
                                 S/ {precio}

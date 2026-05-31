@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import CarruselHome from "./CarruselHome";
 
 import accesorios from "../../data/accesorios";
@@ -11,13 +12,34 @@ import CardConsolaHome from "./CardConsolaHome";
 
 import Footer from "../../components/Footer";
 
+import Toast from "../../components/Toast";
+
 function Home() {
+
+  const [toasts, setToasts] = useState([]);
 
   const juegosDestacados = juegosHome.slice(0, 3);
 
   const consolasDestacadas = consolasHome.slice(0, 4);
 
   const accesoriosDestacados = accesorios.slice(0, 4);
+
+  const addToast = (mensaje, juegoId) => {
+    const id = Date.now();
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        juegoId,
+        mensaje,
+      },
+    ]);
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2000);
+  };
 
   return (
     <div className="bg-[#0f172a] min-h-screen text-white">
@@ -82,6 +104,7 @@ function Home() {
             <CardJuegoHome
               key={juego.id}
               juego={juego}
+              addToast={addToast}
             />
           ))}
         </div>
@@ -116,6 +139,7 @@ function Home() {
             <CardConsolaHome
               key={producto.id}
               producto={producto}
+              addToast={addToast}
             />
           ))}
         </div>
@@ -156,6 +180,8 @@ function Home() {
       </section>
 
       <Footer />
+
+      <Toast toasts={toasts} />
 
     </div>
     
