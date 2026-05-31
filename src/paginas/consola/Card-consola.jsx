@@ -64,7 +64,7 @@ function Card({ producto, addToast }) {
     stock,
   } = producto;
 
-  const favorito = esFavorito ? esFavorito(producto.id) : false;
+  const favorito = esFavorito ? esFavorito(producto.id, 'consola') : false;
 
   const [mostrarModal, setMostrarModal] = useState(false);
    const [toasts, setToasts] = useState([]);
