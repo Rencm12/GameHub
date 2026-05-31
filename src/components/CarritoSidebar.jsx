@@ -15,11 +15,26 @@ function CarritoSidebar({ abierto, cerrar }) {
     useContext(CarritoContext);
 
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
 
   const total = carrito.reduce(
     (acc, juego) => acc + juego.precio * juego.cantidad,
     0,
   );
+
+  const finalizarCompra = () => {
+    if (carrito.length === 0) {
+      alert("Tu carrito está vacío");
+      return;
+    }
+
+    if (!usuario) {
+      alert("Debes iniciar sesión para finalizar tu compra");
+      return;
+    }
+
+    setMostrarCheckout(true);
+  };
 
   return (
     <>
@@ -51,7 +66,7 @@ function CarritoSidebar({ abierto, cerrar }) {
         >
           <h2 className="text-xl md:text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
             <ShoppingCart size={22} className="text-[#00ffc3]" />
-            Tu carrito
+            Mi carrito
           </h2>
 
           <button
@@ -207,17 +222,20 @@ function CarritoSidebar({ abierto, cerrar }) {
           </div>
 
           <button
-            onClick={() => setMostrarCheckout(true)}
-            className="
-              w-full
-              bg-[#00ffc3]
-              text-black
-              py-3
-              rounded-xl
-              font-bold
-              hover:bg-[#00d7aa]
-              transition
-            "
+            onClick={finalizarCompra}
+            disabled={carrito.length === 0}
+            className={`
+             w-full
+             py-3
+             rounded-xl
+             font-bold
+             transition
+              ${
+                carrito.length === 0
+                  ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  : "bg-[#00ffc3] text-black hover:bg-[#00d7aa]"
+              }
+           `}
           >
             Finalizar compra
           </button>

@@ -146,7 +146,9 @@ function Juegos() {
               rounded-full
             "
           >
-            <option value="">Ordenar por</option>
+            <option value="" disabled hidden>
+              Ordenar por
+            </option>
             <option value="menor">Menor precio</option>
             <option value="mayor">Mayor precio</option>
           </select>
@@ -166,7 +168,9 @@ function Juegos() {
               rounded-full
             "
           >
-            <option value="">Plataforma</option>
+            <option value="" disabled hidden>
+              Plataforma
+            </option>
             <option value="PS5">PS5</option>
             <option value="Xbox">Xbox</option>
             <option value="Nintendo">Nintendo</option>
@@ -187,7 +191,9 @@ function Juegos() {
               rounded-full
             "
           >
-            <option value="">Categoría</option>
+            <option value="" disabled hidden text-gray-300>
+              Categoría
+            </option>
             <option value="Acción">Acción</option>
             <option value="Aventura">Aventura</option>
             <option value="Deportes">Deportes</option>

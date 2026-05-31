@@ -2,22 +2,22 @@ import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 
 function CheckoutModal({ abierto, cerrar }) {
-
   const { carrito, setCarrito } = useContext(CarritoContext);
 
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [metodoPago, setMetodoPago] = useState("");
 
   const total = carrito.reduce(
     (acc, juego) => acc + juego.precio * juego.cantidad,
-    0
+    0,
   );
 
   const finalizarCompra = () => {
-
-    if (!nombre || !correo || !direccion) {
-      alert("Completa todos los campos");
+    if (!nombre || !correo || !telefono || !direccion || !metodoPago) {
+      alert("Completa todos los campos y selecciona un método de pago");
       return;
     }
 
@@ -26,13 +26,11 @@ function CheckoutModal({ abierto, cerrar }) {
     setCarrito([]);
 
     cerrar();
-
   };
 
   if (!abierto) return null;
 
   return (
-
     <div
       className="
         fixed
@@ -45,7 +43,6 @@ function CheckoutModal({ abierto, cerrar }) {
         p-5
       "
     >
-
       <div
         className="
           bg-[#111827]
@@ -59,7 +56,6 @@ function CheckoutModal({ abierto, cerrar }) {
           max-h-[90vh]
         "
       >
-
         {/* CERRAR */}
         <button
           onClick={cerrar}
@@ -88,7 +84,6 @@ function CheckoutModal({ abierto, cerrar }) {
 
         {/* FORMULARIO */}
         <div className="flex flex-col gap-4">
-
           <input
             type="text"
             placeholder="Nombre completo"
@@ -118,6 +113,20 @@ function CheckoutModal({ abierto, cerrar }) {
           />
 
           <input
+            type="tel"
+            placeholder="Teléfono"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+            className="
+              bg-[#1e293b]
+              text-white
+              p-3
+              rounded-xl
+              outline-none
+             "
+          />
+
+          <input
             type="text"
             placeholder="Dirección"
             value={direccion}
@@ -131,13 +140,30 @@ function CheckoutModal({ abierto, cerrar }) {
             "
           />
 
+          <select
+            value={metodoPago}
+            onChange={(e) => setMetodoPago(e.target.value)}
+            className="
+              bg-[#1e293b]
+              text-white
+              p-3
+              rounded-xl
+              outline-none
+            "
+          >
+            <option value="">Selecciona un método de pago</option>
+            <option value="Tarjeta">Tarjeta de crédito/débito</option>
+            <option value="Yape o Plin">Yape / Plin</option>
+            <option value="Transferencia bancaria">
+              Transferencia bancaria
+            </option>
+            <option value="Pago contra entrega">Pago contra entrega</option>
+          </select>
         </div>
 
         {/* PRODUCTOS */}
         <div className="mt-8 flex flex-col gap-4">
-
           {carrito.map((juego, index) => (
-
             <div
               key={index}
               className="
@@ -149,27 +175,17 @@ function CheckoutModal({ abierto, cerrar }) {
                 rounded-xl
               "
             >
-
               <div>
+                <h3 className="text-white font-bold">{juego.nombre}</h3>
 
-                <h3 className="text-white font-bold">
-                  {juego.nombre}
-                </h3>
-
-                <p className="text-gray-400">
-                  Cantidad: {juego.cantidad}
-                </p>
-
+                <p className="text-gray-400">Cantidad: {juego.cantidad}</p>
               </div>
 
               <p className="text-[#00ffc3] font-bold">
                 S/ {(juego.precio * juego.cantidad).toFixed(2)}
               </p>
-
             </div>
-
           ))}
-
         </div>
 
         {/* TOTAL */}
@@ -182,15 +198,11 @@ function CheckoutModal({ abierto, cerrar }) {
             text-2xl
           "
         >
-
-          <span className="text-white">
-            Total:
-          </span>
+          <span className="text-white">Total:</span>
 
           <span className="text-[#00ffc3] font-bold">
             S/ {total.toFixed(2)}
           </span>
-
         </div>
 
         {/* BOTÓN */}
@@ -210,13 +222,9 @@ function CheckoutModal({ abierto, cerrar }) {
         >
           Confirmar compra
         </button>
-
       </div>
-
     </div>
-
   );
-
 }
 
 export default CheckoutModal;
