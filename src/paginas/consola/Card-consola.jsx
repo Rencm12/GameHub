@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
 
+
 // Detecta si un src es un link de YouTube y extrae el ID
 function getYoutubeId(src) {
   if (!src) return null;
