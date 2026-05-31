@@ -100,41 +100,41 @@ const Header = () => {
 
         {/* NAVEGACIÓN */}
         <nav>
-          <ul className="flex gap-8 text-white">
-            {["Inicio", "Consolas", "Juegos", "Accesorios", "Nosotros"].map((item) => (
           <ul
             className="
-    flex
-    flex-wrap
-    justify-center
-    gap-4
-    md:gap-8
-    text-white
-    text-sm
-    md:text-base
-  "
+      flex
+      flex-wrap
+      justify-center
+      gap-4
+      md:gap-8
+      text-white
+      text-sm
+      md:text-base
+    "
           >
-            {["Inicio", "Consolas", "Juegos", "Accesorios"].map((item) => (
-              <li
-                key={item}
-                className="
-                  relative
-                  cursor-pointer
-                  after:absolute
-                  after:left-0
-                  after:-bottom-1
-                  after:h-[2px]
-                  after:w-0
-                  after:bg-[#00ffc3]
-                  after:transition-all
-                  hover:after:w-full
-                "
-              >
-                <Link to={item === "Inicio" ? "/" : `/${item.toLowerCase()}`}>
-                  {item}
-                </Link>
-              </li>
-            ))}
+            {["Inicio", "Consolas", "Juegos", "Accesorios", "Nosotros"].map(
+              (item) => (
+                <li
+                  key={item}
+                  className="
+            relative
+            cursor-pointer
+            after:absolute
+            after:left-0
+            after:-bottom-1
+            after:h-[2px]
+            after:w-0
+            after:bg-[#00ffc3]
+            after:transition-all
+            hover:after:w-full
+          "
+                >
+                  <Link to={item === "Inicio" ? "/" : `/${item.toLowerCase()}`}>
+                    {item}
+                  </Link>
+                </li>
+              ),
+            )}
           </ul>
         </nav>
 
