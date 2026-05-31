@@ -1,7 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 
 const Carousel = ({ slides = [] }) => {
+
   const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+  }, 7000); // cambia cada 3 segundos
+
+  return () => clearInterval(interval);
+}, [slides.length]);
 
   if (!slides.length) {
     return <p>No hay imágenes disponibles</p>;

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Juegos from "./paginas/juegos/Juegos";
 import Nosotros from "./paginas/nosotros/Nosotros";
+import Favoritos from "./paginas/juegos/Favoritos";
 
 import "./App.css";
 import Consolaspag from "./paginas/consola/consolas";
@@ -25,6 +26,8 @@ function App() {
         <Route path="/juegos" element={<Juegos />} />
         <Route path= "/consolas" element={<Consolaspag/>} />
         <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/consolas" element={<Consolaspag />} />
+        <Route path="/favoritos" element={<Favoritos />} />
       </Routes>
     </BrowserRouter>
   );
