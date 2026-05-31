@@ -3,6 +3,8 @@ import { useState } from "react";
 function Nosotros() {
     const [faqAbierto, setFaqAbierto] = useState(false);
     const [terminosAbierto, setTerminosAbierto] = useState(false);
+    const [misionVisionAbierto, setMisionVisionAbierto] = useState(false);
+    const [valoresAbierto, setValoresAbierto] = useState(false);
   const integrantes = [
     {
       nombre: "Renato Alejandro Osorio Cama",
@@ -69,43 +71,114 @@ function Nosotros() {
         </p>
       </section>
 
+      <section className="mb-6">
+
+  <button
+    onClick={() => setMisionVisionAbierto(!misionVisionAbierto)}
+    className="
+      w-full
+      text-left
+      bg-slate-900
+      border
+      border-[#00ffc3]
+      p-4
+      rounded-xl
+      font-bold
+      text-[#00ffc3]
+    "
+  >
+    {misionVisionAbierto
+      ? "▼ Misión y Visión"
+      : "► Misión y Visión"}
+  </button>
+
+  {misionVisionAbierto && (
+    <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
+
+      <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
+        Misión
+      </h3>
+
+      <p className="mb-6">
+        Brindar a los usuarios una plataforma moderna e intuitiva donde
+        puedan explorar videojuegos, consolas y accesorios, ofreciendo una
+        experiencia organizada, accesible y atractiva.
+      </p>
+
+      <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
+        Visión
+      </h3>
+
+      <p>
+        Convertirnos en una plataforma de referencia para la comunidad gamer,
+        incorporando nuevas tecnologías y funcionalidades innovadoras que
+        permitan una experiencia cada vez más completa y personalizada.
+      </p>
+
+    </div>
+  )}
+
+</section>
+
+
       <section className="mb-12">
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-4">
-          Misión
-        </h2>
 
-        <p className="leading-8 text-lg">
-          Brindar a los usuarios una plataforma moderna e intuitiva donde
-          puedan explorar videojuegos, consolas y accesorios, ofreciendo una
-          experiencia organizada, accesible y atractiva.
-        </p>
-      </section>
+  <button
+    onClick={() => setValoresAbierto(!valoresAbierto)}
+    className="
+      w-full
+      text-left
+      bg-slate-900
+      border
+      border-[#00ffc3]
+      p-4
+      rounded-xl
+      font-bold
+      text-[#00ffc3]
+    "
+  >
+    {valoresAbierto
+      ? "▼ Valores Organizacionales"
+      : "► Valores Organizacionales"}
+  </button>
 
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-4">
-          Visión
-        </h2>
+  {valoresAbierto && (
+    <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
 
-        <p className="leading-8 text-lg">
-          Convertirnos en una plataforma de referencia para la comunidad gamer,
-          incorporando nuevas tecnologías y funcionalidades innovadoras que
-          permitan una experiencia cada vez más completa y personalizada.
-        </p>
-      </section>
+      <ul className="list-disc pl-6 space-y-3 text-lg">
 
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-4">
-          Valores Organizacionales
-        </h2>
+        <li>
+          <strong>Innovación tecnológica:</strong> buscamos mejorar continuamente
+          nuestras soluciones mediante nuevas tecnologías.
+        </li>
 
-        <ul className="list-disc pl-6 space-y-2 text-lg">
-          <li>Innovación tecnológica.</li>
-          <li>Trabajo en equipo.</li>
-          <li>Compromiso con la calidad.</li>
-          <li>Responsabilidad en el desarrollo.</li>
-          <li>Mejora continua.</li>
-        </ul>
-      </section>
+        <li>
+          <strong>Trabajo en equipo:</strong> fomentamos la colaboración y la
+          comunicación entre los integrantes.
+        </li>
+
+        <li>
+          <strong>Compromiso con la calidad:</strong> desarrollamos funcionalidades
+          eficientes y fáciles de utilizar.
+        </li>
+
+        <li>
+          <strong>Responsabilidad:</strong> cumplimos con los objetivos y tareas
+          asignadas durante el proyecto.
+        </li>
+
+        <li>
+          <strong>Mejora continua:</strong> analizamos constantemente oportunidades
+          para optimizar la plataforma.
+        </li>
+
+      </ul>
+
+    </div>
+  )}
+
+</section>
+
 
       <section>
         <h2 className="text-3xl font-bold text-[#00ffc3] mb-8">
