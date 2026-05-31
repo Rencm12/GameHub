@@ -9,7 +9,7 @@ function CardJuego({ juego, addToast }) {
   const { agregarAlCarrito } = useContext(CarritoContext);
   const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
 
-  const favorito = esFavorito(juego.id);
+  const favorito = esFavorito ? esFavorito(juego.id, 'juego') : false;
 
   // CARRITO
   const handleCarrito = (data) => {

@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { FavoritosContext } from "../../context/FavoritosContext";
 import { Heart, HeartCrack } from "lucide-react";
 import CardJuego from "../../components/CardJuego";
+import CardConsola from "../consola/Card-consola";
 import Toast from "../../components/Toast";
 
 function Favoritos() {
@@ -58,7 +59,7 @@ function Favoritos() {
 
           <h2 className="text-3xl text-white font-bold">No tienes favoritos</h2>
 
-          <p className="text-gray-400 mt-3">Agrega juegos para verlos aquí</p>
+          <p className="text-gray-400 mt-3">Agrega juegos o consolas para verlos aquí</p>
         </div>
       ) : (
         <div
@@ -71,9 +72,14 @@ function Favoritos() {
             gap-8
           "
         >
-          {favoritos.map((juego) => (
-            <CardJuego key={juego.id} juego={juego} addToast={addToast} />
-          ))}
+          {favoritos.map((item) => {
+            // Determinar si el favorito es una consola (usa la propiedad `titulo`) o un juego
+            if (item && (item.titulo || item.consola) && !item.nombre) {
+              return <CardConsola key={item.id} producto={item} addToast={addToast} />;
+            }
+
+            return <CardJuego key={item.id} juego={item} addToast={addToast} />;
+          })}
         </div>
       )}
       <Toast toasts={toasts} />

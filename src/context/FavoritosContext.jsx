@@ -5,7 +5,18 @@ export const FavoritosContext = createContext();
 export function FavoritosProvider({ children }) {
   const [favoritos, setFavoritos] = useState(() => {
     const guardados = localStorage.getItem("favoritos");
-    return guardados ? JSON.parse(guardados) : [];
+    if (!guardados) return [];
+
+    try {
+      const parsed = JSON.parse(guardados);
+      // Normalizar cada item para asegurar que tenga `tipo`
+      return parsed.map((it) => ({
+        ...it,
+        tipo: it.tipo ?? (it.nombre ? "juego" : "consola"),
+      }));
+    } catch (e) {
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -13,23 +24,36 @@ export function FavoritosProvider({ children }) {
   }, [favoritos]);
 
   const agregarFavorito = (juego) => {
+    // Normalizar tipo: 'juego' o 'consola'
+    const tipo = juego.tipo ?? (juego.nombre ? "juego" : "consola");
+    const item = { ...juego, tipo };
+
     setFavoritos((prev) => {
-      const existe = prev.some((item) => item.id === juego.id);
+      // Comparar por id + tipo para evitar colisiones entre juegos y consolas
+      const existe = prev.some((i) => i.id === item.id && i.tipo === item.tipo);
 
       if (existe) {
-        return prev.filter((item) => item.id !== juego.id);
+        return prev.filter((i) => !(i.id === item.id && i.tipo === item.tipo));
       }
 
-      return [...prev, juego];
+      return [...prev, item];
     });
   };
 
-  const eliminarFavorito = (id) => {
-    setFavoritos((prev) => prev.filter((juego) => juego.id !== id));
+  const eliminarFavorito = (id, tipo) => {
+    setFavoritos((prev) => {
+      if (tipo) {
+        return prev.filter((i) => !(i.id === id && i.tipo === tipo));
+      }
+
+      // Si no se especifica tipo, eliminar cualquier favorito con ese id
+      return prev.filter((i) => i.id !== id);
+    });
   };
 
-  const esFavorito = (id) => {
-    return favoritos.some((juego) => juego.id === id);
+  const esFavorito = (id, tipo) => {
+    if (tipo) return favoritos.some((i) => i.id === id && i.tipo === tipo);
+    return favoritos.some((i) => i.id === id);
   };
 
   return (

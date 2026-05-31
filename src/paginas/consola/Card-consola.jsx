@@ -1,5 +1,8 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
+import { FavoritosContext } from "../../context/FavoritosContext";
+import { Heart } from "lucide-react";
+import Toast from "../../components/Toast";
 
 
 // Detecta si un src es un link de YouTube y extrae el ID
@@ -47,8 +50,9 @@ function Slide({ slide, isActive }) {
   );
 }
 
-function Card({ producto }) {
+function Card({ producto, addToast }) {
   const { agregarAlCarrito } = useContext(CarritoContext);
+  const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
   const {
     imagen,
     media,
@@ -61,10 +65,31 @@ function Card({ producto }) {
     stock,
   } = producto;
 
+  const favorito = esFavorito ? esFavorito(producto.id, 'consola') : false;
+
   const [mostrarModal, setMostrarModal] = useState(false);
+   const [toasts, setToasts] = useState([]);
   const [descExpandida, setDescExpandida] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const autoplayRef = useRef(null);
+   const localAddToast = (mensaje, consolaId) => {
+    const id = Date.now();
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        consolaId,
+        mensaje,
+      },
+    ]);
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2000);
+  };
+
+  const toastFn = addToast ? addToast : localAddToast;
 
   // Si no hay array media, armar uno solo con la imagen principal
   const slides = media && media.length > 0 ? media : [{ tipo: "imagen", src: imagen }];
@@ -99,11 +124,12 @@ function Card({ producto }) {
     setDescExpandida(false);
   };
 
+  
   return (
     <>
       {/* ── CARD ── */}
       <div className="relative bg-[#1a1a1a] p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#00ffc3]">
-        <div className="absolute top-3 right-3 flex gap-2">
+        <div className="absolute top-3 right-3 flex gap-2 items-center">
           {exclusivo && (
             <span className="bg-cyan-400 text-black px-2 py-1 rounded-lg text-xs font-bold">
               Exclusiva
@@ -114,6 +140,23 @@ function Card({ producto }) {
               Limitada
             </span>
           )}
+          {/* Botón favorito */}
+          <button
+            onClick={() => {
+              agregarFavorito(producto);
+              toastFn(
+                favorito
+                  ? `${titulo} eliminado de favoritos`
+                  : `${titulo} agregado a favoritos`,
+                producto.id
+              );
+            }}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 ${
+              favorito ? "bg-white/90 text-gray-500" : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            <Heart size={18} className={favorito ? "text-red-500 fill-red-500" : "text-gray-400"} />
+          </button>
         </div>
 
         <img src={imagen} alt={titulo} className="w-full h-[260px] object-cover rounded-lg" />
@@ -292,6 +335,7 @@ function Card({ producto }) {
           to   { width: 100% }
         }
       `}</style>
+      {!addToast && <Toast toasts={toasts} />}
     </>
   );
 }
