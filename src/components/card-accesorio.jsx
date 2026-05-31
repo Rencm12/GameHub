@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext.jsx";
+import { Link } from "react-router-dom";
 
 function CardAccesorio({ producto }) {
 
@@ -29,16 +30,18 @@ function CardAccesorio({ producto }) {
         "
       >
 
-        <img
-          src={imagen}
-          alt={nombre}
-          className="
-            w-full
-            h-[260px]
-            object-cover
-          "
-        />
-
+        <Link to="/accesorios">
+          <img
+            src={imagen}
+            alt={nombre}
+            className="
+      w-full
+      h-[260px]
+      object-cover
+      cursor-pointer
+    "
+          />
+        </Link>
         <div className="p-4">
 
           <h3

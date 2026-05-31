@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Juegos from "./paginas/juegos/Juegos";
 import Home from "./paginas/home/Home";
 
+
 import "./App.css";
 import Consolaspag from "./paginas/consola/consolas";
 
