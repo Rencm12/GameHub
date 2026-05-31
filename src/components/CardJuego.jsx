@@ -13,7 +13,12 @@ function CardJuego({ juego, addToast }) {
 
   // CARRITO
   const handleCarrito = (data) => {
-    const agregado = agregarAlCarrito(data);
+    const productoCarrito = {
+      ...data,
+      tipo: "juego",
+    };
+
+    const agregado = agregarAlCarrito(productoCarrito);
 
     if (agregado) {
       addToast(`${data.nombre} agregado al carrito`, data.id);

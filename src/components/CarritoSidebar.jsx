@@ -86,7 +86,7 @@ function CarritoSidebar({ abierto, cerrar }) {
           ) : (
             carrito.map((juego) => (
               <div
-                key={juego.id}
+                key={juego._key}
                 className="
                   bg-[#1e293b]
                   rounded-xl
