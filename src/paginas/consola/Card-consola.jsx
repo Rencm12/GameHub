@@ -1,12 +1,20 @@
-import React, { useContext, useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { CarritoContext } from "../../context/CarritoContext";
-
+import { FavoritosContext } from "../../context/FavoritosContext";
+import { Heart } from "lucide-react";
+import Toast from "../../components/Toast";
 
 // Detecta si un src es un link de YouTube y extrae el ID
 function getYoutubeId(src) {
   if (!src) return null;
   const match = src.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
   );
   return match ? match[1] : null;
 }
@@ -39,16 +47,13 @@ function Slide({ slide, isActive }) {
   }
 
   return (
-    <img
-      src={slide.src}
-      alt="slide"
-      className="w-full h-full object-contain"
-    />
+    <img src={slide.src} alt="slide" className="w-full h-full object-contain" />
   );
 }
 
-function Card({ producto }) {
+function Card({ producto, addToast }) {
   const { agregarAlCarrito } = useContext(CarritoContext);
+  const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
   const {
     imagen,
     media,
@@ -61,25 +66,48 @@ function Card({ producto }) {
     stock,
   } = producto;
 
+  const favorito = esFavorito ? esFavorito(producto.id, 'consola') : false;
+
   const [mostrarModal, setMostrarModal] = useState(false);
+   const [toasts, setToasts] = useState([]);
   const [descExpandida, setDescExpandida] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const autoplayRef = useRef(null);
+   const localAddToast = (mensaje, consolaId) => {
+    const id = Date.now();
+
+    setToasts((prev) => [
+      ...prev,
+      {
+        id,
+        consolaId,
+        mensaje,
+      },
+    ]);
+
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2000);
+  };
+
+  const toastFn = addToast ? addToast : localAddToast;
 
   // Si no hay array media, armar uno solo con la imagen principal
-  const slides = media && media.length > 0 ? media : [{ tipo: "imagen", src: imagen }];
+  const slides =
+    media && media.length > 0 ? media : [{ tipo: "imagen", src: imagen }];
 
   // Detecta si el slide actual es un video (local o YouTube)
   const currentIsVideo =
-    slides[mediaIndex]?.tipo === "video" || !!getYoutubeId(slides[mediaIndex]?.src);
+    slides[mediaIndex]?.tipo === "video" ||
+    !!getYoutubeId(slides[mediaIndex]?.src);
 
   const irAnterior = useCallback(
     () => setMediaIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1)),
-    [slides.length]
+    [slides.length],
   );
   const irSiguiente = useCallback(
     () => setMediaIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1)),
-    [slides.length]
+    [slides.length],
   );
 
   // Autoplay: 5s, se pausa si el slide actual es un video
@@ -99,11 +127,12 @@ function Card({ producto }) {
     setDescExpandida(false);
   };
 
+  
   return (
     <>
       {/* ── CARD ── */}
       <div className="relative bg-[#1a1a1a] p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#00ffc3]">
-        <div className="absolute top-3 right-3 flex gap-2">
+        <div className="absolute top-3 right-3 flex gap-2 items-center">
           {exclusivo && (
             <span className="bg-cyan-400 text-black px-2 py-1 rounded-lg text-xs font-bold">
               Exclusiva
@@ -114,9 +143,30 @@ function Card({ producto }) {
               Limitada
             </span>
           )}
+          {/* Botón favorito */}
+          <button
+            onClick={() => {
+              agregarFavorito(producto);
+              toastFn(
+                favorito
+                  ? `${titulo} eliminado de favoritos`
+                  : `${titulo} agregado a favoritos`,
+                producto.id
+              );
+            }}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 ${
+              favorito ? "bg-white/90 text-gray-500" : "bg-gray-200 text-gray-500"
+            }`}
+          >
+            <Heart size={18} className={favorito ? "text-red-500 fill-red-500" : "text-gray-400"} />
+          </button>
         </div>
 
-        <img src={imagen} alt={titulo} className="w-full h-[260px] object-cover rounded-lg" />
+        <img
+          src={imagen}
+          alt={titulo}
+          className="w-full h-[260px] object-cover rounded-lg"
+        />
 
         <div className="p-4">
           <h3 className="text-white text-xl font-bold">{titulo}</h3>
@@ -124,10 +174,16 @@ function Card({ producto }) {
           <p className="text-[#00ffc3] text-2xl font-bold mt-2">S/ {precio}</p>
 
           <button
-            onClick={() => agregarAlCarrito(producto)}
-            className="w-full mt-4 bg-[#00ffc3] text-black py-2 rounded-lg font-bold transition hover:bg-[#00d7aa]"
+            onClick={() =>
+              agregarAlCarrito({
+                ...producto,
+                tipo: "consola",
+              })
+            }
+            disabled={stock === 0}
+            className="mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#00ffc3]"
           >
-            Agregar al carrito
+            {stock === 0 ? "Sin stock" : "Agregar al carrito"}
           </button>
 
           <button
@@ -143,10 +199,11 @@ function Card({ producto }) {
       {mostrarModal && (
         <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-[999] p-4"
-          onClick={(e) => e.target === e.currentTarget && setMostrarModal(false)}
+          onClick={(e) =>
+            e.target === e.currentTarget && setMostrarModal(false)
+          }
         >
           <div className="bg-[#111827] w-full max-w-[480px] rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,255,195,0.5)] flex flex-col max-h-[90vh]">
-
             {/* Botón cerrar */}
             <button
               onClick={() => setMostrarModal(false)}
@@ -157,25 +214,27 @@ function Card({ producto }) {
 
             {/* ── CARRUSEL ── */}
             <div className="relative w-full h-[260px] bg-black flex-shrink-0">
-
               {/* Slide actual */}
               <div className="w-full h-full">
                 <Slide slide={slides[mediaIndex]} isActive={true} />
               </div>
 
               {/* Badge de tipo */}
-              {(slides[mediaIndex]?.tipo === "video" || getYoutubeId(slides[mediaIndex]?.src)) && (
+              {(slides[mediaIndex]?.tipo === "video" ||
+                getYoutubeId(slides[mediaIndex]?.src)) && (
                 <div className="absolute top-3 left-3 bg-black/70 text-[#00ffc3] text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
                   <span>▶</span>
-                  <span>{getYoutubeId(slides[mediaIndex]?.src) ? "YouTube" : "Video"}</span>
+                  <span>
+                    {getYoutubeId(slides[mediaIndex]?.src)
+                      ? "YouTube"
+                      : "Video"}
+                  </span>
                 </div>
               )}
 
               {/* Indicador de pausa del carrusel cuando hay video */}
               {currentIsVideo && slides.length > 1 && (
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-[#00ffc3]/70 text-[10px] px-2 py-0.5 rounded-full pointer-events-none whitespace-nowrap">
-                
-                </div>
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-[#00ffc3]/70 text-[10px] px-2 py-0.5 rounded-full pointer-events-none whitespace-nowrap"></div>
               )}
 
               {/* Flechas */}
@@ -242,7 +301,9 @@ function Card({ producto }) {
 
               {/* Descripción colapsable */}
               <div className="mt-4">
-                <p className={`text-gray-400 leading-7 transition-all ${descExpandida ? "" : "line-clamp-3"}`}>
+                <p
+                  className={`text-gray-400 leading-7 transition-all ${descExpandida ? "" : "line-clamp-3"}`}
+                >
                   {descripcion}
                 </p>
                 {descripcion && descripcion.length > 0 && (
@@ -255,7 +316,9 @@ function Card({ producto }) {
                 )}
               </div>
 
-              <p className="text-[#00ffc3] text-3xl font-bold mt-6">S/ {precio}</p>
+              <p className="text-[#00ffc3] text-3xl font-bold mt-6">
+                S/ {precio}
+              </p>
 
               {/* Stock */}
               <div className="mt-4 flex items-center gap-2">
@@ -265,8 +328,8 @@ function Card({ producto }) {
                     stock === 0
                       ? "bg-red-500/20 text-red-400"
                       : stock <= 5
-                      ? "bg-yellow-500/20 text-yellow-400"
-                      : "bg-green-500/20 text-green-400"
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : "bg-green-500/20 text-green-400"
                   }`}
                 >
                   {stock === 0 ? "Agotado" : `${stock} unidades`}
@@ -274,7 +337,12 @@ function Card({ producto }) {
               </div>
 
               <button
-                onClick={() => agregarAlCarrito(producto)}
+                onClick={() =>
+                  agregarAlCarrito({
+                    ...producto,
+                    tipo: "consola",
+                  })
+                }
                 disabled={stock === 0}
                 className="mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#00ffc3]"
               >
@@ -292,6 +360,7 @@ function Card({ producto }) {
           to   { width: 100% }
         }
       `}</style>
+      {!addToast && <Toast toasts={toasts} />}
     </>
   );
 }
