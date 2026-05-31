@@ -1,8 +1,11 @@
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ShoppingCart, Heart } from "lucide-react";
+
 import { CarritoContext } from "../context/CarritoContext";
+import { FavoritosContext } from "../context/FavoritosContext";
+
 import CarritoSidebar from "./CarritoSidebar";
-import { ShoppingCart } from "lucide-react";
 
 const Header = () => {
   const [mostrarLogin, setMostrarLogin] = useState(false);
@@ -15,8 +18,12 @@ const Header = () => {
   const [nuevaPassword, setNuevaPassword] = useState("");
 
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
+
   const { carrito } = useContext(CarritoContext);
+  const { favoritos } = useContext(FavoritosContext);
+
   const [animarCarrito, setAnimarCarrito] = useState(false);
+  const [mostrarBotonFlotante, setMostrarBotonFlotante] = useState(false);
 
   useEffect(() => {
     if (carrito.length > 0) {
@@ -30,6 +37,22 @@ const Header = () => {
     }
   }, [carrito.length]);
 
+  useEffect(() => {
+    const manejarScroll = () => {
+      if (window.scrollY > 300) {
+        setMostrarBotonFlotante(true);
+      } else {
+        setMostrarBotonFlotante(false);
+      }
+    };
+
+    window.addEventListener("scroll", manejarScroll);
+
+    return () => {
+      window.removeEventListener("scroll", manejarScroll);
+    };
+  }, []);
+
   const iniciarSesion = () => {
     if (!usuario || !password) {
       alert("Falta completar campos");
@@ -37,6 +60,7 @@ const Header = () => {
     }
 
     alert(`Bienvenido ${usuario} 🎮`);
+
     setMostrarLogin(false);
   };
 
@@ -47,18 +71,47 @@ const Header = () => {
     }
 
     alert(`Usuario ${nuevoUsuario} registrado con éxito 🎉`);
+
     setMostrarRegistro(false);
   };
 
   return (
     <>
-      <header className="bg-black px-10 py-4 flex items-center justify-between border-b-2 border-[#00ffc3]">
-        {/* Logo */}
-        <div className="text-[24px] text-[#00ffc3] font-bold">GameHub</div>
+      <header
+        className="
+    bg-black
+    px-4
+    md:px-10
+    py-4
+    flex
+    flex-col
+    md:flex-row
+    items-center
+    justify-between
+    gap-4
+    border-b-2
+    border-[#00ffc3]
+  "
+      >
+        {/* LOGO */}
+        <div className="text-[20px] md:text-[24px] text-[#00ffc3] font-bold">
+          GameHub
+        </div>
 
-        {/* Navegación */}
+        {/* NAVEGACIÓN */}
         <nav>
-          <ul className="flex gap-8 text-white">
+          <ul
+            className="
+    flex
+    flex-wrap
+    justify-center
+    gap-4
+    md:gap-8
+    text-white
+    text-sm
+    md:text-base
+  "
+          >
             {["Inicio", "Consolas", "Juegos", "Accesorios"].map((item) => (
               <li
                 key={item}
@@ -83,8 +136,16 @@ const Header = () => {
           </ul>
         </nav>
 
-        {/* Botones */}
-        <div className="flex items-center gap-4">
+        {/* BOTONES */}
+        <div
+          className="
+    flex
+    flex-wrap
+    items-center
+    justify-center
+    gap-3
+  "
+        >
           <button
             className="btn-primary"
             onClick={() => setMostrarRegistro(true)}
@@ -96,16 +157,53 @@ const Header = () => {
             Iniciar sesión
           </button>
 
-          <div
-            onClick={() => setMostrarCarrito(true)}
+          {/* FAVORITOS */}
+          <Link
+            to="/favoritos"
             className="
               relative
-              text-white
-              text-3xl
-              cursor-pointer
+              text-2xl md:text-3xl
               hover:scale-110
               transition
             "
+          >
+            <Heart size={28} className="text-red-500 fill-red-500" />
+            {favoritos.length > 0 && (
+              <span
+                className="
+                  absolute
+                  -top-2
+                  -right-2
+                  bg-[#00ffc3]
+                  text-black
+                  text-xs
+                  font-bold
+                  w-5
+                  h-5
+                  rounded-full
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
+                {favoritos.length}
+              </span>
+            )}
+          </Link>
+
+          {/* CARRITO */}
+          <div
+            onClick={() => setMostrarCarrito(true)}
+            className={`
+              relative
+              text-white
+              text-2xl 
+              md:text-3xl
+              cursor-pointer
+              hover:scale-110
+              transition
+              ${animarCarrito ? "animate-bounceCart" : ""}
+            `}
           >
             <ShoppingCart size={28} />
 
@@ -209,11 +307,60 @@ const Header = () => {
         </div>
       )}
 
-      {/* SIDEBAR DEL CARRITO */}
+      {/* SIDEBAR */}
       <CarritoSidebar
         abierto={mostrarCarrito}
         cerrar={() => setMostrarCarrito(false)}
       />
+
+      {/* BOTÓN FLOTANTE CARRITO */}
+      {mostrarBotonFlotante && !mostrarCarrito && (
+        <button
+          onClick={() => setMostrarCarrito(true)}
+          className="
+      fixed
+      bottom-6
+      right-6
+      z-[999]
+      bg-[#00ffc3]
+      text-black
+      w-16
+      h-16
+      rounded-full
+      flex
+      items-center
+      justify-center
+      shadow-[0_0_25px_rgba(0,255,195,0.7)]
+      hover:scale-110
+      transition
+      animate-fadeIn
+    "
+        >
+          <ShoppingCart size={30} />
+
+          {carrito.length > 0 && (
+            <span
+              className="
+          absolute
+          -top-1
+          -right-1
+          bg-red-500
+          text-white
+          text-xs
+          font-bold
+          w-6
+          h-6
+          rounded-full
+          flex
+          items-center
+          justify-center
+        "
+            >
+              {carrito.length}
+            </span>
+          )}
+        </button>
+      )}
     </>
   );
 };
