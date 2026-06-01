@@ -86,44 +86,29 @@ export default function Login({ onClose }) {
       return;
     }
 
-    if (password.length < 6) {
-      setErrorAuth("La contraseña debe tener mínimo 6 caracteres.");
-      return;
-    }
-
     setCargando(true);
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { nombre: nombre.trim() },
+      },
     });
 
+    setCargando(false);
+
     if (error) {
-      setCargando(false);
       setErrorAuth(error.message);
       return;
     }
 
-    // guardar en profiles
-    if (data?.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        nombre,
-        correo: email,
-      });
-    }
-
-    setCargando(false);
-
-    setMensajeAuth("Cuenta creada correctamente");
-
+    setMensajeAuth("Cuenta creada correctamente ✓");
     setNombre("");
     setEmail("");
     setPassword("");
 
-    setTimeout(() => {
-      setEsRegistro(false);
-    }, 1500);
+    setTimeout(() => setEsRegistro(false), 1500);
   };
 
   return (
