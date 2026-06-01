@@ -3,6 +3,7 @@ import Toast from "../../components/Toast";
 import Carrusel from "./Carrusel";
 import { supabase } from "../../supabase/client";
 import CardJuego from "../../components/CardJuego";
+import Footer from "../../components/Footer";
 
 function Juegos() {
   const [busqueda, setBusqueda] = useState("");
@@ -274,10 +275,9 @@ function Juegos() {
                     rounded-lg
                     font-bold
                     transition
-                    ${
-                      paginaActual === numeroPagina
-                        ? "bg-[#00ffc3] text-black"
-                        : "bg-[#1e293b] text-white hover:bg-[#334155]"
+                    ${paginaActual === numeroPagina
+                      ? "bg-[#00ffc3] text-black"
+                      : "bg-[#1e293b] text-white hover:bg-[#334155]"
                     }
                   `}
                 >
@@ -308,6 +308,8 @@ function Juegos() {
           </div>
         )}
       </section>
+
+      <Footer />
 
       <Toast toasts={toasts} />
     </div>
