@@ -1,10 +1,11 @@
 import { useState } from "react";
+import Footer from "../../components/Footer";
 
 function Nosotros() {
-    const [faqAbierto, setFaqAbierto] = useState(false);
-    const [terminosAbierto, setTerminosAbierto] = useState(false);
-    const [misionVisionAbierto, setMisionVisionAbierto] = useState(false);
-    const [valoresAbierto, setValoresAbierto] = useState(false);
+  const [faqAbierto, setFaqAbierto] = useState(false);
+  const [terminosAbierto, setTerminosAbierto] = useState(false);
+  const [misionVisionAbierto, setMisionVisionAbierto] = useState(false);
+  const [valoresAbierto, setValoresAbierto] = useState(false);
   const integrantes = [
     {
       nombre: "Renato Alejandro Osorio Cama",
@@ -73,9 +74,9 @@ function Nosotros() {
 
       <section className="mb-6">
 
-  <button
-    onClick={() => setMisionVisionAbierto(!misionVisionAbierto)}
-    className="
+        <button
+          onClick={() => setMisionVisionAbierto(!misionVisionAbierto)}
+          className="
       w-full
       text-left
       bg-slate-900
@@ -86,46 +87,46 @@ function Nosotros() {
       font-bold
       text-[#00ffc3]
     "
-  >
-    {misionVisionAbierto
-      ? "▼ Misión y Visión"
-      : "► Misión y Visión"}
-  </button>
+        >
+          {misionVisionAbierto
+            ? "▼ Misión y Visión"
+            : "► Misión y Visión"}
+        </button>
 
-  {misionVisionAbierto && (
-    <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
+        {misionVisionAbierto && (
+          <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
 
-      <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
-        Misión
-      </h3>
+            <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
+              Misión
+            </h3>
 
-      <p className="mb-6">
-        Brindar a los usuarios una plataforma moderna e intuitiva donde
-        puedan explorar videojuegos, consolas y accesorios, ofreciendo una
-        experiencia organizada, accesible y atractiva.
-      </p>
+            <p className="mb-6">
+              Brindar a los usuarios una plataforma moderna e intuitiva donde
+              puedan explorar videojuegos, consolas y accesorios, ofreciendo una
+              experiencia organizada, accesible y atractiva.
+            </p>
 
-      <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
-        Visión
-      </h3>
+            <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
+              Visión
+            </h3>
 
-      <p>
-        Convertirnos en una plataforma de referencia para la comunidad gamer,
-        incorporando nuevas tecnologías y funcionalidades innovadoras que
-        permitan una experiencia cada vez más completa y personalizada.
-      </p>
+            <p>
+              Convertirnos en una plataforma de referencia para la comunidad gamer,
+              incorporando nuevas tecnologías y funcionalidades innovadoras que
+              permitan una experiencia cada vez más completa y personalizada.
+            </p>
 
-    </div>
-  )}
+          </div>
+        )}
 
-</section>
+      </section>
 
 
       <section className="mb-12">
 
-  <button
-    onClick={() => setValoresAbierto(!valoresAbierto)}
-    className="
+        <button
+          onClick={() => setValoresAbierto(!valoresAbierto)}
+          className="
       w-full
       text-left
       bg-slate-900
@@ -136,48 +137,48 @@ function Nosotros() {
       font-bold
       text-[#00ffc3]
     "
-  >
-    {valoresAbierto
-      ? "▼ Valores Organizacionales"
-      : "► Valores Organizacionales"}
-  </button>
+        >
+          {valoresAbierto
+            ? "▼ Valores Organizacionales"
+            : "► Valores Organizacionales"}
+        </button>
 
-  {valoresAbierto && (
-    <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
+        {valoresAbierto && (
+          <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
 
-      <ul className="list-disc pl-6 space-y-3 text-lg">
+            <ul className="list-disc pl-6 space-y-3 text-lg">
 
-        <li>
-          <strong>Innovación tecnológica:</strong> buscamos mejorar continuamente
-          nuestras soluciones mediante nuevas tecnologías.
-        </li>
+              <li>
+                <strong>Innovación tecnológica:</strong> buscamos mejorar continuamente
+                nuestras soluciones mediante nuevas tecnologías.
+              </li>
 
-        <li>
-          <strong>Trabajo en equipo:</strong> fomentamos la colaboración y la
-          comunicación entre los integrantes.
-        </li>
+              <li>
+                <strong>Trabajo en equipo:</strong> fomentamos la colaboración y la
+                comunicación entre los integrantes.
+              </li>
 
-        <li>
-          <strong>Compromiso con la calidad:</strong> desarrollamos funcionalidades
-          eficientes y fáciles de utilizar.
-        </li>
+              <li>
+                <strong>Compromiso con la calidad:</strong> desarrollamos funcionalidades
+                eficientes y fáciles de utilizar.
+              </li>
 
-        <li>
-          <strong>Responsabilidad:</strong> cumplimos con los objetivos y tareas
-          asignadas durante el proyecto.
-        </li>
+              <li>
+                <strong>Responsabilidad:</strong> cumplimos con los objetivos y tareas
+                asignadas durante el proyecto.
+              </li>
 
-        <li>
-          <strong>Mejora continua:</strong> analizamos constantemente oportunidades
-          para optimizar la plataforma.
-        </li>
+              <li>
+                <strong>Mejora continua:</strong> analizamos constantemente oportunidades
+                para optimizar la plataforma.
+              </li>
 
-      </ul>
+            </ul>
 
-    </div>
-  )}
+          </div>
+        )}
 
-</section>
+      </section>
 
 
       <section>
@@ -226,17 +227,17 @@ function Nosotros() {
 
       <section className="mt-16">
 
-  <h2 className="text-3xl font-bold text-[#00ffc3] mb-6">
-    Información Adicional
-  </h2>
+        <h2 className="text-3xl font-bold text-[#00ffc3] mb-6">
+          Información Adicional
+        </h2>
 
-  {/* FAQ */}
+        {/* FAQ */}
 
-  <div className="mb-6">
+        <div className="mb-6">
 
-    <button
-      onClick={() => setFaqAbierto(!faqAbierto)}
-      className="
+          <button
+            onClick={() => setFaqAbierto(!faqAbierto)}
+            className="
         w-full
         text-left
         bg-slate-900
@@ -247,61 +248,61 @@ function Nosotros() {
         font-bold
         text-[#00ffc3]
       "
-    >
-      {faqAbierto
-        ? "▼ Preguntas Frecuentes"
-        : "► Preguntas Frecuentes"}
-    </button>
+          >
+            {faqAbierto
+              ? "▼ Preguntas Frecuentes"
+              : "► Preguntas Frecuentes"}
+          </button>
 
-    {faqAbierto && (
+          {faqAbierto && (
 
-      <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
+            <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
 
-        <h3 className="font-bold text-xl mb-2">
-          ¿Qué es GameHub?
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                ¿Qué es GameHub?
+              </h3>
 
-        <p className="mb-4">
-          GameHub es una plataforma web orientada al mundo gamer donde los usuarios pueden explorar videojuegos, consolas y accesorios.
-        </p>
+              <p className="mb-4">
+                GameHub es una plataforma web orientada al mundo gamer donde los usuarios pueden explorar videojuegos, consolas y accesorios.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          ¿Necesito registrarme?
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                ¿Necesito registrarme?
+              </h3>
 
-        <p className="mb-4">
-          No necesariamente. Sin embargo, algunas funcionalidades requieren autenticación para una experiencia más personalizada.
-        </p>
+              <p className="mb-4">
+                No necesariamente. Sin embargo, algunas funcionalidades requieren autenticación para una experiencia más personalizada.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          ¿Qué productos ofrece GameHub?
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                ¿Qué productos ofrece GameHub?
+              </h3>
 
-        <p className="mb-4">
-          Videojuegos, consolas y accesorios relacionados con el entretenimiento gamer.
-        </p>
+              <p className="mb-4">
+                Videojuegos, consolas y accesorios relacionados con el entretenimiento gamer.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          ¿Qué tecnologías utiliza GameHub?
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                ¿Qué tecnologías utiliza GameHub?
+              </h3>
 
-        <p>
-          React, JavaScript, Tailwind CSS, Supabase y PostgreSQL.
-        </p>
+              <p>
+                React, JavaScript, Tailwind CSS, Supabase y PostgreSQL.
+              </p>
 
-      </div>
+            </div>
 
-    )}
+          )}
 
-  </div>
+        </div>
 
-  {/* TERMINOS */}
+        {/* TERMINOS */}
 
-  <div>
+        <div>
 
-    <button
-      onClick={() => setTerminosAbierto(!terminosAbierto)}
-      className="
+          <button
+            onClick={() => setTerminosAbierto(!terminosAbierto)}
+            className="
         w-full
         text-left
         bg-slate-900
@@ -312,55 +313,57 @@ function Nosotros() {
         font-bold
         text-[#00ffc3]
       "
-    >
-      {terminosAbierto
-        ? "▼ Términos y Condiciones"
-        : "► Términos y Condiciones"}
-    </button>
+          >
+            {terminosAbierto
+              ? "▼ Términos y Condiciones"
+              : "► Términos y Condiciones"}
+          </button>
 
-    {terminosAbierto && (
+          {terminosAbierto && (
 
-      <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
+            <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
 
-        <h3 className="font-bold text-xl mb-2">
-          Uso de la plataforma
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                Uso de la plataforma
+              </h3>
 
-        <p className="mb-4">
-          GameHub tiene fines informativos y demostrativos dentro del proyecto académico desarrollado por el equipo.
-        </p>
+              <p className="mb-4">
+                GameHub tiene fines informativos y demostrativos dentro del proyecto académico desarrollado por el equipo.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          Responsabilidad de la información
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                Responsabilidad de la información
+              </h3>
 
-        <p className="mb-4">
-          Se procura mantener información actualizada sobre videojuegos, consolas y accesorios mostrados en la plataforma.
-        </p>
+              <p className="mb-4">
+                Se procura mantener información actualizada sobre videojuegos, consolas y accesorios mostrados en la plataforma.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          Derechos de autor
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                Derechos de autor
+              </h3>
 
-        <p className="mb-4">
-          Las imágenes, marcas y nombres comerciales pertenecen a sus respectivos propietarios.
-        </p>
+              <p className="mb-4">
+                Las imágenes, marcas y nombres comerciales pertenecen a sus respectivos propietarios.
+              </p>
 
-        <h3 className="font-bold text-xl mb-2">
-          Modificaciones
-        </h3>
+              <h3 className="font-bold text-xl mb-2">
+                Modificaciones
+              </h3>
 
-        <p>
-          El equipo de desarrollo podrá actualizar funcionalidades, diseño y contenido en futuras versiones del sistema.
-        </p>
+              <p>
+                El equipo de desarrollo podrá actualizar funcionalidades, diseño y contenido en futuras versiones del sistema.
+              </p>
 
-      </div>
+            </div>
 
-    )}
+          )}
 
-  </div>
+        </div>
 
-</section>
+      </section>
+
+      <Footer />
 
     </div>
   );

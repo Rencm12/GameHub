@@ -72,6 +72,9 @@ function Home() {
           "
         >
           "Bienvenidos a GameHub, el punto de encuentro creado por y para gamers. No solo vendemos consolas, videojuegos y accesorios; alimentamos tu lado geek con el mejor coleccionismo. Sube de nivel tu experiencia y sumérgete en tu próxima gran aventura."
+          <br />
+          <br />
+          "La pasión por los videojuegos es el motor que impulsa GameHub. Aquí encontrarás no solo los últimos lanzamientos, sino también joyas clásicas y accesorios imprescindibles para cada jugador. Únete a nuestra comunidad de gamers y lleva tu experiencia al siguiente nivel con GameHub."
         </p>
 
       </section>

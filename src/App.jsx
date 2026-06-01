@@ -9,6 +9,7 @@ import Favoritos from "./paginas/juegos/Favoritos";
 
 import "./App.css";
 import Consolaspag from "./paginas/consola/consolas";
+import Accesorios from "./paginas/accesorios/Accesorios";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/nosotros" element={<Nosotros />} />
         <Route path="/consolas" element={<Consolaspag />} />
         <Route path="/favoritos" element={<Favoritos />} />
+        <Route path="/accesorios" element={<Accesorios />} />
       </Routes>
     </BrowserRouter>
   );
