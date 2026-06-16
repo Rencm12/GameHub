@@ -1,18 +1,65 @@
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Heart } from "lucide-react";
+import { PersonStanding, ShoppingCart, Heart } from "lucide-react";
 import Login from "./Login";
 import { supabase } from "../supabase/client";
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
 import CheckoutModal from "./CheckoutModal";
 import CarritoSidebar from "./CarritoSidebar";
+import AccessibilityMenu from "./Accesibilidad";
+import { useLanguage } from "../i18n/useLanguage";
+
+const HEADER_TEXT = {
+  es: {
+    login: "Ingresar",
+    logout: "Salir",
+    customer: "Cliente",
+    accessibility: "Abrir menu de accesibilidad",
+    nav: [
+      { label: "Inicio", path: "/" },
+      { label: "Consolas", path: "/consolas" },
+      { label: "Juegos", path: "/juegos" },
+      { label: "Accesorios", path: "/accesorios" },
+      { label: "Nosotros", path: "/nosotros" },
+    ],
+  },
+  en: {
+    login: "Sign in",
+    logout: "Log out",
+    customer: "Customer",
+    accessibility: "Open accessibility menu",
+    nav: [
+      { label: "Home", path: "/" },
+      { label: "Consoles", path: "/consolas" },
+      { label: "Games", path: "/juegos" },
+      { label: "Accessories", path: "/accesorios" },
+      { label: "About us", path: "/nosotros" },
+    ],
+  },
+  pt: {
+    login: "Entrar",
+    logout: "Sair",
+    customer: "Cliente",
+    accessibility: "Abrir menu de acessibilidade",
+    nav: [
+      { label: "Inicio", path: "/" },
+      { label: "Consoles", path: "/consolas" },
+      { label: "Jogos", path: "/juegos" },
+      { label: "Acessorios", path: "/accesorios" },
+      { label: "Sobre nos", path: "/nosotros" },
+    ],
+  },
+};
 
 const Header = () => {
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
+  const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const idioma = useLanguage();
   const [usuario, setUsuario] = useState(null);
+  const textos = HEADER_TEXT[idioma] ?? HEADER_TEXT.es;
 
   const { carrito } = useContext(CarritoContext);
   const { favoritos } = useContext(FavoritosContext);
@@ -108,10 +155,9 @@ const Header = () => {
       md:text-base
     "
           >
-            {["Inicio", "Consolas", "Juegos", "Accesorios", "Nosotros"].map(
-              (item) => (
+            {textos.nav.map((item) => (
                 <li
-                  key={item}
+                  key={item.path}
                   className="
             relative
             cursor-pointer
@@ -125,12 +171,9 @@ const Header = () => {
             hover:after:w-full
           "
                 >
-                  <Link to={item === "Inicio" ? "/" : `/${item.toLowerCase()}`}>
-                    {item}
-                  </Link>
+                  <Link to={item.path}>{item.label}</Link>
                 </li>
-              ),
-            )}
+              ))}
           </ul>
         </nav>
 
@@ -155,11 +198,11 @@ const Header = () => {
                   drop-shadow-[0_0_8px_rgba(0,255,195,0.5)]
                 "
               >
-                {usuario.user_metadata?.nombre || "Cliente"}
+                {usuario.user_metadata?.nombre || textos.customer}
               </span>
 
               <button onClick={cerrarSesion} className="btn-primary">
-                Salir
+                {textos.logout}
               </button>
             </div>
           ) : (
@@ -167,9 +210,33 @@ const Header = () => {
               className="btn-primary"
               onClick={() => setMostrarLogin(true)}
             >
-              Ingresar
+              {textos.login}
             </button>
           )}
+
+          {/* ACCESIBILIDAD */}
+          <button
+            type="button"
+            onClick={() => setMostrarAccesibilidad((actual) => !actual)}
+            aria-label={textos.accessibility}
+            aria-expanded={mostrarAccesibilidad}
+            className="
+              w-11
+              h-11
+              rounded-lg
+              border
+              border-[#00ffc3]
+              text-[#00ffc3]
+              flex
+              items-center
+              justify-center
+              hover:bg-[#00ffc3]
+              hover:text-black
+              transition
+            "
+          >
+            <PersonStanding size={24} />
+          </button>
 
           {/* FAVORITOS */}
           <Link
@@ -253,6 +320,12 @@ const Header = () => {
         setMostrarLogin={setMostrarLogin}
       />
       {mostrarLogin && <Login onClose={() => setMostrarLogin(false)} />}
+
+      {/* MENU DE ACCESIBILIDAD */}
+      <AccessibilityMenu
+        open={mostrarAccesibilidad}
+        onClose={() => setMostrarAccesibilidad(false)}
+      />
 
       {/* SIDEBAR */}
       <CarritoSidebar

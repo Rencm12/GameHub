@@ -3,8 +3,11 @@ import { CarritoContext } from "../../context/CarritoContext";
 import { supabase } from "../../supabase/client";
 import { Link } from "react-router-dom";
 import { CircleCheck, TriangleAlert, CircleX } from "lucide-react";
+import { commonText, textByLanguage, useLanguage } from "../../i18n/useLanguage";
 
 function CardConsolaHome({ producto, addToast }) {
+  const idioma = useLanguage();
+  const textos = textByLanguage(commonText, idioma);
   const { agregarAlCarrito } = useContext(CarritoContext);
 
   const { imagen, titulo, consola, descripcion, precio } = producto;
@@ -47,9 +50,9 @@ function CardConsolaHome({ producto, addToast }) {
       productoConStock.nombre || productoConStock.titulo || "Producto";
 
     if (agregado) {
-      addToast(`${nombreProducto} agregado al carrito`, productoConStock.id);
+      addToast(`${nombreProducto} ${textos.addedToCart}`, productoConStock.id);
     } else {
-      addToast("No hay más unidades disponibles", productoConStock.id);
+      addToast(textos.noMoreUnits, productoConStock.id);
     }
   };
 
@@ -109,21 +112,21 @@ function CardConsolaHome({ producto, addToast }) {
               {stock > 5 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
                   <CircleCheck size={14} />
-                  Disponible
+                  {textos.available}
                 </span>
               )}
 
               {stock > 0 && stock <= 5 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
                   <TriangleAlert size={14} />
-                  Últimas unidades
+                  {textos.lastUnits}
                 </span>
               )}
 
               {stock === 0 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
                   <CircleX size={14} />
-                  Agotado
+                  {textos.soldOut}
                 </span>
               )}
             </div>
@@ -145,10 +148,10 @@ function CardConsolaHome({ producto, addToast }) {
             `}
           >
             {stock === 0
-              ? "Sin stock"
+              ? textos.noStock
               : stock === undefined
-                ? "Cargando stock..."
-                : "Agregar al carrito"}
+                ? textos.loadingStock
+                : textos.addToCart}
           </button>
 
           <button
@@ -167,7 +170,7 @@ function CardConsolaHome({ producto, addToast }) {
               transition
             "
           >
-            Ver más
+            {textos.seeMore}
           </button>
         </div>
       </div>
@@ -244,21 +247,21 @@ function CardConsolaHome({ producto, addToast }) {
                   {stock > 5 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
                       <CircleCheck size={14} />
-                      Disponible
+                      {textos.available}
                     </span>
                   )}
 
                   {stock > 0 && stock <= 5 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
                       <TriangleAlert size={14} />
-                      Últimas unidades
+                      {textos.lastUnits}
                     </span>
                   )}
 
                   {stock === 0 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
                       <CircleX size={14} />
-                      Agotado
+                      {textos.soldOut}
                     </span>
                   )}
                 </div>
@@ -291,10 +294,10 @@ function CardConsolaHome({ producto, addToast }) {
                 `}
               >
                 {stock === 0
-                  ? "Sin stock"
+                  ? textos.noStock
                   : stock === undefined
-                    ? "Cargando stock..."
-                    : "Agregar al carrito"}
+                    ? textos.loadingStock
+                    : textos.addToCart}
               </button>
             </div>
           </div>

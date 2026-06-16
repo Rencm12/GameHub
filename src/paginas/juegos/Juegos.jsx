@@ -4,8 +4,42 @@ import Carrusel from "./Carrusel";
 import { supabase } from "../../supabase/client";
 import CardJuego from "../../components/CardJuego";
 import Footer from "../../components/Footer";
+import { commonText, textByLanguage, useLanguage } from "../../i18n/useLanguage";
+
+const GAMES_TEXT = {
+  es: {
+    title: "Catalogo de Videojuegos",
+    loading: "Cargando juegos...",
+    search: "Buscar juego...",
+    noResults: "No se encontraron juegos",
+    action: "Accion",
+    adventure: "Aventura",
+    sports: "Deportes",
+  },
+  en: {
+    title: "Video Game Catalog",
+    loading: "Loading games...",
+    search: "Search game...",
+    noResults: "No games found",
+    action: "Action",
+    adventure: "Adventure",
+    sports: "Sports",
+  },
+  pt: {
+    title: "Catalogo de Jogos",
+    loading: "Carregando jogos...",
+    search: "Buscar jogo...",
+    noResults: "Nenhum jogo encontrado",
+    action: "Acao",
+    adventure: "Aventura",
+    sports: "Esportes",
+  },
+};
 
 function Juegos() {
+  const idioma = useLanguage();
+  const textos = textByLanguage(GAMES_TEXT, idioma);
+  const comunes = textByLanguage(commonText, idioma);
   const [busqueda, setBusqueda] = useState("");
   const [plataforma, setPlataforma] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -19,18 +53,9 @@ function Juegos() {
 
   const addToast = (mensaje, juegoId) => {
     const id = Date.now();
-
-    setToasts((prev) => [
-      ...prev,
-      {
-        id,
-        juegoId,
-        mensaje,
-      },
-    ]);
-
+    setToasts((prev) => [...prev, { id, juegoId, mensaje }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 2000);
   };
 
@@ -84,123 +109,73 @@ function Juegos() {
       <Carrusel />
 
       <section className="p-10">
-        <h2
-          className="
-            text-center
-            text-4xl
-            text-[#00ffc3]
-            font-bold
-            mb-10
-          "
-        >
-          Catálogo de Videojuegos
+        <h2 className="text-center text-4xl text-[#00ffc3] font-bold mb-10">
+          {textos.title}
         </h2>
 
         {cargando && (
-          <p className="text-center text-white mb-10">Cargando juegos...</p>
+          <p className="text-center text-white mb-10">{textos.loading}</p>
         )}
 
-        <div
-          className="
-            flex
-            flex-wrap
-            gap-4
-            bg-[#020617]
-            p-5
-            rounded-xl
-            mb-10
-          "
-        >
-          {/* BUSCADOR */}
+        <div className="flex flex-wrap gap-4 bg-[#020617] p-5 rounded-xl mb-10">
           <input
             type="text"
-            placeholder="Buscar juego..."
+            placeholder={textos.search}
             value={busqueda}
-            onChange={(e) => {
-              setBusqueda(e.target.value);
+            onChange={(event) => {
+              setBusqueda(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              flex-1
-              min-w-[200px]
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-              outline-none
-            "
+            className="flex-1 min-w-[200px] bg-[#1e293b] text-white px-4 py-2 rounded-full outline-none"
           />
 
-          {/* ORDEN */}
           <select
             value={orden}
-            onChange={(e) => {
-              setOrden(e.target.value);
+            onChange={(event) => {
+              setOrden(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Ordenar por
+              {comunes.sortBy}
             </option>
-            <option value="menor">Menor precio</option>
-            <option value="mayor">Mayor precio</option>
+            <option value="menor">{comunes.lowerPrice}</option>
+            <option value="mayor">{comunes.higherPrice}</option>
           </select>
 
-          {/* PLATAFORMA */}
           <select
             value={plataforma}
-            onChange={(e) => {
-              setPlataforma(e.target.value);
+            onChange={(event) => {
+              setPlataforma(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Plataforma
+              {comunes.platform}
             </option>
             <option value="PS5">PS5</option>
             <option value="Xbox">Xbox</option>
             <option value="Nintendo">Nintendo</option>
           </select>
 
-          {/* CATEGORÍA */}
           <select
             value={categoria}
-            onChange={(e) => {
-              setCategoria(e.target.value);
+            onChange={(event) => {
+              setCategoria(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Categoría
+              {comunes.category}
             </option>
-            <option value="Acción">Acción</option>
-            <option value="Aventura">Aventura</option>
-            <option value="Deportes">Deportes</option>
+            <option value="AcciÃ³n">{textos.action}</option>
+            <option value="Aventura">{textos.adventure}</option>
+            <option value="Deportes">{textos.sports}</option>
           </select>
 
-          {/* BOTÓN LIMPIAR */}
           <button
             onClick={() => {
               setBusqueda("");
@@ -209,37 +184,20 @@ function Juegos() {
               setOrden("");
               setPaginaActual(1);
             }}
-            className="
-              bg-red-500
-              text-white
-              px-4
-              py-2
-              rounded-full
-              font-bold
-            "
+            className="bg-red-500 text-white px-4 py-2 rounded-full font-bold"
           >
-            Limpiar
+            {comunes.clear}
           </button>
         </div>
 
-        <div
-          className="
-            grid
-            grid-cols-1
-            md:grid-cols-2
-            lg:grid-cols-4
-            gap-6
-          "
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {juegosPaginados.map((juego) => (
             <CardJuego key={juego.id} juego={juego} addToast={addToast} />
           ))}
         </div>
 
         {!cargando && juegosFiltrados.length === 0 && (
-          <p className="text-center text-white mt-10">
-            No se encontraron juegos
-          </p>
+          <p className="text-center text-white mt-10">{textos.noResults}</p>
         )}
 
         {totalPaginas > 1 && (
@@ -247,19 +205,9 @@ function Juegos() {
             <button
               onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
               disabled={paginaActual === 1}
-              className="
-                px-4
-                py-2
-                rounded-lg
-                bg-[#1e293b]
-                text-white
-                disabled:opacity-40
-                disabled:cursor-not-allowed
-                hover:bg-[#334155]
-                transition
-              "
+              className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
             >
-              Anterior
+              {comunes.previous}
             </button>
 
             {[...Array(totalPaginas)].map((_, index) => {
@@ -269,18 +217,11 @@ function Juegos() {
                 <button
                   key={numeroPagina}
                   onClick={() => setPaginaActual(numeroPagina)}
-                  className={`
-                    w-10
-                    h-10
-                    rounded-lg
-                    font-bold
-                    transition
-                    ${
-                      paginaActual === numeroPagina
-                        ? "bg-[#00ffc3] text-black"
-                        : "bg-[#1e293b] text-white hover:bg-[#334155]"
-                    }
-                  `}
+                  className={`w-10 h-10 rounded-lg font-bold transition ${
+                    paginaActual === numeroPagina
+                      ? "bg-[#00ffc3] text-black"
+                      : "bg-[#1e293b] text-white hover:bg-[#334155]"
+                  }`}
                 >
                   {numeroPagina}
                 </button>
@@ -292,26 +233,15 @@ function Juegos() {
                 setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
               }
               disabled={paginaActual === totalPaginas}
-              className="
-                px-4
-                py-2
-                rounded-lg
-                bg-[#1e293b]
-                text-white
-                disabled:opacity-40
-                disabled:cursor-not-allowed
-                hover:bg-[#334155]
-                transition
-              "
+              className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
             >
-              Siguiente
+              {comunes.next}
             </button>
           </div>
         )}
       </section>
 
       <Footer />
-
       <Toast toasts={toasts} />
     </div>
   );

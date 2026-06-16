@@ -1,8 +1,11 @@
 import React, { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext.jsx";
 import { Link } from "react-router-dom";
+import { commonText, textByLanguage, useLanguage } from "../i18n/useLanguage";
 
 function CardAccesorio({ producto }) {
+  const idioma = useLanguage();
+  const textos = textByLanguage(commonText, idioma);
 
   const { agregarAlCarrito } = useContext(CarritoContext);
 
@@ -76,7 +79,7 @@ function CardAccesorio({ producto }) {
               hover:bg-[#00d7aa]
             "
           >
-            Agregar al carrito
+            {textos.addToCart}
           </button>
 
           <button
@@ -95,7 +98,7 @@ function CardAccesorio({ producto }) {
               transition
             "
           >
-            Ver más
+            {textos.seeMore}
           </button>
 
         </div>
@@ -193,7 +196,7 @@ function CardAccesorio({ producto }) {
                   transition
                 "
               >
-                Agregar al carrito
+                {textos.addToCart}
               </button>
 
             </div>
