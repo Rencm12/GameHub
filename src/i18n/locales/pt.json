@@ -18,6 +18,9 @@
     "knowUs": "Conheça-nos",
     "description": "Descubra quem somos e a paixão pelos videogames por trás da GameHub.",
     "goToAbout": "Ir para Sobre nós",
+    "email": "suporte@gamehub.com",
+    "phone": "+51 999 999 999",
+    "copyright": "© 2026 GameHub",
     "customerService": "Atendimento ao Cliente",
     "claimsDescription": "Registre uma reclamação ou queixa sobre sua experiência na GameHub.",
     "claimsBook": "Livro de Reclamações"
@@ -57,6 +60,19 @@
     "language": "Idioma",
     "profile": "Perfil",
     "reset": "Reiniciar",
+    "speech": {
+      "read": "Ler por seção",
+      "selecting": "Selecione uma seção",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "stop": "Parar",
+      "speed": "Velocidade de leitura",
+      "rates": {
+        "slow": "Lenta",
+        "normal": "Normal",
+        "fast": "Rápida"
+      }
+    },
     "levels": ["Desativado", "Nível 1", "Nível 2", "Nível 3", "Nível 4"],
     "languages": {
       "es": "Espanhol",

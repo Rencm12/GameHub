@@ -17,7 +17,13 @@
     "contact": "Contacto",
     "knowUs": "Conócenos",
     "description": "Descubre quiénes somos y la pasión por los videojuegos detrás de GameHub.",
-    "goToAbout": "Ir a Nosotros"
+    "goToAbout": "Ir a Nosotros",
+    "email": "soporte@gamehub.com",
+    "phone": "+51 999 999 999",
+    "copyright": "© 2026 GameHub",
+    "customerService": "Atención al Cliente",
+    "claimsDescription": "Registra un reclamo o queja sobre tu experiencia en GameHub.",
+    "claimsBook": "Libro de Reclamaciones"
   },
   "common": {
     "addToCart": "Agregar al carrito",
@@ -54,6 +60,19 @@
     "language": "Idioma",
     "profile": "Perfil",
     "reset": "Reiniciar",
+    "speech": {
+      "read": "Leer por sección",
+      "selecting": "Selecciona una sección",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "stop": "Detener",
+      "speed": "Velocidad de lectura",
+      "rates": {
+        "slow": "Lenta",
+        "normal": "Normal",
+        "fast": "Rápida"
+      }
+    },
     "levels": ["Desactivado", "Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4"],
     "languages": {
       "es": "Español",
@@ -235,14 +254,6 @@
         }
       ]
     }
-  },
-  "footer": {
-    "email": "soporte@gamehub.com",
-    "phone": "+51 999 999 999",
-    "copyright": "© 2026 GameHub",
-    "customerService": "Atención al Cliente",
-    "claimsDescription": "Registra un reclamo o queja sobre tu experiencia en GameHub.",
-    "claimsBook": "Libro de Reclamaciones"
   },
   "claims": {
     "title": "Libro de Reclamaciones",

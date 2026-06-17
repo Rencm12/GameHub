@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   X,
@@ -9,7 +9,13 @@ import {
   Rows3,
   CaseSensitive,
   AlignJustify,
+  Gauge,
+  Pause,
+  Play,
   RotateCcw,
+  Square,
+  Volume2,
+  Zap,
 } from "lucide-react";
 import i18n from "../i18n";
 
@@ -50,6 +56,37 @@ const TOOL_CONFIG = [
   { id: "lineHeight", Icon: AlignJustify, levels: 4 },
 ];
 
+const SPEECH_LANG = {
+  es: "es-ES",
+  en: "en-US",
+  pt: "pt-BR",
+};
+
+const SPEECH_RATES = {
+  slow: 0.75,
+  normal: 0.95,
+  fast: 1.25,
+};
+
+const RATE_OPTIONS = [
+  { id: "slow", Icon: Gauge },
+  { id: "normal", Icon: Volume2 },
+  { id: "fast", Icon: Zap },
+];
+
+const ACCESSIBILITY_MENU_SELECTOR = "[data-a11y-menu='true']";
+const READABLE_BLOCK_SELECTOR = [
+  "section",
+  "article",
+  "main",
+  "form",
+  "li",
+  "[role='region']",
+  "[role='article']",
+  "[class*='card']",
+  "[class*='Card']",
+].join(",");
+
 function getSavedPreferences() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -65,6 +102,41 @@ function savePreferences(preferences) {
   i18n.changeLanguage(preferences.language);
 }
 
+function getReadableTextFromElement(element) {
+  const ignoredSelectors = [
+    "script",
+    "style",
+    "noscript",
+    "[aria-hidden='true']",
+    ".a11y-custom-cursor",
+    ".a11y-section-reader-hint",
+    ACCESSIBILITY_MENU_SELECTOR,
+  ].join(",");
+
+  const elementClone = element.cloneNode(true);
+  elementClone.querySelectorAll(ignoredSelectors).forEach((ignoredElement) => ignoredElement.remove());
+
+  return elementClone.innerText.replace(/\s+/g, " ").trim();
+}
+
+function getReadableBlock(target) {
+  const selectedBlock = target.closest(READABLE_BLOCK_SELECTOR);
+  if (!selectedBlock || selectedBlock.matches(ACCESSIBILITY_MENU_SELECTOR)) return null;
+  if (selectedBlock.closest(ACCESSIBILITY_MENU_SELECTOR)) return null;
+  return selectedBlock;
+}
+
+function getVoiceForLanguage(languageCode) {
+  const voices = window.speechSynthesis.getVoices();
+  const languagePrefix = languageCode.split("-")[0];
+
+  return (
+    voices.find((voice) => voice.lang === languageCode) ||
+    voices.find((voice) => voice.lang.startsWith(languagePrefix)) ||
+    null
+  );
+}
+
 export default function AccessibilityWidget({ open = false, onClose = () => {} }) {
   return <AccessibilityMenu open={open} onClose={onClose} />;
 }
@@ -76,11 +148,21 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
   const [profile, setProfile] = useState(savedPreferences?.profile ?? "default");
   const [langOpen, setLangOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [sectionReaderActive, setSectionReaderActive] = useState(false);
+  const [speechRate, setSpeechRate] = useState("normal");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 120 });
+  const currentReadableBlockRef = useRef(null);
+  const speechSessionRef = useRef(0);
   const [settings, setSettings] = useState({
     ...DEFAULT_SETTINGS,
     ...(savedPreferences?.settings ?? {}),
   });
+  const speechSupported =
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    "SpeechSynthesisUtterance" in window;
 
   const levels = t("accessibility.levels", { returnObjects: true });
   const languages = t("accessibility.languages", { returnObjects: true });
@@ -127,12 +209,151 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [settings.cursor, settings.readingMask]);
 
+  useEffect(() => {
+    if (!speechSupported) return undefined;
+
+    const handleVoicesChanged = () => window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+
+    return () => {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+    };
+  }, [speechSupported]);
+
+  const stopSpeech = useCallback(() => {
+    if (!speechSupported) return;
+    speechSessionRef.current += 1;
+    window.speechSynthesis.cancel();
+    currentReadableBlockRef.current = null;
+    document.querySelectorAll(".a11y-readable-selected").forEach((element) => {
+      element.classList.remove("a11y-readable-selected");
+    });
+    setIsSpeaking(false);
+    setIsPaused(false);
+  }, [speechSupported]);
+
+  const pauseSpeech = () => {
+    if (!speechSupported || !isSpeaking || isPaused) return;
+    window.speechSynthesis.pause();
+    setIsPaused(true);
+  };
+
+  const resumeSpeech = () => {
+    if (!speechSupported || !isSpeaking || !isPaused) return;
+    window.speechSynthesis.resume();
+    setIsPaused(false);
+  };
+
   const toggleTool = (tool) => {
     setProfile("default");
     setSettings((prev) => {
       if (tool.levels === 0) return { ...prev, [tool.id]: !prev[tool.id] };
       return { ...prev, [tool.id]: (prev[tool.id] + 1) % (tool.levels + 1) };
     });
+  };
+
+  const speakTextFromBlock = useCallback((readableBlock, rate = speechRate) => {
+    if (!speechSupported) return;
+
+    const text = getReadableTextFromElement(readableBlock);
+    if (!text) return;
+
+    const speechLanguage = SPEECH_LANG[language] ?? SPEECH_LANG.es;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = speechLanguage;
+    utterance.rate = SPEECH_RATES[rate] ?? SPEECH_RATES.normal;
+    utterance.pitch = 1;
+
+    const voice = getVoiceForLanguage(speechLanguage);
+    if (voice) utterance.voice = voice;
+
+    const speechSession = speechSessionRef.current + 1;
+    speechSessionRef.current = speechSession;
+
+    utterance.onend = () => {
+      if (speechSessionRef.current !== speechSession) return;
+      readableBlock.classList.remove("a11y-readable-selected");
+      currentReadableBlockRef.current = null;
+      setIsSpeaking(false);
+      setIsPaused(false);
+    };
+    utterance.onerror = () => {
+      if (speechSessionRef.current !== speechSession) return;
+      readableBlock.classList.remove("a11y-readable-selected");
+      currentReadableBlockRef.current = null;
+      setIsSpeaking(false);
+      setIsPaused(false);
+    };
+
+    window.speechSynthesis.cancel();
+    document.querySelectorAll(".a11y-readable-selected").forEach((element) => {
+      element.classList.remove("a11y-readable-selected");
+    });
+    readableBlock.classList.add("a11y-readable-selected");
+    currentReadableBlockRef.current = readableBlock;
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
+    setIsPaused(false);
+  }, [language, speechRate, speechSupported]);
+
+  useEffect(() => {
+    if (!sectionReaderActive || !speechSupported) return undefined;
+
+    let hoveredBlock = null;
+
+    const clearHoveredBlock = () => {
+      hoveredBlock?.classList.remove("a11y-readable-hover");
+      hoveredBlock = null;
+    };
+
+    const handleMouseMove = (event) => {
+      const readableBlock = getReadableBlock(event.target);
+      if (readableBlock === hoveredBlock) return;
+
+      clearHoveredBlock();
+
+      if (readableBlock) {
+        readableBlock.classList.add("a11y-readable-hover");
+        hoveredBlock = readableBlock;
+      }
+    };
+
+    const handleClick = (event) => {
+      const readableBlock = getReadableBlock(event.target);
+      if (!readableBlock) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      speakTextFromBlock(readableBlock);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove, true);
+    document.addEventListener("click", handleClick, true);
+
+    return () => {
+      clearHoveredBlock();
+      document.removeEventListener("mousemove", handleMouseMove, true);
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [sectionReaderActive, speechSupported, speakTextFromBlock]);
+
+  const toggleSectionReader = () => {
+    if (!speechSupported) return;
+
+    if (sectionReaderActive) {
+      stopSpeech();
+    }
+
+    setSectionReaderActive((active) => !active);
+  };
+
+  const selectSpeechRate = (nextRate) => {
+    setSpeechRate(nextRate);
+
+    if (isSpeaking && currentReadableBlockRef.current) {
+      speakTextFromBlock(currentReadableBlockRef.current, nextRate);
+    }
   };
 
   const selectProfile = (nextProfile) => {
@@ -142,6 +363,9 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
   };
 
   const reset = () => {
+    stopSpeech();
+    setSectionReaderActive(false);
+    setSpeechRate("normal");
     setSettings(DEFAULT_SETTINGS);
     setProfile("default");
     setLanguage("es");
@@ -180,6 +404,7 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
           ease-in-out
           ${open ? "translate-x-0" : "translate-x-[120%]"}
         `}
+        data-a11y-menu="true"
       >
         <div className="bg-blue-900 text-white flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
@@ -204,7 +429,7 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
             getLabel={(option) => languages[option]}
             open={langOpen}
             onToggle={() => { setLangOpen((o) => !o); setProfileOpen(false); }}
-            onSelect={(value) => { setLanguage(value); setLangOpen(false); }}
+            onSelect={(value) => { stopSpeech(); setSectionReaderActive(false); setLanguage(value); setLangOpen(false); }}
           />
 
           <Dropdown
@@ -231,6 +456,60 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
             ))}
           </div>
 
+          <button
+            type="button"
+            onClick={toggleSectionReader}
+            disabled={!speechSupported}
+            aria-pressed={sectionReaderActive || isSpeaking}
+            className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+              sectionReaderActive
+                ? "bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200 hover:bg-emerald-100"
+                : "bg-blue-900 text-white hover:bg-blue-800"
+            } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
+          >
+            <Volume2 className="w-5 h-5" />
+            {sectionReaderActive
+              ? t("accessibility.speech.selecting")
+              : t("accessibility.speech.read")}
+          </button>
+
+          {(sectionReaderActive || isSpeaking) && (
+            <div className="mt-3 rounded-xl bg-white p-3 shadow-sm">
+              <div className="grid grid-cols-3 gap-2">
+                <SpeechControlButton
+                  label={t("accessibility.speech.pause")}
+                  Icon={Pause}
+                  onClick={pauseSpeech}
+                  disabled={!isSpeaking || isPaused}
+                />
+                <SpeechControlButton
+                  label={t("accessibility.speech.resume")}
+                  Icon={Play}
+                  onClick={resumeSpeech}
+                  disabled={!isSpeaking || !isPaused}
+                />
+                <SpeechControlButton
+                  label={t("accessibility.speech.stop")}
+                  Icon={Square}
+                  onClick={stopSpeech}
+                  disabled={!isSpeaking}
+                />
+              </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2" aria-label={t("accessibility.speech.speed")}>
+                {RATE_OPTIONS.map(({ id, Icon }) => (
+                  <SpeechControlButton
+                    key={id}
+                    label={t(`accessibility.speech.rates.${id}`)}
+                    Icon={Icon}
+                    active={speechRate === id}
+                    onClick={() => selectSpeechRate(id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="border-t border-slate-300 mt-4 pt-3 flex justify-center">
             <button
               type="button"
@@ -244,6 +523,25 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
         </div>
       </section>
     </>
+  );
+}
+
+function SpeechControlButton({ label, Icon, active = false, disabled = false, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={active}
+      className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
+        active
+          ? "bg-blue-900 text-white"
+          : "bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-900"
+      } disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+    </button>
   );
 }
 

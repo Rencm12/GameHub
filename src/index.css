@@ -136,6 +136,19 @@ body.a11y-reading-mask::after {
   height: max(0px, calc(100vh - var(--a11y-mask-y, 45vh) - 58px));
 }
 
+body:has([data-a11y-menu='true']) .a11y-readable-hover {
+  cursor: pointer;
+  outline: 3px solid rgba(0, 255, 195, 0.85);
+  outline-offset: 6px;
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.a11y-readable-selected {
+  outline: 3px solid #00ffc3;
+  outline-offset: 6px;
+  box-shadow: 0 0 0 6px rgba(0, 255, 195, 0.16);
+}
+
 @layer components {
 
   .btn-primary {

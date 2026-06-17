@@ -36,8 +36,8 @@ const Footer = () => {
           <h3 className="text-[#00ffc3] text-xl font-bold mb-4">
             {t("footer.contact")}
           </h3>
-          <p className="text-gray-400">{t("email")}</p>
-          <p className="text-gray-400">{t("phone")}</p>
+          <p className="text-gray-400">{t("footer.email")}</p>
+          <p className="text-gray-400">{t("footer.phone")}</p>
         </div>
 
         <div>
@@ -88,7 +88,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <p className="text-center text-gray-500 mt-10">{t("copyright")}</p>
+      <p className="text-center text-gray-500 mt-10">{t("footer.copyright")}</p>
     </footer>
   );
 };

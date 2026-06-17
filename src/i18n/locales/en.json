@@ -34,6 +34,19 @@
     "language": "Language",
     "profile": "Profile",
     "reset": "Reset",
+    "speech": {
+      "read": "Read by section",
+      "selecting": "Select a section",
+      "pause": "Pause",
+      "resume": "Resume",
+      "stop": "Stop",
+      "speed": "Reading speed",
+      "rates": {
+        "slow": "Slow",
+        "normal": "Normal",
+        "fast": "Fast"
+      }
+    },
     "levels": ["Off", "Level 1", "Level 2", "Level 3", "Level 4"],
     "languages": {
       "es": "Spanish",
@@ -75,6 +88,9 @@
     "knowUs": "Get to know us",
     "description": "Discover who we are and the gaming passion behind GameHub.",
     "goToAbout": "Go to About us",
+    "email": "support@gamehub.com",
+    "phone": "+51 999 999 999",
+    "copyright": "© 2026 GameHub",
     "customerService": "Customer Service",
     "claimsDescription": "Register a claim or complaint about your GameHub experience.",
     "claimsBook": "Complaints Book"
