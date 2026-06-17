@@ -1,0 +1,340 @@
+{
+  "header": {
+    "login": "Fazer login",
+    "logout": "Sair",
+    "customer": "Cliente",
+    "accessibility": "Abrir menu de acessibilidade",
+    "nav": [
+      { "label": "Início", "path": "/" },
+      { "label": "Consoles", "path": "/consolas" },
+      { "label": "Jogos", "path": "/juegos" },
+      { "label": "Acessórios", "path": "/accesorios" },
+      { "label": "Sobre nós", "path": "/nosotros" }
+    ]
+  },
+  "footer": {
+    "tagline": "Seu universo gaming definitivo.",
+    "contact": "Contato",
+    "knowUs": "Conheça-nos",
+    "description": "Descubra quem somos e a paixão pelos videogames por trás da GameHub.",
+    "goToAbout": "Ir para Sobre nós",
+    "customerService": "Atendimento ao Cliente",
+    "claimsDescription": "Registre uma reclamação ou queixa sobre sua experiência na GameHub.",
+    "claimsBook": "Livro de Reclamações"
+  },
+  "common": {
+    "addToCart": "Adicionar ao carrinho",
+    "seeMore": "Ver mais",
+    "seeLess": "Ver menos",
+    "noStock": "Sem estoque",
+    "loadingStock": "Carregando estoque...",
+    "available": "Disponível",
+    "lastUnits": "Últimas unidades",
+    "soldOut": "Esgotado",
+    "exclusive": "Exclusivo",
+    "limited": "Limitado",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "recommended": "Recomendado",
+    "sortBy": "Ordenar por",
+    "lowerPrice": "Preço menor",
+    "higherPrice": "Preço maior",
+    "clear": "Limpar",
+    "clearFilters": "Limpar filtros",
+    "platform": "Plataforma",
+    "category": "Categoria",
+    "product": "produto",
+    "products": "produtos",
+    "addedToCart": "adicionado ao carrinho",
+    "noMoreUnits": "Sem mais unidades disponíveis",
+    "addedToFavorites": "adicionado aos favoritos",
+    "removedFromFavorites": "removido dos favoritos"
+  },
+  "accessibility": {
+    "title": "Menu de acessibilidade",
+    "close": "Fechar menu de acessibilidade",
+    "open": "Abrir menu de acessibilidade",
+    "language": "Idioma",
+    "profile": "Perfil",
+    "reset": "Reiniciar",
+    "levels": ["Desativado", "Nível 1", "Nível 2", "Nível 3", "Nível 4"],
+    "languages": {
+      "es": "Espanhol",
+      "en": "Inglês",
+      "pt": "Português"
+    },
+    "profiles": {
+      "default": "Padrão",
+      "colorBlind": "Daltonismo",
+      "lowVision": "Baixa visão",
+      "adhd": "TDAH",
+      "dyslexia": "Dislexia"
+    },
+    "tools": {
+      "textSize": "Tamanho do texto",
+      "contrast": "Contraste",
+      "cursor": "Cursor grande",
+      "readingMask": "Máscara de leitura",
+      "dyslexia": "Fonte legível",
+      "lineHeight": "Altura da linha"
+    }
+  },
+  "home": {
+    "title": "GameHub: O arsenal definitivo para verdadeiros gamers.",
+    "intro": "Bem-vindo a GameHub, o ponto de encontro criado por gamers, para gamers. Fazemos mais do que vender consoles, videogames e acessórios; alimentamos seu lado geek com o melhor em artigos colecionáveis. Eleve sua experiência e mergulhe em sua próxima grande aventura.",
+    "intro2": "A paixão por videogames é o que impulsiona a GameHub. Aqui você encontrará os últimos lançamentos, joias clássicas e acessórios imprescindíveis para cada jogador. Junte-se à nossa comunidade gamer e leve sua experiência para o próximo nível com GameHub.",
+    "featuredGames": "Jogos em Destaque",
+    "featuredConsoles": "Consoles em Destaque",
+    "featuredAccessories": "Acessórios em Destaque"
+  },
+  "games": {
+    "title": "Catálogo de Videogames",
+    "loading": "Carregando jogos...",
+    "search": "Procurar jogo...",
+    "noResults": "Nenhum jogo encontrado",
+    "action": "Ação",
+    "adventure": "Aventura",
+    "sports": "Esportes"
+  },
+  "accessories": {
+    "title": "Catálogo de Acessórios",
+    "loading": "Carregando acessórios...",
+    "loadError": "Erro ao carregar",
+    "search": "Procurar acessório...",
+    "lowerToHigher": "Preço menor para maior",
+    "higherToLower": "Preço maior para menor",
+    "typeAll": "Tipo (Todos)",
+    "exclusives": "Exclusivos",
+    "limited": "Limitados",
+    "noResults": "Nenhum acessório encontrado com esses filtros.",
+    "resetSearch": "Redefinir pesquisa",
+    "showing": "Mostrando",
+    "results": "resultados"
+  },
+  "consolesList": {
+    "loading": "Carregando consoles...",
+    "noResults": "Nenhum console encontrado com os filtros selecionados."
+  },
+  "consolesFilter": {
+    "title": "Filtrar Consoles",
+    "search": "Procurar console...",
+    "sortBy": "Ordenar por",
+    "recent": "Mais recente",
+    "onlyExclusive": "Apenas exclusivos",
+    "onlyLimited": "Apenas limitados",
+    "showing": "Mostrando",
+    "clear": "Limpar filtros"
+  },
+  "about": {
+    "title": "Sobre a GameHub",
+    "whoWeAre": {
+      "heading": "Quem somos?",
+      "text": "A GameHub é uma plataforma web voltada para oferecer uma experiência interativa no mundo dos videogames, contando com seções como início, jogos, consoles, acessórios e login, permitindo que os usuários explorem conteúdos variados e relevantes em um só lugar. Nosso objetivo é facilitar a navegação e a busca de informações, organizar preferências pessoais e oferecer uma experiência moderna para a comunidade gamer."
+    },
+    "missionVision": {
+      "toggle": "Missão e Visão",
+      "missionTitle": "Missão",
+      "missionText": "Oferecer aos usuários uma plataforma moderna e intuitiva onde possam explorar videogames, consoles e acessórios, proporcionando uma experiência organizada, acessível e atraente.",
+      "visionTitle": "Visão",
+      "visionText": "Tornar-se uma plataforma de referência para a comunidade gamer, incorporando novas tecnologias e funcionalidades inovadoras que permitam uma experiência cada vez mais completa e personalizada."
+    },
+    "values": {
+      "toggle": "Valores Organizacionais",
+      "items": [
+        {
+          "title": "Inovação tecnológica:",
+          "text": "buscamos melhorar continuamente nossas soluções por meio de novas tecnologias."
+        },
+        {
+          "title": "Trabalho em equipe:",
+          "text": "incentivamos a colaboração e a comunicação entre os integrantes."
+        },
+        {
+          "title": "Compromisso com a qualidade:",
+          "text": "desenvolvemos funcionalidades eficientes e fáceis de usar."
+        },
+        {
+          "title": "Responsabilidade:",
+          "text": "cumprimos os objetivos e tarefas atribuídas durante o projeto."
+        },
+        {
+          "title": "Melhoria contínua:",
+          "text": "analisamos constantemente oportunidades para otimizar a plataforma."
+        }
+      ]
+    },
+    "team": {
+      "heading": "Equipe de Desenvolvimento",
+      "members": [
+        {
+          "name": "Renato Alejandro Osorio Cama",
+          "role": "Líder de Projeto",
+          "description": "Supervisiona o desenvolvimento geral, coordena as atividades da equipe e participa do design do banco de dados e do desenvolvimento das funcionalidades principais."
+        },
+        {
+          "name": "Carlos Ernesto Gonzales Solórzano",
+          "role": "Desenvolvedor Full Stack",
+          "description": "Responsável pela configuração do Supabase, implementação da autenticação, cadastro e login, além do desenvolvimento das interfaces e funcionalidades do sistema."
+        },
+        {
+          "name": "Caleb Isaac Alvarez Ysmodés",
+          "role": "Desenvolvedor Front-End",
+          "description": "Encarregado do design e implementação da interface do usuário, da configuração inicial do projeto em React e da adaptação visual do sistema."
+        },
+        {
+          "name": "Karol Nieves Huamani Espinoza",
+          "role": "Desenvolvedora Back-End",
+          "description": "Responsável pelo desenvolvimento do banco de dados, integração de funcionalidades como carrinho e favoritos, além de participar dos testes do sistema."
+        },
+        {
+          "name": "Hilmer Kharoll Jauregui Canchanya",
+          "role": "Analista de Requisitos e Desenvolvedor Front-End",
+          "description": "Encarregado de identificar os requisitos do sistema, definir funcionalidades e participar do desenvolvimento de interfaces e navegação da aplicação."
+        }
+      ]
+    },
+    "additionalInfo": {
+      "heading": "Informações Adicionais"
+    },
+    "faq": {
+      "toggle": "Perguntas Frequentes",
+      "items": [
+        {
+          "question": "O que é a GameHub?",
+          "answer": "A GameHub é uma plataforma web voltada para o mundo gamer, onde os usuários podem explorar videogames, consoles e acessórios."
+        },
+        {
+          "question": "Preciso me cadastrar?",
+          "answer": "Não necessariamente. No entanto, algumas funcionalidades exigem autenticação para uma experiência mais personalizada."
+        },
+        {
+          "question": "Quais produtos a GameHub oferece?",
+          "answer": "Videogames, consoles e acessórios relacionados ao entretenimento gamer."
+        },
+        {
+          "question": "Quais tecnologias a GameHub utiliza?",
+          "answer": "React, JavaScript, Tailwind CSS, Supabase e PostgreSQL."
+        }
+      ]
+    },
+    "terms": {
+      "toggle": "Termos e Condições",
+      "items": [
+        {
+          "title": "Uso da plataforma",
+          "text": "A GameHub tem fins informativos e demonstrativos dentro do projeto acadêmico desenvolvido pela equipe."
+        },
+        {
+          "title": "Responsabilidade pela informação",
+          "text": "Procuramos manter atualizadas as informações sobre os videogames, consoles e acessórios exibidos na plataforma."
+        },
+        {
+          "title": "Direitos de autor",
+          "text": "As imagens, marcas e nomes comerciais pertencem aos seus respectivos proprietários."
+        },
+        {
+          "title": "Modificações",
+          "text": "A equipe de desenvolvimento poderá atualizar funcionalidades, design e conteúdo em versões futuras do sistema."
+        }
+      ]
+    }
+  },
+  "email": "suporte@gamehub.com",
+  "phone": "+51 999 999 999",
+  "copyright": "© 2026 GameHub",
+  "claims": {
+    "title": "Livro de Reclamações",
+    "intro": "Na GameHub, ouvimos cada solicitação para melhorar a experiência de compra e atendimento. Preencha o formulário com seus dados e os detalhes do seu caso.",
+    "privacy": "As informações registradas serão usadas apenas para analisar e responder à sua reclamação ou queixa.",
+    "differenceTitle": "Diferença importante",
+    "differenceText": "Reclamação: insatisfação relacionada a um produto ou serviço. Queixa: insatisfação com o atendimento recebido.",
+    "fields": {
+      "fullName": "Nome completo",
+      "document": "DNI ou documento",
+      "phone": "Telefone",
+      "email": "Endereço de email",
+      "address": "Endereço",
+      "type": "Tipo de solicitação",
+      "product": "Produto ou serviço",
+      "order": "Número do pedido",
+      "detail": "Detalhes do caso",
+      "request": "Pedido do consumidor"
+    },
+    "placeholders": {
+      "fullName": "Digite seu nome",
+      "document": "Ex. 12345678",
+      "email": "email@exemplo.com",
+      "address": "Digite seu endereço",
+      "product": "Jogo, console ou acessório",
+      "order": "Opcional",
+      "detail": "Descreva o ocorrido",
+      "request": "Indique a solução esperada"
+    },
+    "types": {
+      "claim": "Reclamação",
+      "complaint": "Queixa"
+    },
+    "validation": {
+      "name": "O nome deve conter apenas letras.",
+      "document": "O DNI deve conter exatamente 8 números.",
+      "phone": "O telefone deve ter 9 números e começar com 9."
+    },
+    "messages": {
+      "success": "Sua solicitação foi registrada com sucesso",
+      "withNumber": "com o número",
+      "error": "Não foi possível registrar a solicitação. Detalhe:"
+    },
+    "actions": {
+      "submit": "Enviar solicitação",
+      "sending": "Enviando..."
+    }
+  },
+  "cart": {
+    "title": "Meu carrinho",
+    "empty": "Seu carrinho está vazio",
+    "finish": "Compra completa"
+  },
+  "checkout": {
+    "title": "Finalizar compra",
+    "authRequired": "Você precisa fazer login para completar sua compra",
+    "completeFields": "Preencha todos os campos",
+    "success": "Compra realizada com sucesso",
+    "fullName": "Nome completo",
+    "email": "Endereço de email",
+    "phone": "Telefone",
+    "address": "Endereço",
+    "paymentMethod": "Selecione um método de pagamento",
+    "creditCard": "Cartão de Crédito/Débito",
+    "yape": "Yape / Plin",
+    "bankTransfer": "Transferência bancária",
+    "cashOnDelivery": "Pagamento na entrega",
+    "quantity": "Quantidade:",
+    "total": "Total:"
+  },
+  "login": {
+    "completeFields": "Preencha todos os campos.",
+    "loginError": "Erro ao fazer login",
+    "welcome": "Bem-vindo",
+    "accountCreated": "Conta criada com sucesso ✓",
+    "fullName": "Seu nome",
+    "email": "email@exemplo.com",
+    "password": "Sua senha",
+    "createAccount": "Criar conta",
+    "signIn": "Fazer login",
+    "processing": "Processando...",
+    "brand": "GameHub"
+  },
+  "filterOptions": {
+    "recommended": "Recomendados",
+    "lowerPrice": "Preço Menor",
+    "higherPrice": "Preço Maior",
+    "all": "Todos",
+    "exclusive": "Exclusivo",
+    "limited": "Limitado"
+  },
+  "favorites": {
+    "title": "Seus favoritos",
+    "noFavorites": "Você não tem favoritos",
+    "addFavorites": "Adicione jogos ou consoles para vê-los aqui"
+  }
+}

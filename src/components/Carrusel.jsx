@@ -97,25 +97,7 @@ const Carousel = ({ slides = [] }) => {
           p-[10px]
         "
       >
-        {slides.map((_, index) => (
-          <span
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`
-              inline-block
-              h-[10px]
-              w-[10px]
-              mx-[5px]
-              rounded-full
-              cursor-pointer
-              ${
-                currentIndex === index
-                  ? "bg-black"
-                  : "bg-gray-400"
-              }
-            `}
-          />
-        ))}
+       
       </div>
     </div>
   );

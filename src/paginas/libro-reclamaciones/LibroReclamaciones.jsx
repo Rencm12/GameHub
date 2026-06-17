@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BookOpenCheck, Send, ShieldCheck } from "lucide-react";
 import Footer from "../../components/Footer";
 import { crearReclamacion } from "../../service/ReclamacionesService";
@@ -16,23 +17,24 @@ const datosIniciales = {
   solicitud: "",
 };
 
-const validarFormulario = (datos) => {
+const validarFormulario = (datos, t) => {
   if (!/^[A-Za-z\s]+$/.test(datos.nombre.trim())) {
-    return "El nombre solo debe contener letras.";
+    return t("claims.validation.name");
   }
 
   if (!/^\d{8}$/.test(datos.documento)) {
-    return "El DNI debe contener exactamente 8 numeros.";
+    return t("claims.validation.document");
   }
 
   if (!/^9\d{8}$/.test(datos.telefono)) {
-    return "El telefono debe tener 9 numeros y empezar con 9.";
+    return t("claims.validation.phone");
   }
 
   return "";
 };
 
 function LibroReclamaciones() {
+  const { t } = useTranslation();
   const [formulario, setFormulario] = useState(datosIniciales);
   const [enviado, setEnviado] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -72,7 +74,7 @@ function LibroReclamaciones() {
     setError("");
     setRegistro(null);
 
-    const errorValidacion = validarFormulario(formulario);
+    const errorValidacion = validarFormulario(formulario, t);
 
     if (errorValidacion) {
       setError(errorValidacion);
@@ -85,7 +87,7 @@ function LibroReclamaciones() {
     if (supabaseError) {
       console.error("Error al registrar reclamacion:", supabaseError);
       setError(
-        `No se pudo registrar la solicitud. Detalle: ${supabaseError.message}`,
+        `${t("claims.messages.error")} ${supabaseError.message}`,
       );
       setEnviando(false);
       return;
@@ -105,32 +107,28 @@ function LibroReclamaciones() {
             <div className="flex items-center gap-3 text-[#00ffc3] mb-5">
               <BookOpenCheck size={36} />
               <h1 className="text-4xl md:text-5xl font-bold">
-                Libro de Reclamaciones
+                {t("claims.title")}
               </h1>
             </div>
 
             <p className="text-gray-300 leading-7 mb-6">
-              En GameHub escuchamos cada solicitud para mejorar la experiencia
-              de compra y atencion. Completa el formulario con tus datos y el
-              detalle de tu caso.
+              {t("claims.intro")}
             </p>
 
             <div className="space-y-4 text-gray-300">
               <div className="flex gap-3">
                 <ShieldCheck className="text-[#00ffc3] shrink-0 mt-1" />
                 <p>
-                  La informacion registrada sera utilizada solo para revisar y
-                  responder tu reclamo o queja.
+                  {t("claims.privacy")}
                 </p>
               </div>
 
               <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
                 <h2 className="text-[#00ffc3] font-bold mb-2">
-                  Diferencia importante
+                  {t("claims.differenceTitle")}
                 </h2>
                 <p className="text-sm leading-6">
-                  Reclamo: disconformidad relacionada con un producto o
-                  servicio. Queja: malestar por la atencion recibida.
+                  {t("claims.differenceText")}
                 </p>
               </div>
             </div>
@@ -142,8 +140,8 @@ function LibroReclamaciones() {
           >
             {enviado && (
               <div className="mb-6 rounded-xl border border-[#00ffc3] bg-[#00ffc3]/10 px-4 py-3 text-[#00ffc3] font-semibold">
-                Tu solicitud fue registrada correctamente
-                {registro?.id ? ` con el numero ${registro.id}.` : "."}
+                {t("claims.messages.success")}
+                {registro?.id ? ` ${t("claims.messages.withNumber")} ${registro.id}.` : "."}
               </div>
             )}
 
@@ -155,7 +153,9 @@ function LibroReclamaciones() {
 
             <div className="grid md:grid-cols-2 gap-5">
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Nombre completo</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.fullName")}
+                </span>
                 <input
                   required
                   name="nombre"
@@ -163,13 +163,15 @@ function LibroReclamaciones() {
                   onChange={manejarCambio}
                   pattern="[A-Za-z\s]+"
                   className="modal-input"
-                  placeholder="Ingresa tu nombre"
-                  title="El nombre solo debe contener letras."
+                  placeholder={t("claims.placeholders.fullName")}
+                  title={t("claims.validation.name")}
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">DNI o documento</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.document")}
+                </span>
                 <input
                   required
                   name="documento"
@@ -179,13 +181,15 @@ function LibroReclamaciones() {
                   maxLength={8}
                   pattern="\d{8}"
                   className="modal-input"
-                  placeholder="Ej. 12345678"
-                  title="El DNI debe contener exactamente 8 numeros."
+                  placeholder={t("claims.placeholders.document")}
+                  title={t("claims.validation.document")}
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Telefono</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.phone")}
+                </span>
                 <input
                   required
                   name="telefono"
@@ -196,12 +200,14 @@ function LibroReclamaciones() {
                   pattern="9\d{8}"
                   className="modal-input"
                   placeholder="999999999"
-                  title="El telefono debe tener 9 numeros y empezar con 9."
+                  title={t("claims.validation.phone")}
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Correo electronico</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.email")}
+                </span>
                 <input
                   required
                   type="email"
@@ -209,79 +215,91 @@ function LibroReclamaciones() {
                   value={formulario.correo}
                   onChange={manejarCambio}
                   className="modal-input"
-                  placeholder="correo@ejemplo.com"
+                  placeholder={t("claims.placeholders.email")}
                 />
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm text-gray-300">Direccion</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.address")}
+                </span>
                 <input
                   required
                   name="direccion"
                   value={formulario.direccion}
                   onChange={manejarCambio}
                   className="modal-input"
-                  placeholder="Ingresa tu direccion"
+                  placeholder={t("claims.placeholders.address")}
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Tipo de solicitud</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.type")}
+                </span>
                 <select
                   name="tipo"
                   value={formulario.tipo}
                   onChange={manejarCambio}
                   className="modal-input"
                 >
-                  <option>Reclamo</option>
-                  <option>Queja</option>
+                  <option value="Reclamo">{t("claims.types.claim")}</option>
+                  <option value="Queja">{t("claims.types.complaint")}</option>
                 </select>
               </label>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Producto o servicio</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.product")}
+                </span>
                 <input
                   required
                   name="producto"
                   value={formulario.producto}
                   onChange={manejarCambio}
                   className="modal-input"
-                  placeholder="Juego, consola o accesorio"
+                  placeholder={t("claims.placeholders.product")}
                 />
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm text-gray-300">Numero de pedido</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.order")}
+                </span>
                 <input
                   name="pedido"
                   value={formulario.pedido}
                   onChange={manejarCambio}
                   className="modal-input"
-                  placeholder="Opcional"
+                  placeholder={t("claims.placeholders.order")}
                 />
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm text-gray-300">Detalle del caso</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.detail")}
+                </span>
                 <textarea
                   required
                   name="detalle"
                   value={formulario.detalle}
                   onChange={manejarCambio}
                   className="modal-input min-h-32 resize-y"
-                  placeholder="Describe lo ocurrido"
+                  placeholder={t("claims.placeholders.detail")}
                 />
               </label>
 
               <label className="space-y-2 md:col-span-2">
-                <span className="text-sm text-gray-300">Pedido del consumidor</span>
+                <span className="text-sm text-gray-300">
+                  {t("claims.fields.request")}
+                </span>
                 <textarea
                   required
                   name="solicitud"
                   value={formulario.solicitud}
                   onChange={manejarCambio}
                   className="modal-input min-h-28 resize-y"
-                  placeholder="Indica que solucion esperas"
+                  placeholder={t("claims.placeholders.request")}
                 />
               </label>
             </div>
@@ -292,7 +310,7 @@ function LibroReclamaciones() {
               className="mt-6 w-full md:w-auto bg-[#00ffc3] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#00d9a8] disabled:opacity-60 disabled:cursor-not-allowed transition inline-flex items-center justify-center gap-2"
             >
               <Send size={20} />
-              {enviando ? "Enviando..." : "Enviar solicitud"}
+              {enviando ? t("claims.actions.sending") : t("claims.actions.submit")}
             </button>
           </form>
         </section>

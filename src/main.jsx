@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CarritoProvider } from "./context/CarritoContext";
 import { FavoritosProvider } from "./context/FavoritosContext";
-import { BrowserRouter } from "react-router-dom";
+import "./i18n";
 import "./index.css";
 import App from "./App.jsx";
 
