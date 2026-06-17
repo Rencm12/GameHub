@@ -14,6 +14,7 @@ export const generarBoleta = (
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margen = 15;
+  const numeroOrden = String(orden_id).substring(0, 8).toUpperCase();
 
   // Color de fondo oscuro
   doc.setFillColor(15, 17, 39);
@@ -44,7 +45,7 @@ export const generarBoleta = (
   doc.setTextColor(200, 200, 200);
   doc.setFontSize(10);
   doc.setFont(undefined, "normal");
-  doc.text(`N° ${orden_id.substring(0, 8).toUpperCase()}`, margen, 65);
+  doc.text(`N° ${numeroOrden}`, margen, 65);
 
   // Fecha
   const fecha = new Date().toLocaleDateString("es-PE", {
@@ -56,7 +57,7 @@ export const generarBoleta = (
 
   // Sección datos del cliente
   doc.setDrawColor(50, 50, 80);
-  doc.rect(margen, 72, pageWidth - 2 * margen, 35);
+  doc.rect(margen, 72, pageWidth - 2 * margen, 45);
 
   doc.setTextColor(0, 255, 195);
   doc.setFontSize(11);
@@ -69,10 +70,15 @@ export const generarBoleta = (
   doc.text(`Cliente: ${nombre}`, margen + 5, 90);
   doc.text(`Correo: ${correo}`, margen + 5, 97);
   doc.text(`Teléfono: ${telefono}`, pageWidth / 2, 90);
-  doc.text(`Dirección: ${direccion}`, margen + 5, 104);
+  const direccionTexto = doc.splitTextToSize(
+    `Dirección: ${direccion}`,
+    pageWidth - 40,
+  );
+
+  doc.text(direccionTexto, margen + 5, 104);
 
   // Sección productos
-  let yPos = 120;
+  let yPos = 130;
   doc.setDrawColor(50, 50, 80);
   doc.rect(margen, yPos - 5, pageWidth - 2 * margen, 8);
 
@@ -97,7 +103,14 @@ export const generarBoleta = (
 
     if (yPos > pageHeight - 40) {
       doc.addPage();
+
+      doc.setFillColor(15, 17, 39);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+
       yPos = 20;
+
+      doc.setTextColor(200, 200, 200);
+      doc.setFontSize(9);
     }
 
     doc.text(item.nombre.substring(0, 35), margen + 5, yPos);
@@ -107,7 +120,12 @@ export const generarBoleta = (
       align: "right",
     });
 
-    yPos += 7;
+    yPos += 4;
+
+    doc.setDrawColor(40, 40, 60);
+    doc.line(margen, yPos, pageWidth - margen, yPos);
+
+    yPos += 3;
   });
 
   // Línea antes del total
@@ -120,49 +138,101 @@ export const generarBoleta = (
   doc.setTextColor(200, 200, 200);
   doc.setFontSize(10);
 
+  doc.setDrawColor(50, 50, 80);
+  doc.rect(pageWidth - 95, yPos + 3, 80, 35);
+
+  yPos += 10;
+
   const subtotal = total / 1.18;
   const igv = total - subtotal;
 
-  doc.text("Subtotal:", pageWidth - 50, yPos);
-  doc.text(`S/ ${subtotal.toFixed(2)}`, pageWidth - margen - 5, yPos, {
-    align: "right",
-  });
+  const xLabel = pageWidth - 90;
+  const xMonto = pageWidth - margen - 5;
 
-  yPos += 7;
-  doc.text("IGV (18%):", pageWidth - 50, yPos);
-  doc.text(`S/ ${igv.toFixed(2)}`, pageWidth - margen - 5, yPos, {
-    align: "right",
-  });
+  doc.setTextColor(200, 200, 200);
+  doc.setFontSize(10);
 
-  yPos += 8;
-  doc.setLineWidth(0.3);
-  doc.line(margen, yPos, pageWidth - margen, yPos);
-
-  yPos += 7;
-  doc.setTextColor(0, 255, 195);
-  doc.setFontSize(12);
+  // Subtotal
   doc.setFont(undefined, "bold");
-  doc.text("TOTAL:", pageWidth - 50, yPos);
-  doc.text(`S/ ${total.toFixed(2)}`, pageWidth - margen - 5, yPos, {
+  doc.text("Subtotal:", xLabel, yPos);
+
+  doc.setFont(undefined, "normal");
+  doc.text(`S/ ${subtotal.toFixed(2)}`, xMonto, yPos, {
     align: "right",
   });
+
+  // IGV
+  yPos += 7;
+
+  doc.setFont(undefined, "bold");
+  doc.text("IGV (18%):", xLabel, yPos);
+
+  doc.setFont(undefined, "normal");
+  doc.text(`S/ ${igv.toFixed(2)}`, xMonto, yPos, {
+    align: "right",
+  });
+
+  // Línea
+  yPos += 6;
+
+  doc.setLineWidth(0.5);
+  doc.line(xLabel, yPos, xMonto, yPos);
+
+  // Total
+  yPos += 8;
+
+  doc.setTextColor(0, 255, 195);
+  doc.setFontSize(14);
+  doc.setFont(undefined, "bold");
+
+  doc.text("TOTAL:", xLabel, yPos);
+
+  doc.text(`S/ ${total.toFixed(2)}`, xMonto, yPos, {
+    align: "right",
+  });
+
+  const totalProductos = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+
+  yPos += 12;
+
+  doc.setTextColor(200, 200, 200);
+  doc.setFontSize(9);
+  doc.setFont(undefined, "normal");
+
+  doc.text(`Productos adquiridos: ${totalProductos}`, margen, yPos);
 
   // Método de pago
-  yPos += 12;
+  yPos += 8;
   doc.setTextColor(200, 200, 200);
   doc.setFontSize(9);
   doc.setFont(undefined, "normal");
   doc.text(`Método de Pago: ${metodoPago}`, margen, yPos);
+  yPos += 6;
+
+  doc.setTextColor(0, 255, 195);
+  doc.setFont(undefined, "bold");
+
+  doc.text("Estado: PAGADO", margen, yPos);
 
   // Pie de página
+  doc.setFont(undefined, "normal");
   doc.setTextColor(100, 100, 100);
   doc.setFontSize(8);
+
+  doc.text("Gracias por confiar en GameHub", pageWidth / 2, pageHeight - 18, {
+    align: "center",
+  });
+
   doc.text(
-    "Gracias por tu compra. www.gamehub.com | soporte@gamehub.com",
+    "proyecto-herramientasdedesarrollo.vercel.app",
     pageWidth / 2,
-    pageHeight - 12,
+    pageHeight - 13,
     { align: "center" },
   );
 
-  doc.save(`boleta-${orden_id.substring(0, 8)}.pdf`);
+  doc.text("soporte@gamehub.com", pageWidth / 2, pageHeight - 8, {
+    align: "center",
+  });
+
+  doc.save(`boleta-${numeroOrden}.pdf`);
 };

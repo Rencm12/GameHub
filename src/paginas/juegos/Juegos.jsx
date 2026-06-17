@@ -54,12 +54,24 @@ function Juegos() {
 
   useEffect(() => {
     obtenerJuegos();
+
+    const actualizarCatalogo = () => {
+      obtenerJuegos();
+    };
+
+    window.addEventListener("stockActualizado", actualizarCatalogo);
+
+    return () => {
+      window.removeEventListener("stockActualizado", actualizarCatalogo);
+    };
   }, []);
 
   let juegosFiltrados = [...juegos];
+  juegosFiltrados = juegosFiltrados.filter((juego) => juego.stock > 0);
 
   juegosFiltrados = juegosFiltrados.filter((juego) => {
     return (
+      juego.stock > 0 &&
       juego.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
       (plataforma === "" || juego.plataforma === plataforma) &&
       (categoria === "" || juego.categoria === categoria)

@@ -57,6 +57,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [cargando, setCargando] = useState(false);
   const [comprobante, setComprobante] = useState(null);
   const [nombreComprobante, setNombreComprobante] = useState("");
+  const [codigoOperacion, setCodigoOperacion] = useState("");
 
   const [numeroTarjeta, setNumeroTarjeta] = useState("");
   const [nombreTitular, setNombreTitular] = useState("");
@@ -184,6 +185,10 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
           .eq("id", item.id)
           .single();
 
+        if (producto.stock < item.cantidad) {
+          throw new Error(`${item.nombre} ya no tiene stock suficiente`);
+        }
+
         if (producto) {
           const nuevoStock = Math.max(0, producto.stock - item.cantidad);
 
@@ -219,8 +224,8 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     }
 
     const metodoObj = metodosDePago.find((m) => m.id === metodoPago);
-    if (metodoObj.requiereComprobante && !comprobante) {
-      setMensaje("Debes subir el comprobante de pago");
+    if (metodoObj.requiereComprobante && !codigoOperacion.trim()) {
+      setMensaje("Ingresa el código de operación");
       return;
     }
 
@@ -267,6 +272,10 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       }
 
       await reducirStock();
+      window.dispatchEvent(new Event("stockActualizado"));
+      const { data } = await supabase
+        .from("juegos")
+        .select("id, nombre, stock");
 
       if (comprobante) {
         const nombreArchivo = `${user.id}-${orden.id}-${Date.now()}`;
@@ -280,6 +289,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             usuario_id: user.id,
             archivo_url: nombreArchivo,
             metodo_pago: metodoPago,
+            codigo_operacion: codigoOperacion,
           });
         }
       }
@@ -389,6 +399,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
                 onClick={() => {
                   setMetodoPago(metodo.id);
                   setComprobante(null);
+                  setCodigoOperacion("");
                 }}
                 className={`p-4 rounded-xl border-2 transition text-left ${
                   metodoPago === metodo.id
@@ -420,6 +431,36 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             </div>
           )}
         </div>
+
+        {metodoPago &&
+          metodosDePago.find((m) => m.id === metodoPago)
+            ?.requiereComprobante && (
+            <div className="mt-4">
+              <label className="block text-[#00ffc3] font-bold mb-2">
+                Código de operación
+              </label>
+
+              <input
+                type="text"
+                value={codigoOperacion}
+                onChange={(e) =>
+                  setCodigoOperacion(e.target.value.substring(0, 30))
+                }
+                placeholder="Ej: 123456789"
+                maxLength="30"
+                className="
+          w-full
+          bg-[#1e293b]
+          text-white
+          p-3
+          rounded-xl
+          outline-none
+          focus:ring-1
+          focus:ring-[#00ffc3]
+        "
+              />
+            </div>
+          )}
 
         {metodoPago === "Tarjeta" && (
           <div className="mb-6">
