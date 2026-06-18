@@ -1,9 +1,13 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&family=Silkscreen:wght@400;700&display=swap');
 
-
+@theme {
+  --font-saira: 'Saira', sans-serif;
+  --font-silkscreen: 'Silkscreen', cursive;
+}
 @layer base {
   body {
-    @apply bg-black m-0 font-sans antialiased;
+    @apply bg-black m-0 font-saira antialiased;
   }
 
   code {
@@ -134,6 +138,19 @@ body.a11y-reading-mask::before {
 body.a11y-reading-mask::after {
   bottom: 0;
   height: max(0px, calc(100vh - var(--a11y-mask-y, 45vh) - 58px));
+}
+
+body:has([data-a11y-menu='true']) .a11y-readable-hover {
+  cursor: pointer;
+  outline: 3px solid rgba(0, 255, 195, 0.85);
+  outline-offset: 6px;
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.a11y-readable-selected {
+  outline: 3px solid #00ffc3;
+  outline-offset: 6px;
+  box-shadow: 0 0 0 6px rgba(0, 255, 195, 0.16);
 }
 
 @layer components {
