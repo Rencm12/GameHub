@@ -3,6 +3,34 @@ import { createContext, useState, useEffect } from "react";
 export const CarritoContext = createContext();
 
 export function CarritoProvider({ children }) {
+  const crearProductoCarrito = (producto) => {
+    const id = producto.id ?? producto._id ?? producto.slug;
+    const nombre =
+      producto.nombre ??
+      producto.titulo ??
+      producto.name ??
+      producto.modelo ??
+      "Producto";
+
+    const tipo = producto.tipo ?? "producto";
+
+    const precio = Number(producto.precio ?? producto.price ?? 0);
+    const stock = Number(producto.stock ?? 99);
+
+    return {
+      ...producto,
+      _key: producto._key ?? `${tipo}-${id ?? nombre}`,
+      id,
+      nombre,
+      titulo: producto.titulo ?? nombre,
+      imagen: producto.imagen ?? producto.image ?? producto.img,
+      precio,
+      stock,
+      cantidad: producto.cantidad ?? 1,
+      tipo,
+    };
+  };
+
   const [carrito, setCarrito] = useState(() => {
     const carritoGuardado = localStorage.getItem("carrito");
 
@@ -10,16 +38,7 @@ export function CarritoProvider({ children }) {
 
     try {
       const parsed = JSON.parse(carritoGuardado);
-
-      // Ensure older items have a normalized _key and nombre
-      return parsed.map((item) => {
-        const nombre = item.nombre || item.titulo || "";
-        return {
-          ...item,
-          _key: item._key || `${item.id}-${nombre}`,
-          nombre: item.nombre || item.titulo || item.nombre || "",
-        };
-      });
+      return parsed.map((item) => crearProductoCarrito(item));
     } catch (e) {
       return [];
     }
@@ -29,58 +48,70 @@ export function CarritoProvider({ children }) {
     localStorage.setItem("carrito", JSON.stringify(carrito));
   }, [carrito]);
 
-  const agregarAlCarrito = (juego) => {
-    // Normalize product fields and create a unique key to avoid id collisions
-    const nombre = juego.nombre || juego.titulo || "";
-    const key = `${juego.id}-${nombre}`;
+  const agregarAlCarrito = (producto) => {
+    const productoNormalizado = crearProductoCarrito(producto);
+    let agregado = true;
 
-    const existe = carrito.find((item) => item._key === key);
-
-    if (existe) {
-      const nuevoCarrito = carrito.map((item) =>
-        item._key === key ? { ...item, cantidad: item.cantidad + 1 } : item,
+    setCarrito((carritoActual) => {
+      const existe = carritoActual.find(
+        (item) => item._key === productoNormalizado._key,
       );
 
-      setCarrito(nuevoCarrito);
-    } else {
-      const nuevoProducto = {
-        _key: key,
-        id: juego.id,
-        nombre: nombre,
-        titulo: juego.titulo,
-        imagen: juego.imagen,
-        precio: juego.precio ?? juego.price ?? 0,
-        exclusivo: juego.exclusivo,
-        limitada: juego.limitada,
-        cantidad: 1,
-      };
+      if (existe) {
+        if (existe.cantidad >= existe.stock) {
+          agregado = false;
+          return carritoActual;
+        }
 
-      setCarrito([...carrito, nuevoProducto]);
-    }
+        return carritoActual.map((item) =>
+          item._key === productoNormalizado._key
+            ? { ...item, cantidad: item.cantidad + 1 }
+            : item,
+        );
+      }
+
+      return [...carritoActual, productoNormalizado];
+    });
+
+    return agregado;
   };
 
   const aumentarCantidad = (key) => {
-    setCarrito(
-      carrito.map((item) => (item._key === key ? { ...item, cantidad: item.cantidad + 1 } : item)),
+    setCarrito((carritoActual) =>
+      carritoActual.map((item) => {
+        if (item._key !== key) return item;
+
+        if (item.cantidad >= item.stock) return item;
+
+        return {
+          ...item,
+          cantidad: item.cantidad + 1,
+        };
+      }),
     );
   };
 
   const disminuirCantidad = (key) => {
-    const nuevoCarrito = carrito
-      .map((item) => (item._key === key ? { ...item, cantidad: item.cantidad - 1 } : item))
-      .filter((item) => item.cantidad > 0);
-
-    setCarrito(nuevoCarrito);
+    setCarrito((carritoActual) =>
+      carritoActual
+        .map((item) =>
+          item._key === key ? { ...item, cantidad: item.cantidad - 1 } : item,
+        )
+        .filter((item) => item.cantidad > 0),
+    );
   };
 
   const eliminarProducto = (key) => {
-    setCarrito(carrito.filter((item) => item._key !== key));
+    setCarrito((carritoActual) =>
+      carritoActual.filter((item) => item._key !== key),
+    );
   };
 
   return (
     <CarritoContext.Provider
       value={{
         carrito,
+        setCarrito,
         agregarAlCarrito,
         aumentarCantidad,
         disminuirCantidad,

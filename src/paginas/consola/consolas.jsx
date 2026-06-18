@@ -1,5 +1,7 @@
 import Carrusel from "./Carrusel";
 import Consolas from "./Cards";
+import Footer from "../../components/Footer";
+
 function Consolaspag() {
   return (
     <>
@@ -9,6 +11,7 @@ function Consolaspag() {
     <div>
         <Consolas />
     </div>
+    <Footer />
   </>
     
   );
