@@ -1,9 +1,13 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&family=Silkscreen:wght@400;700&display=swap');
 
-
+@theme {
+  --font-saira: 'Saira', sans-serif;
+  --font-silkscreen: 'Silkscreen', cursive;
+}
 @layer base {
   body {
-    @apply bg-black m-0 font-sans antialiased;
+    @apply bg-black m-0 font-saira antialiased;
   }
 
   code {
