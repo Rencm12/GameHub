@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { BookOpenCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <footer
       className="
@@ -26,41 +29,26 @@ const Footer = () => {
         {/* Logo */}
         <div>
           <h3 className="text-[#86E1FF] text-2xl font-bold mb-4">GameHub</h3>
-
-          <p className="text-gray-400">Tu universo gamer definitivo.</p>
+          <p className="text-gray-400">{t("footer.tagline")}</p>
         </div>
 
-        {/* Contacto */}
         <div>
-          <h3 className="text-[#86E1FF] text-xl font-bold mb-4">Contacto</h3>
-
-          <p className="text-gray-400">soporte@gamehub.com</p>
-
-          <p className="text-gray-400">+51 999 999 999</p>
+          <h3 className="text-[#86E1FF] text-xl font-bold mb-4">
+            {t("footer.contact")}
+          </h3>
+          <p className="text-gray-400">{t("footer.email")}</p>
+          <p className="text-gray-400">{t("footer.phone")}</p>
         </div>
 
-        {/* Nosotros */}
         <div>
-          <h3 className="text-[#86E1FF] text-xl font-bold mb-4">Conócenos</h3>
-
-          <p className="text-gray-400 mb-4">
-            Descubre quiénes somos y la pasión gamer que impulsa GameHub.
-          </p>
+          <h3 className="text-[#86E1FF] text-xl font-bold mb-4">
+            {t("footer.knowUs")}
+          </h3>
+          <p className="text-gray-400 mb-4">{t("footer.description")}</p>
 
           <Link to="/nosotros">
-            <button
-              className="
-                bg-[#86E1FF]
-                text-black
-                px-6
-                py-3
-                rounded-xl
-                font-bold
-                hover:bg-[#5C7CFA] hover:text-white
-                transition
-              "
-            >
-              Ir a Nosotros
+            <button className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition">
+              {t("footer.goToAbout")}
             </button>
           </Link>
         </div>
@@ -68,12 +56,10 @@ const Footer = () => {
         {/* Libro de Reclamaciones */}
         <div>
           <h3 className="text-[#86E1FF] text-xl font-bold mb-4">
-            Atencion al Cliente
+            {t("footer.customerService")}
           </h3>
 
-          <p className="text-gray-400 mb-4">
-            Registra un reclamo o queja sobre tu experiencia en GameHub.
-          </p>
+          <p className="text-gray-400 mb-4">{t("footer.claimsDescription")}</p>
 
           <Link
             to="/libro-reclamaciones"
@@ -95,12 +81,11 @@ const Footer = () => {
             "
           >
             <BookOpenCheck size={20} />
-            Libro de Reclamaciones
+            {t("footer.claimsBook")}
           </Link>
         </div>
       </div>
-
-      <p className="text-center text-gray-500 mt-10">© 2026 GameHub</p>
+      <p className="text-center text-gray-500 mt-10">{t("footer.copyright")}</p>
     </footer>
   );
 };

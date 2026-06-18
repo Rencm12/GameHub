@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Toast from "../../components/Toast";
 import Carrusel from "./Carrusel";
 import { supabase } from "../../supabase/client";
@@ -6,6 +7,7 @@ import CardJuego from "../../components/CardJuego";
 import Footer from "../../components/Footer";
 
 function Juegos() {
+  const { t } = useTranslation();
   const [busqueda, setBusqueda] = useState("");
   const [plataforma, setPlataforma] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -19,18 +21,9 @@ function Juegos() {
 
   const addToast = (mensaje, juegoId) => {
     const id = Date.now();
-
-    setToasts((prev) => [
-      ...prev,
-      {
-        id,
-        juegoId,
-        mensaje,
-      },
-    ]);
-
+    setToasts((prev) => [...prev, { id, juegoId, mensaje }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 2000);
   };
 
@@ -96,123 +89,73 @@ function Juegos() {
       <Carrusel />
 
       <section className="p-10">
-        <h2
-          className="
-            text-center
-            text-4xl
-            text-[#86E1FF]
-            font-bold
-            mb-10
-          "
-        >
-          Catálogo de Videojuegos
+        <h2 className="text-center text-4xl text-[#86E1FF] font-bold mb-10">
+          {t("games.title")}
         </h2>
 
         {cargando && (
-          <p className="text-center text-white mb-10">Cargando juegos...</p>
+          <p className="text-center text-white mb-10">{t("games.loading")}</p>
         )}
 
-        <div
-          className="
-            flex
-            flex-wrap
-            gap-4
-            bg-[#020617]
-            p-5
-            rounded-xl
-            mb-10
-          "
-        >
-          {/* BUSCADOR */}
+        <div className="flex flex-wrap gap-4 bg-[#020617] p-5 rounded-xl mb-10">
           <input
             type="text"
-            placeholder="Buscar juego..."
+            placeholder={t("games.search")}
             value={busqueda}
-            onChange={(e) => {
-              setBusqueda(e.target.value);
+            onChange={(event) => {
+              setBusqueda(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              flex-1
-              min-w-[200px]
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-              outline-none
-            "
+            className="flex-1 min-w-[200px] bg-[#1e293b] text-white px-4 py-2 rounded-full outline-none"
           />
 
-          {/* ORDEN */}
           <select
             value={orden}
-            onChange={(e) => {
-              setOrden(e.target.value);
+            onChange={(event) => {
+              setOrden(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Ordenar por
+              {t("common.sortBy")}
             </option>
-            <option value="menor">Menor precio</option>
-            <option value="mayor">Mayor precio</option>
+            <option value="menor">{t("common.lowerPrice")}</option>
+            <option value="mayor">{t("common.higherPrice")}</option>
           </select>
 
-          {/* PLATAFORMA */}
           <select
             value={plataforma}
-            onChange={(e) => {
-              setPlataforma(e.target.value);
+            onChange={(event) => {
+              setPlataforma(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Plataforma
+              {t("common.platform")}
             </option>
             <option value="PS5">PS5</option>
             <option value="Xbox">Xbox</option>
             <option value="Nintendo">Nintendo</option>
           </select>
 
-          {/* CATEGORÍA */}
           <select
             value={categoria}
-            onChange={(e) => {
-              setCategoria(e.target.value);
+            onChange={(event) => {
+              setCategoria(event.target.value);
               setPaginaActual(1);
             }}
-            className="
-              bg-[#1e293b]
-              text-white
-              px-4
-              py-2
-              rounded-full
-            "
+            className="bg-[#1e293b] text-white px-4 py-2 rounded-full"
           >
             <option value="" disabled hidden>
-              Categoría
+              {t("common.category")}
             </option>
-            <option value="Acción">Acción</option>
-            <option value="Aventura">Aventura</option>
-            <option value="Deportes">Deportes</option>
+            <option value="Acción">{t("games.action")}</option>
+            <option value="Aventura">{t("games.adventure")}</option>
+            <option value="Deportes">{t("games.sports")}</option>
           </select>
 
-          {/* BOTÓN LIMPIAR */}
           <button
             onClick={() => {
               setBusqueda("");
@@ -221,37 +164,20 @@ function Juegos() {
               setOrden("");
               setPaginaActual(1);
             }}
-            className="
-              bg-red-500
-              text-white
-              px-4
-              py-2
-              rounded-full
-              font-bold
-            "
+            className="bg-red-500 text-white px-4 py-2 rounded-full font-bold"
           >
-            Limpiar
+            {t("common.clear")}
           </button>
         </div>
 
-        <div
-          className="
-            grid
-            grid-cols-1
-            md:grid-cols-2
-            lg:grid-cols-4
-            gap-6
-          "
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {juegosPaginados.map((juego) => (
             <CardJuego key={juego.id} juego={juego} addToast={addToast} />
           ))}
         </div>
 
         {!cargando && juegosFiltrados.length === 0 && (
-          <p className="text-center text-white mt-10">
-            No se encontraron juegos
-          </p>
+          <p className="text-center text-white mt-10">{t("games.noResults")}</p>
         )}
 
         {totalPaginas > 1 && (
@@ -271,7 +197,7 @@ function Juegos() {
                 transition
               "
             >
-              Anterior
+              {t("common.previous")}
             </button>
 
             {[...Array(totalPaginas)].map((_, index) => {
@@ -281,18 +207,11 @@ function Juegos() {
                 <button
                   key={numeroPagina}
                   onClick={() => setPaginaActual(numeroPagina)}
-                  className={`
-                    w-10
-                    h-10
-                    rounded-lg
-                    font-bold
-                    transition
-                    ${
-                      paginaActual === numeroPagina
-                        ? "bg-[#86E1FF] text-black"
-                        : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
-                    }
-                  `}
+                  className={`w-10 h-10 rounded-lg font-bold transition ${
+                    paginaActual === numeroPagina
+                      ? "bg-[#86E1FF] text-black"
+                      : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
+                  }`}
                 >
                   {numeroPagina}
                 </button>
@@ -316,14 +235,13 @@ function Juegos() {
                 transition
               "
             >
-              Siguiente
+              {t("common.next")}
             </button>
           </div>
         )}
       </section>
 
       <Footer />
-
       <Toast toasts={toasts} />
     </div>
   );

@@ -1,13 +1,56 @@
-import React, { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext.jsx";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { supabase } from "../supabase/client";
 
 function CardAccesorio({ producto }) {
+  const { t } = useTranslation();
+
   const { agregarAlCarrito } = useContext(CarritoContext);
 
   const { imagen, nombre, descripcion, precio } = producto;
 
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [stock, setStock] = useState(producto.stock ?? undefined);
+
+  useEffect(() => {
+    const obtenerStock = async () => {
+      if (!producto?.id) return;
+
+      const { data, error } = await supabase
+        .from("accesorios")
+        .select("stock")
+        .eq("id", producto.id)
+        .single();
+
+      if (error) {
+        console.error("Error al obtener stock de accesorio:", error);
+        return;
+      }
+
+      setStock(data?.stock ?? 0);
+    };
+
+    obtenerStock();
+  }, [producto?.id]);
+
+  useEffect(() => {
+    const actualizarStock = (event) => {
+      const productoActualizado = event.detail?.productos?.find(
+        (item) =>
+          item.tipo === "accesorio" && String(item.id) === String(producto?.id),
+      );
+
+      if (productoActualizado) {
+        setStock(productoActualizado.stock);
+      }
+    };
+
+    window.addEventListener("gamehub-stock-updated", actualizarStock);
+    return () =>
+      window.removeEventListener("gamehub-stock-updated", actualizarStock);
+  }, [producto?.id]);
 
   return (
     <>
@@ -51,7 +94,10 @@ function CardAccesorio({ producto }) {
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
 
           <button
-            onClick={() => agregarAlCarrito(producto)}
+            disabled={stock === 0 || stock === undefined}
+            onClick={() =>
+              agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })
+            }
             className="
               w-full
               mt-4
@@ -65,7 +111,11 @@ function CardAccesorio({ producto }) {
               hover:text-white
             "
           >
-            Agregar al carrito
+            {stock === 0
+              ? t("common.noStock")
+              : stock === undefined
+                ? t("common.loadingStock")
+                : t("common.addToCart")}
           </button>
 
           <button
@@ -84,7 +134,7 @@ function CardAccesorio({ producto }) {
               transition
             "
           >
-            Ver más
+            {t("common.seeMore")}
           </button>
         </div>
       </div>
@@ -158,7 +208,10 @@ function CardAccesorio({ producto }) {
               </p>
 
               <button
-                onClick={() => agregarAlCarrito(producto)}
+                disabled={stock === 0 || stock === undefined}
+                onClick={() =>
+                  agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })
+                }
                 className="
                   mt-6
                   w-full
@@ -170,9 +223,15 @@ function CardAccesorio({ producto }) {
                   hover:bg-[#5C7CFA]
                   hover:text-white
                   transition
+                  disabled:opacity-60
+                  disabled:cursor-not-allowed
                 "
               >
-                Agregar al carrito
+                {stock === 0
+                  ? t("common.noStock")
+                  : stock === undefined
+                    ? t("common.loadingStock")
+                    : t("common.addToCart")}
               </button>
             </div>
           </div>

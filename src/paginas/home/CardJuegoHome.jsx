@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
 import { supabase } from "../../supabase/client";
 import { Link } from "react-router-dom";
 import { CircleCheck, TriangleAlert, CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function CardJuegoHome({ juego, addToast }) {
+  const { t } = useTranslation();
   const { agregarAlCarrito } = useContext(CarritoContext);
 
   const { imagen, titulo, descripcion, precio } = juego;
@@ -33,6 +35,23 @@ function CardJuegoHome({ juego, addToast }) {
     obtenerStock();
   }, [juego?.id]);
 
+  useEffect(() => {
+    const actualizarStock = (event) => {
+      const productoActualizado = event.detail?.productos?.find(
+        (producto) =>
+          producto.tipo === "juego" && String(producto.id) === String(juego?.id),
+      );
+
+      if (productoActualizado) {
+        setStock(productoActualizado.stock);
+      }
+    };
+
+    window.addEventListener("gamehub-stock-updated", actualizarStock);
+    return () =>
+      window.removeEventListener("gamehub-stock-updated", actualizarStock);
+  }, [juego?.id]);
+
   // CARRITO
   const handleCarrito = (data) => {
     const productoConStock = {
@@ -48,9 +67,9 @@ function CardJuegoHome({ juego, addToast }) {
       productoConStock.nombre || productoConStock.titulo || "Producto";
 
     if (agregado) {
-      addToast(`${nombreProducto} agregado al carrito`, productoConStock.id);
+      addToast(`${nombreProducto} ${t("common.addedToCart")}`, productoConStock.id);
     } else {
-      addToast("No hay más unidades disponibles", productoConStock.id);
+      addToast(t("common.noMoreUnits"), productoConStock.id);
     }
   };
 
@@ -92,21 +111,21 @@ function CardJuegoHome({ juego, addToast }) {
               {stock > 5 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
                   <CircleCheck size={14} />
-                  Disponible
+                  {t("common.available")}
                 </span>
               )}
 
               {stock > 0 && stock <= 5 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
                   <TriangleAlert size={14} />
-                  Últimas unidades
+                  {t("common.lastUnits")}
                 </span>
               )}
 
               {stock === 0 && (
                 <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
                   <CircleX size={14} />
-                  Agotado
+                  {t("common.soldOut")}
                 </span>
               )}
             </div>
@@ -128,10 +147,10 @@ function CardJuegoHome({ juego, addToast }) {
             `}
           >
             {stock === 0
-              ? "Sin stock"
+              ? t("common.noStock")
               : stock === undefined
-                ? "Cargando stock..."
-                : "Agregar al carrito"}
+                ? t("common.loadingStock")
+                : t("common.addToCart")}
           </button>
 
           <button
@@ -150,7 +169,7 @@ function CardJuegoHome({ juego, addToast }) {
               transition
             "
           >
-            Ver más
+            {t("common.seeMore")}
           </button>
         </div>
       </div>
@@ -210,21 +229,21 @@ function CardJuegoHome({ juego, addToast }) {
                   {stock > 5 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
                       <CircleCheck size={14} />
-                      Disponible
+                      {t("common.available")}
                     </span>
                   )}
 
                   {stock > 0 && stock <= 5 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
                       <TriangleAlert size={14} />
-                      Últimas unidades
+                      {t("common.lastUnits")}
                     </span>
                   )}
 
                   {stock === 0 && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
                       <CircleX size={14} />
-                      Agotado
+                      {t("common.soldOut")}
                     </span>
                   )}
                 </div>

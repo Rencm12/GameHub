@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { CarritoContext } from "../context/CarritoContext";
 import { supabase } from "../supabase/client";
 import { generarBoleta } from "../components/Boleta";
@@ -44,7 +45,81 @@ const getMetodosDePago = (total) => [
   },
 ];
 
+const STOCK_TABLE_BY_TYPE = {
+  juego: "juegos",
+  consola: "consolas",
+  accesorio: "accesorios",
+  producto: "accesorios",
+};
+
+async function descontarStockDelCarrito(carrito) {
+  const productosValidados = [];
+
+  for (const producto of carrito) {
+    const tabla = STOCK_TABLE_BY_TYPE[producto.tipo];
+
+    if (!tabla || !producto.id) {
+      return {
+        ok: false,
+        message: `No se pudo identificar el producto: ${producto.nombre}`,
+      };
+    }
+
+    const { data, error } = await supabase
+      .from(tabla)
+      .select("stock")
+      .eq("id", producto.id)
+      .single();
+
+    if (error) {
+      return {
+        ok: false,
+        message: `No se pudo validar el stock de ${producto.nombre}`,
+      };
+    }
+
+    const stockActual = Number(data?.stock ?? 0);
+
+    if (stockActual < producto.cantidad) {
+      return {
+        ok: false,
+        message: `${producto.nombre} no tiene stock suficiente`,
+      };
+    }
+
+    productosValidados.push({
+      ...producto,
+      tabla,
+      nuevoStock: stockActual - producto.cantidad,
+    });
+  }
+
+  for (const producto of productosValidados) {
+    const { error } = await supabase
+      .from(producto.tabla)
+      .update({ stock: producto.nuevoStock })
+      .eq("id", producto.id);
+
+    if (error) {
+      return {
+        ok: false,
+        message: `No se pudo actualizar el stock de ${producto.nombre}`,
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    productosActualizados: productosValidados.map((producto) => ({
+      id: producto.id,
+      tipo: producto.tipo === "producto" ? "accesorio" : producto.tipo,
+      stock: producto.nuevoStock,
+    })),
+  };
+}
+
 function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
+  const { t } = useTranslation();
   const { carrito, setCarrito } = useContext(CarritoContext);
 
   const [nombre, setNombre] = useState("");
@@ -52,7 +127,6 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
   const [metodoPago, setMetodoPago] = useState("");
-  const [usuario, setUsuario] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
   const [comprobante, setComprobante] = useState(null);
@@ -63,6 +137,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [nombreTitular, setNombreTitular] = useState("");
   const [fechaVencimiento, setFechaVencimiento] = useState("");
   const [cvv, setCvv] = useState("");
+  const [procesando, setProcesando] = useState(false);
 
   const total = carrito.reduce(
     (acc, item) => acc + item.precio * item.cantidad,
@@ -213,19 +288,35 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     const user = session?.user;
 
     if (!user) {
-      setMensaje("Debes iniciar sesión para finalizar tu compra");
+      setMensaje(t("checkout.authRequired"));
       setMostrarLogin(true);
       return;
     }
 
     if (!nombre || !correo || !telefono || !direccion || !metodoPago) {
-      setMensaje("Completa todos los campos");
+      setMensaje(t("checkout.completeFields"));
       return;
     }
 
     if (metodoPago === "Tarjeta" && !validarTarjeta()) {
       return;
     }
+    setProcesando(true);
+    const resultadoStock = await descontarStockDelCarrito(carrito);
+    setProcesando(false);
+
+    if (!resultadoStock.ok) {
+      setMensaje(resultadoStock.message);
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("gamehub-stock-updated", {
+        detail: { productos: resultadoStock.productosActualizados },
+      }),
+    );
+
+    setMensaje(t("checkout.success"));
 
     const metodoObj = metodosDePago.find((m) => m.id === metodoPago);
     if (metodoObj.requiereComprobante && !codigoOperacion.trim()) {
@@ -339,8 +430,16 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
           <X />
         </button>
 
-        <h2 className="text-3xl font-bold text-[#86E1FF] mb-6">
-          Finalizar compra
+        {/* TÍTULO */}
+        <h2
+          className="
+            text-3xl
+            font-bold
+            text-[#86E1FF]
+            mb-6
+          "
+        >
+          {t("checkout.title")}
         </h2>
 
         {mensaje && (
@@ -605,10 +704,10 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
           <button
             onClick={finalizarCompra}
-            disabled={cargando}
+            disabled={cargando || procesando}
             className="w-full bg-[#86E1FF] text-black py-4 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {cargando ? "Procesando..." : "Confirmar Compra"}
+            {cargando || procesando ? "Procesando..." : "Confirmar Compra"}
           </button>
         </div>
       </div>

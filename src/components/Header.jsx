@@ -1,18 +1,23 @@
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Heart } from "lucide-react";
+import { PersonStanding, ShoppingCart, Heart } from "lucide-react";
 import Login from "./Login";
 import { supabase } from "../supabase/client";
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
 import CheckoutModal from "./CheckoutModal";
 import CarritoSidebar from "./CarritoSidebar";
+import AccessibilityMenu from "./Accesibilidad";
+import { useTranslation } from "react-i18next";
 
 const Header = () => {
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
+  const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const { t } = useTranslation();
   const [usuario, setUsuario] = useState(null);
+  const navItems = t("header.nav", { returnObjects: true });
 
   const { carrito } = useContext(CarritoContext);
   const { favoritos } = useContext(FavoritosContext);
@@ -108,11 +113,10 @@ const Header = () => {
       md:text-base
     "
           >
-            {["Inicio", "Consolas", "Juegos", "Accesorios", "Nosotros"].map(
-              (item) => (
-                <li
-                  key={item}
-                  className="
+            {navItems.map((item) => (
+              <li
+                key={item.path}
+                className="
             relative
             cursor-pointer
             after:absolute
@@ -124,13 +128,10 @@ const Header = () => {
             after:transition-all
             hover:after:w-full
           "
-                >
-                  <Link to={item === "Inicio" ? "/" : `/${item.toLowerCase()}`}>
-                    {item}
-                  </Link>
-                </li>
-              ),
-            )}
+              >
+                <Link to={item.path}>{item.label}</Link>
+              </li>
+            ))}
           </ul>
         </nav>
 
@@ -155,14 +156,14 @@ const Header = () => {
                   drop-shadow-[0_0_8px_rgba(134,225,255,0.5)]
                 "
               >
-                {usuario.user_metadata?.nombre || "Cliente"}
+                {usuario.user_metadata?.nombre || t("header.customer")}
               </span>
 
               <button
                 onClick={cerrarSesion}
                 className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
               >
-                Salir
+                {t("header.logout")}
               </button>
             </div>
           ) : (
@@ -170,9 +171,33 @@ const Header = () => {
               className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
               onClick={() => setMostrarLogin(true)}
             >
-              Ingresar
+              {t("header.login")}
             </button>
           )}
+
+          {/* ACCESIBILIDAD */}
+          <button
+            type="button"
+            onClick={() => setMostrarAccesibilidad((actual) => !actual)}
+            aria-label={t("header.accessibility")}
+            aria-expanded={mostrarAccesibilidad}
+            className="
+              w-11
+              h-11
+              rounded-lg
+              border
+              border-[#00ffc3]
+              text-[#00ffc3]
+              flex
+              items-center
+              justify-center
+              hover:bg-[#00ffc3]
+              hover:text-black
+              transition
+            "
+          >
+            <PersonStanding size={24} />
+          </button>
 
           {/* FAVORITOS */}
           <Link
@@ -256,6 +281,12 @@ const Header = () => {
         setMostrarLogin={setMostrarLogin}
       />
       {mostrarLogin && <Login onClose={() => setMostrarLogin(false)} />}
+
+      {/* MENU DE ACCESIBILIDAD */}
+      <AccessibilityMenu
+        open={mostrarAccesibilidad}
+        onClose={() => setMostrarAccesibilidad(false)}
+      />
 
       {/* SIDEBAR */}
       <CarritoSidebar

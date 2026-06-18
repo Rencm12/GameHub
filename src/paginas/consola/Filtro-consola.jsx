@@ -1,18 +1,15 @@
-// src/pages/consolas/Filtro-consola.jsx  ← reemplaza el archivo actual
-// Ahora recibe filtros centralizados desde useConsolas (sin estado local duplicado)
 import { useMemo } from "react";
 import { Gamepad } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function FiltroConsolas({ productos, filtros, setFiltros }) {
+  const { t } = useTranslation();
   const { busqueda, consolas: seleccionadas, tipo: tipoFiltro } = filtros;
 
-  // Lista única de marcas extraída de los productos actuales
   const marcas = useMemo(
     () => [...new Set(productos.map((p) => p.consola))],
     [productos],
   );
-
-  // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleBusqueda = (e) => setFiltros({ busqueda: e.target.value });
 
@@ -25,8 +22,6 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
 
   const limpiarFiltros = () =>
     setFiltros({ busqueda: "", consolas: [], tipo: "default" });
-
-  // ── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <aside
@@ -43,13 +38,12 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
     >
       <h2 className="text-center mb-5 text-xl font-bold">
         <Gamepad size={20} className="inline-block mr-2 text-[#86E1FF]" />
-        Filtrar Consolas
+        {t("consolesFilter.title")}
       </h2>
 
-      {/* Búsqueda por texto */}
       <input
         type="text"
-        placeholder="Buscar consola..."
+        placeholder={t("consolesFilter.search")}
         value={busqueda}
         onChange={handleBusqueda}
         className="
@@ -59,7 +53,6 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
         "
       />
 
-      {/* Checkboxes de marca */}
       <div className="space-y-2">
         {marcas.map((marca) => (
           <label
@@ -80,10 +73,9 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
         ))}
       </div>
 
-      {/* Ordenar por */}
       <div className="mt-5 bg-zinc-950 p-3 rounded-xl">
         <div className="flex flex-col text-xs">
-          <label className="mb-2">Ordenar por</label>
+          <label className="mb-2">{t("consolesFilter.sortBy")}</label>
           <select
             value={tipoFiltro}
             onChange={(e) => setFiltros({ tipo: e.target.value })}
@@ -92,23 +84,23 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
               rounded-md p-2 text-white
             "
           >
-            <option value="default">Recomendados</option>
-            <option value="recientes">Más recientes</option>
-            <option value="exclusivos">Solo exclusivos</option>
-            <option value="limitados">Solo limitados</option>
+            <option value="default">{t("common.recommended")}</option>
+            <option value="recientes">{t("consolesFilter.recent")}</option>
+            <option value="exclusivos">
+              {t("consolesFilter.onlyExclusive")}
+            </option>
+            <option value="limitados">{t("consolesFilter.onlyLimited")}</option>
           </select>
         </div>
       </div>
 
-      {/* Contador */}
       <div className="mt-5 bg-zinc-950 p-3 rounded-xl text-sm">
         <span>
-          Mostrando {productos.length} producto
-          {productos.length !== 1 ? "s" : ""}
+          {t("consolesFilter.showing")} {productos.length}{" "}
+          {productos.length !== 1 ? t("common.products") : t("common.product")}
         </span>
       </div>
 
-      {/* Limpiar */}
       <button
         onClick={limpiarFiltros}
         className="
@@ -117,7 +109,7 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
           hover:bg-red-600 duration-300
         "
       >
-        Limpiar Filtros
+        {t("consolesFilter.clear")}
       </button>
     </aside>
   );

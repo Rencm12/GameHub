@@ -1,7 +1,9 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
+import { useTranslation } from "react-i18next";
 
 function Card({ producto }) {
+  const { t } = useTranslation();
   const { agregarAlCarrito } = useContext(CarritoContext);
   // Asumo que los accesorios también tienen estas propiedades en tu base de datos
   const { imagen, titulo, consola, descripcion, precio, exclusivo, limitada } =
@@ -26,13 +28,13 @@ function Card({ producto }) {
         <div className="absolute top-3 right-3 flex gap-2">
           {exclusivo && (
             <span className="bg-cyan-400 text-black px-2 py-1 rounded-lg text-xs font-bold">
-              Exclusiva
+              {t("common.exclusive")}
             </span>
           )}
 
           {limitada && (
             <span className="bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
-              Limitada
+              {t("common.limited")}
             </span>
           )}
         </div>
@@ -53,14 +55,14 @@ function Card({ producto }) {
             onClick={() => agregarAlCarrito(producto)}
             className="w-full mt-4 bg-[#86E1FF] text-black py-2 rounded-lg font-bold transition hover:bg-[#5C7CFA] hover:text-white"
           >
-            Agregar al carrito
+            {t("common.addToCart")}
           </button>
 
           <button
             onClick={() => setMostrarModal(true)}
             className="w-full mt-3 border border-[#86E1FF] text-[#86E1FF] py-2 rounded-lg font-bold hover:bg-[#5C7CFA] hover:text-white transition"
           >
-            Ver más
+            {t("common.seeMore")}
           </button>
         </div>
       </div>
@@ -88,9 +90,13 @@ function Card({ producto }) {
 
               <div className="mt-3 text-xl">
                 {exclusivo && (
-                  <span className="text-cyan-400 mr-2">Exclusiva</span>
+                  <span className="text-cyan-400 mr-2">
+                    {t("common.exclusive")}
+                  </span>
                 )}
-                {limitada && <span className="text-red-500">Limitada</span>}
+                {limitada && (
+                  <span className="text-red-500">{t("common.limited")}</span>
+                )}
               </div>
 
               <p className="text-gray-400 mt-4 leading-7">{descripcion}</p>
@@ -102,7 +108,7 @@ function Card({ producto }) {
                 onClick={() => agregarAlCarrito(producto)}
                 className="mt-6 w-full bg-[#86E1FF] text-black py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
               >
-                Agregar al carrito
+                {t("common.addToCart")}
               </button>
             </div>
           </div>

@@ -9,7 +9,147 @@
   code {
     @apply font-mono;
   }
-}@layer components {
+}
+
+html.a11y-text-1 {
+  font-size: 106%;
+}
+
+html.a11y-text-2 {
+  font-size: 112%;
+}
+
+html.a11y-text-3 {
+  font-size: 118%;
+}
+
+html.a11y-text-4 {
+  font-size: 125%;
+}
+
+html.a11y-line-height-1 body {
+  line-height: 1.6;
+}
+
+html.a11y-line-height-2 body {
+  line-height: 1.75;
+}
+
+html.a11y-line-height-3 body {
+  line-height: 1.9;
+}
+
+html.a11y-line-height-4 body {
+  line-height: 2.05;
+}
+
+html.a11y-dyslexia-1 body,
+html.a11y-dyslexia-1 button,
+html.a11y-dyslexia-1 input,
+html.a11y-dyslexia-1 textarea,
+html.a11y-dyslexia-1 select {
+  font-family: Arial, Verdana, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+html.a11y-dyslexia-2 body,
+html.a11y-dyslexia-2 button,
+html.a11y-dyslexia-2 input,
+html.a11y-dyslexia-2 textarea,
+html.a11y-dyslexia-2 select {
+  font-family: Arial, Verdana, sans-serif;
+  letter-spacing: 0.06em;
+  word-spacing: 0.12em;
+}
+
+html.a11y-contrast-1 {
+  filter: contrast(1.25) saturate(1.15);
+}
+
+html.a11y-contrast-2 {
+  filter: contrast(1.55) brightness(1.08);
+}
+
+html.a11y-contrast-3 {
+  filter: invert(1) hue-rotate(180deg) contrast(1.45);
+}
+
+html.a11y-cursor-1,
+html.a11y-cursor-1 * {
+  cursor: none !important;
+}
+
+html.a11y-cursor-2,
+html.a11y-cursor-2 * {
+  cursor: none !important;
+}
+
+html.a11y-cursor-3,
+html.a11y-cursor-3 * {
+  cursor: none !important;
+}
+
+.a11y-custom-cursor {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #00ffc3;
+  box-shadow: 0 0 0 2px #000000, 0 0 14px rgba(0, 255, 195, 0.7);
+  transform: translate(-25%, -25%);
+}
+
+.a11y-custom-cursor-1 {
+  width: 24px;
+  height: 24px;
+}
+
+.a11y-custom-cursor-2 {
+  width: 36px;
+  height: 36px;
+}
+
+.a11y-custom-cursor-3 {
+  width: 48px;
+  height: 48px;
+}
+
+body.a11y-reading-mask::before,
+body.a11y-reading-mask::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+body.a11y-reading-mask::before {
+  top: 0;
+  height: max(0px, calc(var(--a11y-mask-y, 45vh) - 58px));
+}
+
+body.a11y-reading-mask::after {
+  bottom: 0;
+  height: max(0px, calc(100vh - var(--a11y-mask-y, 45vh) - 58px));
+}
+
+body:has([data-a11y-menu='true']) .a11y-readable-hover {
+  cursor: pointer;
+  outline: 3px solid rgba(0, 255, 195, 0.85);
+  outline-offset: 6px;
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.a11y-readable-selected {
+  outline: 3px solid #00ffc3;
+  outline-offset: 6px;
+  box-shadow: 0 0 0 6px rgba(0, 255, 195, 0.16);
+}
+
+@layer components {
 
   .btn-primary {
     @apply

@@ -1,4 +1,5 @@
 import { useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { CarritoContext } from "../context/CarritoContext";
 import {
   ShoppingCart,
@@ -13,6 +14,7 @@ import { supabase } from "../supabase/client";
 import Login from "./Login";
 
 function CarritoSidebar({ abierto, cerrar }) {
+  const { t } = useTranslation();
   const { carrito, aumentarCantidad, disminuirCantidad, eliminarProducto } =
     useContext(CarritoContext);
 
@@ -46,7 +48,7 @@ function CarritoSidebar({ abierto, cerrar }) {
 
   const finalizarCompra = () => {
     if (carrito.length === 0) {
-      setMensaje("Tu carrito está vacío");
+      setMensaje(t("cart.empty"));
       return;
     }
 
@@ -102,9 +104,7 @@ function CarritoSidebar({ abierto, cerrar }) {
         {/* PRODUCTOS */}
         <div className="p-4 md:p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
           {carrito.length === 0 ? (
-            <p className="text-gray-400 text-center mt-10">
-              Tu carrito está vacío
-            </p>
+            <p className="text-gray-400 text-center mt-10">{t("cart.empty")}</p>
           ) : (
             carrito.map((juego) => (
               <div
@@ -259,7 +259,7 @@ function CarritoSidebar({ abierto, cerrar }) {
               }
            `}
           >
-            Finalizar compra
+            {t("cart.finish")}
           </button>
         </div>
       </div>
