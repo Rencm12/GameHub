@@ -2,7 +2,7 @@ const juegosHome = [
   {
     id: 5,
     titulo: "God of War Ragnarok",
-    descripcion: "Aventura épica de Kratos",
+    descripcion: "Aventura Epica de Kratos",
     precio: 249,
     imagen: "https://media.falabella.com/falabellaPE/113903708_01/w=800,h=800,fit=pad"
   },

@@ -2,8 +2,10 @@ import { useContext, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext";
 import { FavoritosContext } from "../context/FavoritosContext";
 import { X, Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function CardJuego({ juego, addToast }) {
+  const { t } = useTranslation();
   const [mostrarModal, setMostrarModal] = useState(false);
 
   const { agregarAlCarrito } = useContext(CarritoContext);
@@ -21,9 +23,9 @@ function CardJuego({ juego, addToast }) {
     const agregado = agregarAlCarrito(productoCarrito);
 
     if (agregado) {
-      addToast(`${data.nombre} agregado al carrito`, data.id);
+      addToast(`${data.nombre} ${t("common.addedToCart")}`, data.id);
     } else {
-      addToast("No hay más unidades disponibles", data.id);
+      addToast(t("common.noMoreUnits"), data.id);
     }
   };
 
@@ -33,8 +35,8 @@ function CardJuego({ juego, addToast }) {
 
     addToast(
       favorito
-        ? `${juego.nombre} eliminado de favoritos`
-        : `${juego.nombre} agregado a favoritos`,
+        ? `${juego.nombre} ${t("common.removedFromFavorites")}`
+        : `${juego.nombre} ${t("common.addedToFavorites")}`,
       juego.id,
     );
   };
@@ -89,21 +91,21 @@ function CardJuego({ juego, addToast }) {
           {juego.stock > 5 && (
             <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
               <CircleCheck size={14} />
-              Disponible
+              {t("common.available")}
             </span>
           )}
 
           {juego.stock > 0 && juego.stock <= 5 && (
             <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
               <TriangleAlert size={14} />
-              Últimas unidades
+              {t("common.lastUnits")}
             </span>
           )}
 
           {juego.stock === 0 && (
             <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
               <CircleX size={14} />
-              Agotado
+              {t("common.soldOut")}
             </span>
           )}
         </div>
@@ -128,7 +130,7 @@ function CardJuego({ juego, addToast }) {
             }
           `}
         >
-          {juego.stock === 0 ? "Sin stock" : "Agregar al carrito"}
+          {juego.stock === 0 ? t("common.noStock") : t("common.addToCart")}
         </button>
 
         {/* BOTÓN VER MÁS */}
@@ -136,7 +138,7 @@ function CardJuego({ juego, addToast }) {
           onClick={() => setMostrarModal(true)}
           className="w-full mt-3 border border-[#00ffc3] text-[#00ffc3] py-2 rounded-lg font-bold hover:bg-[#00ffc3] hover:text-black transition"
         >
-          Ver más
+          {t("common.seeMore")}
         </button>
       </div>
 
@@ -190,7 +192,7 @@ function CardJuego({ juego, addToast }) {
                   ${juego.stock === 0 ? "bg-gray-500 cursor-not-allowed text-white" : ""}
                 `}
               >
-                {juego.stock === 0 ? "Sin stock" : "Agregar al carrito"}
+                {juego.stock === 0 ? t("common.noStock") : t("common.addToCart")}
               </button>
             </div>
           </div>

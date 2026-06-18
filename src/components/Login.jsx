@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "../supabase/client";
 import { Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
 
 export default function Login({ onClose }) {
+  const { t } = useTranslation();
   const [esRegistro, setEsRegistro] = useState(false);
 
   const [nombre, setNombre] = useState("");
@@ -40,7 +42,7 @@ export default function Login({ onClose }) {
     limpiarMensajes();
 
     if (!email || !password) {
-      setErrorAuth("Completa todos los campos.");
+      setErrorAuth(t("login.completeFields"));
       return;
     }
 
@@ -52,7 +54,7 @@ export default function Login({ onClose }) {
     });
 
     if (error || !data?.user) {
-      setErrorAuth("Error al iniciar sesión");
+      setErrorAuth(t("login.loginError"));
       return;
     }
 
@@ -70,7 +72,7 @@ export default function Login({ onClose }) {
       .eq("id", data.user.id)
       .single();
 
-    setMensajeAuth(`Bienvenido ${profile?.nombre || data.user.email}`);
+    setMensajeAuth(`${t("login.welcome")} ${profile?.nombre || data.user.email}`);
 
     setTimeout(() => {
       onClose();
@@ -82,7 +84,7 @@ export default function Login({ onClose }) {
     limpiarMensajes();
 
     if (!email || !password || !nombre) {
-      setErrorAuth("Completa todos los campos.");
+      setErrorAuth(t("login.completeFields"));
       return;
     }
 
@@ -103,7 +105,7 @@ export default function Login({ onClose }) {
       return;
     }
 
-    setMensajeAuth("Cuenta creada correctamente ✓");
+    setMensajeAuth(t("login.accountCreated"));
     setNombre("");
     setEmail("");
     setPassword("");
@@ -129,11 +131,11 @@ export default function Login({ onClose }) {
         <div className="flex items-start justify-between border-b border-white/10 px-6 py-5">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00ffc3]/80">
-              GameHub
+              {t("login.brand")}
             </p>
 
             <h2 className="mt-1 text-2xl font-bold text-white">
-              {esRegistro ? "Crear cuenta" : "Iniciar sesión"}
+              {esRegistro ? t("login.createAccount") : t("login.signIn")}
             </h2>
           </div>
 
@@ -172,7 +174,7 @@ export default function Login({ onClose }) {
                   : "text-gray-300 hover:text-white"
               }`}
             >
-              Ingresar
+              {t("login.signIn")}
             </button>
 
             <button
@@ -186,7 +188,7 @@ export default function Login({ onClose }) {
                   : "text-gray-300 hover:text-white"
               }`}
             >
-              Registro
+              {t("login.createAccount")}
             </button>
           </div>
 
@@ -207,7 +209,7 @@ export default function Login({ onClose }) {
           {esRegistro && (
             <div className="mb-4">
               <label className="mb-2 block text-sm font-semibold text-gray-200">
-                Nombre
+                {t("login.fullName")}
               </label>
 
               <div className="relative">
@@ -218,7 +220,7 @@ export default function Login({ onClose }) {
 
                 <input
                   type="text"
-                  placeholder="Tu nombre"
+                  placeholder={t("login.fullName")}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   className="
@@ -242,7 +244,7 @@ export default function Login({ onClose }) {
           {/* EMAIL */}
           <div className="mb-4">
             <label className="mb-2 block text-sm font-semibold text-gray-200">
-              Correo electrónico
+              {t("login.email")}
             </label>
 
             <div className="relative">
@@ -256,7 +258,7 @@ export default function Login({ onClose }) {
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="correo@ejemplo.com"
+                placeholder={t("login.email")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="
@@ -279,7 +281,7 @@ export default function Login({ onClose }) {
           {/* PASSWORD */}
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-200">
-              Contraseña
+              {t("login.password")}
             </label>
 
             <div className="relative">
@@ -293,7 +295,7 @@ export default function Login({ onClose }) {
                 name="password"
                 type={mostrarPassword ? "text" : "password"}
                 autoComplete="current-password"
-                placeholder="Tu contraseña"
+                placeholder={t("login.password")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="
@@ -346,10 +348,10 @@ export default function Login({ onClose }) {
             "
           >
             {cargando
-              ? "Procesando..."
+              ? t("login.processing")
               : esRegistro
-                ? "Crear cuenta"
-                : "Ingresar"}
+                ? t("login.createAccount")
+                : t("login.signIn")}
           </button>
         </div>
       </section>

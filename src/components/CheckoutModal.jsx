@@ -1,9 +1,11 @@
 import { useContext, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { CarritoContext } from "../context/CarritoContext";
 import { supabase } from "../supabase/client";
 import { X } from "lucide-react";
 
 function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
+  const { t } = useTranslation();
   const { carrito, setCarrito } = useContext(CarritoContext);
 
   const [nombre, setNombre] = useState("");
@@ -52,17 +54,17 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     const user = session?.user;
 
     if (!user) {
-      setMensaje("Debes iniciar sesión para finalizar tu compra");
+      setMensaje(t("checkout.authRequired"));
       setMostrarLogin(true);
       return;
     }
 
     if (!nombre || !correo || !telefono || !direccion || !metodoPago) {
-      setMensaje("Completa todos los campos");
+      setMensaje(t("checkout.completeFields"));
       return;
     }
 
-    setMensaje("Compra realizada con éxito");
+    setMensaje(t("checkout.success"));
 
     setCarrito([]);
     cerrar();
@@ -119,7 +121,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             mb-6
           "
         >
-          Finalizar compra
+          {t("checkout.title")}
         </h2>
 
         {/* MENSAJE */}
@@ -133,7 +135,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         <div className="flex flex-col gap-4">
           <input
             type="text"
-            placeholder="Nombre completo"
+            placeholder={t("checkout.fullName")}
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="
@@ -147,7 +149,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
           <input
             type="email"
-            placeholder="Correo electrónico"
+            placeholder={t("checkout.email")}
             value={correo}
             onChange={(e) => setCorreo(e.target.value)}
             className="
@@ -161,7 +163,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
           <input
             type="tel"
-            placeholder="Teléfono"
+            placeholder={t("checkout.phone")}
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
             className="
@@ -175,7 +177,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
           <input
             type="text"
-            placeholder="Dirección"
+            placeholder={t("checkout.address")}
             value={direccion}
             onChange={(e) => setDireccion(e.target.value)}
             className="
@@ -199,14 +201,14 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             "
           >
             <option value="" disabled hidden>
-              Selecciona un método de pago
+              {t("checkout.paymentMethod")}
             </option>
-            <option value="Tarjeta">Tarjeta de crédito/débito</option>
-            <option value="Yape o Plin">Yape / Plin</option>
+            <option value="Tarjeta">{t("checkout.creditCard")}</option>
+            <option value="Yape o Plin">{t("checkout.yape")}</option>
             <option value="Transferencia bancaria">
-              Transferencia bancaria
+              {t("checkout.bankTransfer")}
             </option>
-            <option value="Pago contra entrega">Pago contra entrega</option>
+            <option value="Pago contra entrega">{t("checkout.cashOnDelivery")}</option>
           </select>
         </div>
 
@@ -227,7 +229,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
               <div>
                 <h3 className="text-white font-bold">{juego.nombre}</h3>
 
-                <p className="text-gray-400">Cantidad: {juego.cantidad}</p>
+                <p className="text-gray-400">{t("checkout.quantity")} {juego.cantidad}</p>
               </div>
 
               <p className="text-[#00ffc3] font-bold">
@@ -247,7 +249,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             text-2xl
           "
         >
-          <span className="text-white">Total:</span>
+          <span className="text-white">{t("checkout.total")}</span>
 
           <span className="text-[#00ffc3] font-bold">
             S/ {total.toFixed(2)}
@@ -269,7 +271,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             transition
           "
         >
-          Confirmar compra
+          {t("checkout.title")}
         </button>
       </div>
     </div>

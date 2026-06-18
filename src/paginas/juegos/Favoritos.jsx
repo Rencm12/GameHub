@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FavoritosContext } from "../../context/FavoritosContext";
 import { Heart, HeartCrack } from "lucide-react";
 import CardJuego from "../../components/CardJuego";
@@ -6,6 +7,7 @@ import CardConsola from "../consola/Card-consola";
 import Toast from "../../components/Toast";
 
 function Favoritos() {
+  const { t } = useTranslation();
   const { favoritos } = useContext(FavoritosContext);
 
   const [toasts, setToasts] = useState([]);
@@ -39,7 +41,7 @@ function Favoritos() {
         "
       >
         <Heart size={30} className="text-red-500 fill-red-500 animate-pulse" />
-        Tus favoritos
+        {t("favorites.title")}
       </h1>
 
       {favoritos.length === 0 ? (
@@ -57,9 +59,9 @@ function Favoritos() {
             <HeartCrack size={60} className="text-red-500" />
           </div>
 
-          <h2 className="text-3xl text-white font-bold">No tienes favoritos</h2>
+          <h2 className="text-3xl text-white font-bold">{t("favorites.noFavorites")}</h2>
 
-          <p className="text-gray-400 mt-3">Agrega juegos o consolas para verlos aquí</p>
+          <p className="text-gray-400 mt-3">{t("favorites.addFavorites")}</p>
         </div>
       ) : (
         <div
