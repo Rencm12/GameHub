@@ -4,6 +4,79 @@ import { CarritoContext } from "../context/CarritoContext";
 import { supabase } from "../supabase/client";
 import { X } from "lucide-react";
 
+const STOCK_TABLE_BY_TYPE = {
+  juego: "juegos",
+  consola: "consolas",
+  accesorio: "accesorios",
+  producto: "accesorios",
+};
+
+async function descontarStockDelCarrito(carrito) {
+  const productosValidados = [];
+
+  for (const producto of carrito) {
+    const tabla = STOCK_TABLE_BY_TYPE[producto.tipo];
+
+    if (!tabla || !producto.id) {
+      return {
+        ok: false,
+        message: `No se pudo identificar el producto: ${producto.nombre}`,
+      };
+    }
+
+    const { data, error } = await supabase
+      .from(tabla)
+      .select("stock")
+      .eq("id", producto.id)
+      .single();
+
+    if (error) {
+      return {
+        ok: false,
+        message: `No se pudo validar el stock de ${producto.nombre}`,
+      };
+    }
+
+    const stockActual = Number(data?.stock ?? 0);
+
+    if (stockActual < producto.cantidad) {
+      return {
+        ok: false,
+        message: `${producto.nombre} no tiene stock suficiente`,
+      };
+    }
+
+    productosValidados.push({
+      ...producto,
+      tabla,
+      nuevoStock: stockActual - producto.cantidad,
+    });
+  }
+
+  for (const producto of productosValidados) {
+    const { error } = await supabase
+      .from(producto.tabla)
+      .update({ stock: producto.nuevoStock })
+      .eq("id", producto.id);
+
+    if (error) {
+      return {
+        ok: false,
+        message: `No se pudo actualizar el stock de ${producto.nombre}`,
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    productosActualizados: productosValidados.map((producto) => ({
+      id: producto.id,
+      tipo: producto.tipo === "producto" ? "accesorio" : producto.tipo,
+      stock: producto.nuevoStock,
+    })),
+  };
+}
+
 function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const { t } = useTranslation();
   const { carrito, setCarrito } = useContext(CarritoContext);
@@ -13,8 +86,8 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
   const [metodoPago, setMetodoPago] = useState("");
-  const [usuario, setUsuario] = useState(null);
   const [mensaje, setMensaje] = useState("");
+  const [procesando, setProcesando] = useState(false);
 
   const total = carrito.reduce(
     (acc, juego) => acc + juego.precio * juego.cantidad,
@@ -26,7 +99,10 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      setUsuario(session?.user || null);
+      const user = session?.user || null;
+      if (user?.email) {
+        setCorreo((correoActual) => correoActual || user.email);
+      }
     };
 
     getSession();
@@ -34,17 +110,14 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user || null);
+      const user = session?.user || null;
+      if (user?.email) {
+        setCorreo((correoActual) => correoActual || user.email);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (usuario?.email) {
-      setCorreo(usuario.email);
-    }
-  }, [usuario]);
 
   const finalizarCompra = async () => {
     const {
@@ -63,6 +136,21 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       setMensaje(t("checkout.completeFields"));
       return;
     }
+
+    setProcesando(true);
+    const resultadoStock = await descontarStockDelCarrito(carrito);
+    setProcesando(false);
+
+    if (!resultadoStock.ok) {
+      setMensaje(resultadoStock.message);
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("gamehub-stock-updated", {
+        detail: { productos: resultadoStock.productosActualizados },
+      }),
+    );
 
     setMensaje(t("checkout.success"));
 
@@ -259,6 +347,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         {/* BOTÓN */}
         <button
           onClick={finalizarCompra}
+          disabled={procesando}
           className="
             mt-8
             w-full
@@ -269,9 +358,11 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
             font-bold
             hover:bg-[#00d7aa]
             transition
+            disabled:opacity-60
+            disabled:cursor-not-allowed
           "
         >
-          {t("checkout.title")}
+          {procesando ? t("checkout.processing") : t("checkout.title")}
         </button>
       </div>
     </div>

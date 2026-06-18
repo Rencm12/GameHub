@@ -35,6 +35,23 @@ function CardJuegoHome({ juego, addToast }) {
     obtenerStock();
   }, [juego?.id]);
 
+  useEffect(() => {
+    const actualizarStock = (event) => {
+      const productoActualizado = event.detail?.productos?.find(
+        (producto) =>
+          producto.tipo === "juego" && String(producto.id) === String(juego?.id),
+      );
+
+      if (productoActualizado) {
+        setStock(productoActualizado.stock);
+      }
+    };
+
+    window.addEventListener("gamehub-stock-updated", actualizarStock);
+    return () =>
+      window.removeEventListener("gamehub-stock-updated", actualizarStock);
+  }, [juego?.id]);
+
   // CARRITO
   const handleCarrito = (data) => {
     const productoConStock = {

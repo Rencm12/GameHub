@@ -35,6 +35,23 @@ function CardConsolaHome({ producto, addToast }) {
     obtenerStock();
   }, [producto?.id]);
 
+  useEffect(() => {
+    const actualizarStock = (event) => {
+      const productoActualizado = event.detail?.productos?.find(
+        (item) =>
+          item.tipo === "consola" && String(item.id) === String(producto?.id),
+      );
+
+      if (productoActualizado) {
+        setStock(productoActualizado.stock);
+      }
+    };
+
+    window.addEventListener("gamehub-stock-updated", actualizarStock);
+    return () =>
+      window.removeEventListener("gamehub-stock-updated", actualizarStock);
+  }, [producto?.id]);
+
   const handleCarrito = (data) => {
     const productoConStock = {
       ...data,

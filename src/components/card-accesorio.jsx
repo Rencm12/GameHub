@@ -1,7 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CarritoContext } from "../context/CarritoContext.jsx";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { supabase } from "../supabase/client";
 
 function CardAccesorio({ producto }) {
   const { t } = useTranslation();
@@ -16,6 +17,45 @@ function CardAccesorio({ producto }) {
   } = producto;
 
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [stock, setStock] = useState(producto.stock ?? undefined);
+
+  useEffect(() => {
+    const obtenerStock = async () => {
+      if (!producto?.id) return;
+
+      const { data, error } = await supabase
+        .from("accesorios")
+        .select("stock")
+        .eq("id", producto.id)
+        .single();
+
+      if (error) {
+        console.error("Error al obtener stock de accesorio:", error);
+        return;
+      }
+
+      setStock(data?.stock ?? 0);
+    };
+
+    obtenerStock();
+  }, [producto?.id]);
+
+  useEffect(() => {
+    const actualizarStock = (event) => {
+      const productoActualizado = event.detail?.productos?.find(
+        (item) =>
+          item.tipo === "accesorio" && String(item.id) === String(producto?.id),
+      );
+
+      if (productoActualizado) {
+        setStock(productoActualizado.stock);
+      }
+    };
+
+    window.addEventListener("gamehub-stock-updated", actualizarStock);
+    return () =>
+      window.removeEventListener("gamehub-stock-updated", actualizarStock);
+  }, [producto?.id]);
 
   return (
     <>
@@ -65,7 +105,8 @@ function CardAccesorio({ producto }) {
           </p>
 
           <button
-            onClick={() => agregarAlCarrito(producto)}
+            disabled={stock === 0 || stock === undefined}
+            onClick={() => agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })}
             className="
               w-full
               mt-4
@@ -76,9 +117,15 @@ function CardAccesorio({ producto }) {
               font-bold
               transition
               hover:bg-[#00d7aa]
+              disabled:opacity-60
+              disabled:cursor-not-allowed
             "
           >
-            {t("common.addToCart")}
+            {stock === 0
+              ? t("common.noStock")
+              : stock === undefined
+                ? t("common.loadingStock")
+                : t("common.addToCart")}
           </button>
 
           <button
@@ -182,7 +229,8 @@ function CardAccesorio({ producto }) {
               </p>
 
               <button
-                onClick={() => agregarAlCarrito(producto)}
+                disabled={stock === 0 || stock === undefined}
+                onClick={() => agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })}
                 className="
                   mt-6
                   w-full
@@ -193,9 +241,15 @@ function CardAccesorio({ producto }) {
                   font-bold
                   hover:bg-[#00d9a8]
                   transition
+                  disabled:opacity-60
+                  disabled:cursor-not-allowed
                 "
               >
-                {t("common.addToCart")}
+                {stock === 0
+                  ? t("common.noStock")
+                  : stock === undefined
+                    ? t("common.loadingStock")
+                    : t("common.addToCart")}
               </button>
 
             </div>
