@@ -322,7 +322,8 @@
     "bankTransfer": "Transferencia bancaria",
     "cashOnDelivery": "Pago contra entrega",
     "quantity": "Cantidad:",
-    "total": "Total:"
+    "total": "Total:",
+    "processing": "Procesando compra..."
   },
   "login": {
     

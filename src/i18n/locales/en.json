@@ -325,7 +325,8 @@
     "bankTransfer": "Bank Transfer",
     "cashOnDelivery": "Cash on Delivery",
     "quantity": "Quantity:",
-    "total": "Total:"
+    "total": "Total:",
+    "processing": "Processing purchase..."
   },
   "login": {
     "completeFields": "Complete all fields.",

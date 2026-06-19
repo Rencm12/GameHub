@@ -39,12 +39,23 @@ const PROFILE_SETTINGS = {
 };
 
 const ACCESSIBILITY_CLASSES = [
-  "a11y-text-1", "a11y-text-2", "a11y-text-3", "a11y-text-4",
-  "a11y-contrast-1", "a11y-contrast-2", "a11y-contrast-3",
-  "a11y-cursor-1", "a11y-cursor-2", "a11y-cursor-3",
+  "a11y-text-1",
+  "a11y-text-2",
+  "a11y-text-3",
+  "a11y-text-4",
+  "a11y-contrast-1",
+  "a11y-contrast-2",
+  "a11y-contrast-3",
+  "a11y-cursor-1",
+  "a11y-cursor-2",
+  "a11y-cursor-3",
   "a11y-reading-mask",
-  "a11y-dyslexia-1", "a11y-dyslexia-2",
-  "a11y-line-height-1", "a11y-line-height-2", "a11y-line-height-3", "a11y-line-height-4",
+  "a11y-dyslexia-1",
+  "a11y-dyslexia-2",
+  "a11y-line-height-1",
+  "a11y-line-height-2",
+  "a11y-line-height-3",
+  "a11y-line-height-4",
 ];
 
 const TOOL_CONFIG = [
@@ -114,14 +125,17 @@ function getReadableTextFromElement(element) {
   ].join(",");
 
   const elementClone = element.cloneNode(true);
-  elementClone.querySelectorAll(ignoredSelectors).forEach((ignoredElement) => ignoredElement.remove());
+  elementClone
+    .querySelectorAll(ignoredSelectors)
+    .forEach((ignoredElement) => ignoredElement.remove());
 
   return elementClone.innerText.replace(/\s+/g, " ").trim();
 }
 
 function getReadableBlock(target) {
   const selectedBlock = target.closest(READABLE_BLOCK_SELECTOR);
-  if (!selectedBlock || selectedBlock.matches(ACCESSIBILITY_MENU_SELECTOR)) return null;
+  if (!selectedBlock || selectedBlock.matches(ACCESSIBILITY_MENU_SELECTOR))
+    return null;
   if (selectedBlock.closest(ACCESSIBILITY_MENU_SELECTOR)) return null;
   return selectedBlock;
 }
@@ -137,7 +151,10 @@ function getVoiceForLanguage(languageCode) {
   );
 }
 
-export default function AccessibilityWidget({ open = false, onClose = () => {} }) {
+export default function AccessibilityWidget({
+  open = false,
+  onClose = () => {},
+}) {
   return <AccessibilityMenu open={open} onClose={onClose} />;
 }
 
@@ -145,7 +162,9 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
   const { t } = useTranslation();
   const savedPreferences = useMemo(() => getSavedPreferences(), []);
   const [language, setLanguage] = useState(savedPreferences?.language ?? "es");
-  const [profile, setProfile] = useState(savedPreferences?.profile ?? "default");
+  const [profile, setProfile] = useState(
+    savedPreferences?.profile ?? "default",
+  );
   const [langOpen, setLangOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -213,11 +232,17 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
     if (!speechSupported) return undefined;
 
     const handleVoicesChanged = () => window.speechSynthesis.getVoices();
-    window.speechSynthesis.addEventListener("voiceschanged", handleVoicesChanged);
+    window.speechSynthesis.addEventListener(
+      "voiceschanged",
+      handleVoicesChanged,
+    );
 
     return () => {
       window.speechSynthesis.cancel();
-      window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
+      window.speechSynthesis.removeEventListener(
+        "voiceschanged",
+        handleVoicesChanged,
+      );
     };
   }, [speechSupported]);
 
@@ -253,49 +278,54 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
     });
   };
 
-  const speakTextFromBlock = useCallback((readableBlock, rate = speechRate) => {
-    if (!speechSupported) return;
+  const speakTextFromBlock = useCallback(
+    (readableBlock, rate = speechRate) => {
+      if (!speechSupported) return;
 
-    const text = getReadableTextFromElement(readableBlock);
-    if (!text) return;
+      const text = getReadableTextFromElement(readableBlock);
+      if (!text) return;
 
-    const speechLanguage = SPEECH_LANG[language] ?? SPEECH_LANG.es;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = speechLanguage;
-    utterance.rate = SPEECH_RATES[rate] ?? SPEECH_RATES.normal;
-    utterance.pitch = 1;
+      const speechLanguage = SPEECH_LANG[language] ?? SPEECH_LANG.es;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = speechLanguage;
+      utterance.rate = SPEECH_RATES[rate] ?? SPEECH_RATES.normal;
+      utterance.pitch = 1;
 
-    const voice = getVoiceForLanguage(speechLanguage);
-    if (voice) utterance.voice = voice;
+      const voice = getVoiceForLanguage(speechLanguage);
+      if (voice) utterance.voice = voice;
 
-    const speechSession = speechSessionRef.current + 1;
-    speechSessionRef.current = speechSession;
+      const speechSession = speechSessionRef.current + 1;
+      speechSessionRef.current = speechSession;
 
-    utterance.onend = () => {
-      if (speechSessionRef.current !== speechSession) return;
-      readableBlock.classList.remove("a11y-readable-selected");
-      currentReadableBlockRef.current = null;
-      setIsSpeaking(false);
+      utterance.onend = () => {
+        if (speechSessionRef.current !== speechSession) return;
+        readableBlock.classList.remove("a11y-readable-selected");
+        currentReadableBlockRef.current = null;
+        setIsSpeaking(false);
+        setIsPaused(false);
+      };
+      utterance.onerror = () => {
+        if (speechSessionRef.current !== speechSession) return;
+        readableBlock.classList.remove("a11y-readable-selected");
+        currentReadableBlockRef.current = null;
+        setIsSpeaking(false);
+        setIsPaused(false);
+      };
+
+      window.speechSynthesis.cancel();
+      document
+        .querySelectorAll(".a11y-readable-selected")
+        .forEach((element) => {
+          element.classList.remove("a11y-readable-selected");
+        });
+      readableBlock.classList.add("a11y-readable-selected");
+      currentReadableBlockRef.current = readableBlock;
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
       setIsPaused(false);
-    };
-    utterance.onerror = () => {
-      if (speechSessionRef.current !== speechSession) return;
-      readableBlock.classList.remove("a11y-readable-selected");
-      currentReadableBlockRef.current = null;
-      setIsSpeaking(false);
-      setIsPaused(false);
-    };
-
-    window.speechSynthesis.cancel();
-    document.querySelectorAll(".a11y-readable-selected").forEach((element) => {
-      element.classList.remove("a11y-readable-selected");
-    });
-    readableBlock.classList.add("a11y-readable-selected");
-    currentReadableBlockRef.current = readableBlock;
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-    setIsPaused(false);
-  }, [language, speechRate, speechSupported]);
+    },
+    [language, speechRate, speechSupported],
+  );
 
   useEffect(() => {
     if (!sectionReaderActive || !speechSupported) return undefined;
@@ -387,49 +417,76 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
       <section
         aria-label={t("accessibility.title")}
         className={`
-          fixed
-          top-24
-          right-4
-          md:right-8
-          z-[10000]
-          w-[calc(100%-2rem)]
-          max-w-sm
-          bg-slate-100
-          rounded-xl
-          overflow-hidden
-          shadow-xl
-          font-sans
-          transition-transform
-          duration-500
-          ease-in-out
+           fixed
+           top-0
+           right-0
+           h-full
+           w-full
+           sm:w-[380px]
+           bg-[#0f172a]
+           z-[999]
+           border-l
+           border-[#5C7CFA]
+           shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]
+           transition-transform
+           duration-300
           ${open ? "translate-x-0" : "translate-x-[120%]"}
         `}
         data-a11y-menu="true"
       >
-        <div className="bg-blue-900 text-white flex items-center justify-between px-4 py-3">
+        <div
+          className="bg-[#111827]
+           flex
+           items-center
+           justify-between
+           p-4
+           border-b
+           border-[#86E1FF]"
+        >
           <div className="flex items-center gap-2">
-            <AccessibilityIcon className="w-5 h-5" />
-            <span className="font-semibold text-sm">{t("accessibility.title")}</span>
+            <AccessibilityIcon className="w-5 h-5 text-[#86E1FF]" />
+            <span className="font-bold text-lg text-[#86E1FF]">
+              {t("accessibility.title")}
+            </span>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label={t("accessibility.close")}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-white/70 hover:bg-white/10 transition-colors"
+            className="w-9
+            h-9
+            items-center
+            flex
+            rounded-full
+            justify-center
+            border-[#86E1FF]
+            border
+            hover:bg-[#86E1FF]
+            text-[#86E1FF]
+            hover:text-black
+            transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-4 space-y-1">
+        <div className="p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100%-80px)] pb-24">
           <Dropdown
             label={t("accessibility.language")}
             value={languages[language]}
             options={languageOptions}
             getLabel={(option) => languages[option]}
             open={langOpen}
-            onToggle={() => { setLangOpen((o) => !o); setProfileOpen(false); }}
-            onSelect={(value) => { stopSpeech(); setSectionReaderActive(false); setLanguage(value); setLangOpen(false); }}
+            onToggle={() => {
+              setLangOpen((o) => !o);
+              setProfileOpen(false);
+            }}
+            onSelect={(value) => {
+              stopSpeech();
+              setSectionReaderActive(false);
+              setLanguage(value);
+              setLangOpen(false);
+            }}
           />
 
           <Dropdown
@@ -438,7 +495,10 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
             options={profileOptions}
             getLabel={(option) => profiles[option]}
             open={profileOpen}
-            onToggle={() => { setProfileOpen((o) => !o); setLangOpen(false); }}
+            onToggle={() => {
+              setProfileOpen((o) => !o);
+              setLangOpen(false);
+            }}
             onSelect={selectProfile}
           />
 
@@ -461,11 +521,24 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
             onClick={toggleSectionReader}
             disabled={!speechSupported}
             aria-pressed={sectionReaderActive || isSpeaking}
-            className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-              sectionReaderActive
-                ? "bg-emerald-50 text-emerald-800 ring-2 ring-emerald-200 hover:bg-emerald-100"
-                : "bg-blue-900 text-white hover:bg-blue-800"
-            } disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500`}
+            className={`mt-3 
+             flex 
+             w-full 
+             items-center 
+             justify-center 
+             gap-2 
+             rounded-xl 
+             px-4 
+             py-3 
+             text-sm 
+             font-bold 
+             transition-all 
+             duration-300
+             border ${
+               sectionReaderActive
+                 ? "bg-[#1e293b] text-[#86E1FF] border-[#86E1FF] shadow-[0_0_15px_#86E1FF] hover:bg-[#0f172a]"
+                 : "bg-[#86E1FF] text-black border-[#86E1FF] hover:bg-[#5C7CFA] hover:text-white hover:shadow-[0_0_15px_#86E1FF]"
+             } disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300`}
           >
             <Volume2 className="w-5 h-5" />
             {sectionReaderActive
@@ -474,7 +547,15 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
           </button>
 
           {(sectionReaderActive || isSpeaking) && (
-            <div className="mt-3 rounded-xl bg-white p-3 shadow-sm">
+            <div
+              className="mt-3
+               ounded-xl
+               bg-[#111827]
+               p-3
+               border
+               border-[#5C7CFA]
+               shadow-[0_0_12px_rgba(134,225,255,0.25)]"
+            >
               <div className="grid grid-cols-3 gap-2">
                 <SpeechControlButton
                   label={t("accessibility.speech.pause")}
@@ -496,7 +577,10 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
                 />
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2" aria-label={t("accessibility.speech.speed")}>
+              <div
+                className="mt-3 grid grid-cols-3 gap-2"
+                aria-label={t("accessibility.speech.speed")}
+              >
                 {RATE_OPTIONS.map(({ id, Icon }) => (
                   <SpeechControlButton
                     key={id}
@@ -510,11 +594,23 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
             </div>
           )}
 
-          <div className="border-t border-slate-300 mt-4 pt-3 flex justify-center">
+          <div className="absolute bottom-0 left-0 w-full p-4 border-t border-[#86E1FF] bg-[#111827] z-10">
             <button
               type="button"
               onClick={reset}
-              className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-900 transition-colors"
+              className="w-full
+                py-3
+                rounded-xl
+                font-bold
+                transition
+                bg-[#86E1FF]
+                text-black
+                hover:bg-[#5C7CFA]
+                hover:text-white
+                flex
+                items-center
+                justify-center
+                gap-2"
             >
               <RotateCcw className="w-4 h-4" />
               {t("accessibility.reset")}
@@ -526,18 +622,24 @@ function AccessibilityMenu({ open = false, onClose = () => {} }) {
   );
 }
 
-function SpeechControlButton({ label, Icon, active = false, disabled = false, onClick }) {
+function SpeechControlButton({
+  label,
+  Icon,
+  active = false,
+  disabled = false,
+  onClick,
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-pressed={active}
-      className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors ${
+      className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-xs font-bold transition-all border ${
         active
-          ? "bg-blue-900 text-white"
-          : "bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-900"
-      } disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}
+          ? "bg-[#86E1FF] text-black border-[#86E1FF] shadow-[0_0_12px_#86E1FF]"
+          : "bg-[#0f172a] text-[#86E1FF] border-[#334155] hover:bg-[#1e293b] hover:border-[#86E1FF] hover:shadow-[0_0_10px_#86E1FF]"
+      } disabled:cursor-not-allowed disabled:bg-[#1e293b] disabled:text-gray-500`}
     >
       <Icon className="h-4 w-4" />
       <span>{label}</span>
@@ -545,33 +647,49 @@ function SpeechControlButton({ label, Icon, active = false, disabled = false, on
   );
 }
 
-function Dropdown({ label, value, options, getLabel, open, onToggle, onSelect }) {
+function Dropdown({
+  label,
+  value,
+  options,
+  getLabel,
+  open,
+  onToggle,
+  onSelect,
+}) {
   return (
-    <div className="relative bg-white rounded-xl px-4 py-3 shadow-sm">
+    <div
+      className="relative
+      rounded-xl
+      bg-[#1e293b]
+      py-3
+      px-4
+      border
+      border-[#5C7CFA]"
+    >
       <button
         type="button"
         onClick={onToggle}
         className="w-full flex items-center justify-between text-left"
         aria-expanded={open}
       >
-        <span className="text-sm text-slate-700">
-          {label}: <span className="font-medium text-slate-900">{value}</span>
+        <span className="text-sm text-gray-300">
+          {label}: <span className="font-medium text-[#86E1FF]">{value}</span>
         </span>
         <ChevronDown
           className={`w-4 h-4 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
-        <ul className="mt-2 border-t border-slate-200 pt-2 space-y-1">
+        <ul className="mt-2 border-t border-[#5C7CFA] pt-2 space-y-1">
           {options.map((option) => (
             <li key={option}>
               <button
                 type="button"
                 onClick={() => onSelect(option)}
-                className={`w-full text-left text-sm px-2 py-1.5 rounded-lg transition-colors ${
+                className={`w-full text-left text-sm px-3 py-2 rounded-lg transition ${
                   getLabel(option) === value
-                    ? "bg-blue-50 text-blue-900 font-medium"
-                    : "text-slate-600 hover:bg-slate-50"
+                    ? "bg-[#5C7CFA]/20 text-[#86E1FF] font-bold border border-[#86E1FF]"
+                    : "text-white hover:bg-[#86E1FF]/10 hover:text-[#86E1FF]"
                 }`}
               >
                 {getLabel(option)}
@@ -593,28 +711,40 @@ function ToolCard({ tool, label, active, level, levelLabel, onClick }) {
       aria-pressed={active}
       aria-label={`${label}: ${levelLabel}`}
       title={levelLabel}
-      className={`flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl p-4 shadow-sm transition-colors text-center ${
-        active ? "bg-blue-50 ring-2 ring-blue-900" : "bg-white hover:bg-slate-50"
-      }`}
+      className={`flex
+        min-h-28
+        flex-col
+        items-center
+        justify-center
+        gap-2
+        rounded-xl
+        p-4
+        border
+        transition
+        text-center ${
+          active
+            ? "bg-[#86E1FF]/20 border-[#86E1FF] shadow-[0_0_12px_#86E1FF]"
+            : "bg-[#111827] border-[#334155] hover:border-[#86E1FF]"
+        }`}
     >
       <Icon
-        className={`w-6 h-6 ${active ? "text-blue-900" : "text-slate-800"}`}
+        className={`w-6 h-6 ${active ? "text-[#86E1FF]" : "text-gray-300"}`}
         strokeWidth={2}
       />
-      <span className="text-sm text-slate-800">{label}</span>
+      <span className="text-sm text-gray-200">{label}</span>
       {levels > 0 ? (
         <div className="flex gap-1 mt-1" aria-hidden="true">
           {Array.from({ length: levels }).map((_, index) => (
             <span
               key={index}
-              className={`h-1.5 w-4 rounded-full ${index < level ? "bg-blue-900" : "bg-slate-200"}`}
+              className={`h-1.5 w-4 rounded-full ${index < level ? "bg-[#5C7CFA]" : "bg-slate-200"}`}
             />
           ))}
         </div>
       ) : (
         <span
           aria-hidden="true"
-          className={`h-1.5 w-8 rounded-full mt-1 ${active ? "bg-blue-900" : "bg-slate-200"}`}
+          className={`h-1.5 w-8 rounded-full mt-1 ${active ? "bg-[#5C7CFA]" : "bg-slate-200"}`}
         />
       )}
     </button>

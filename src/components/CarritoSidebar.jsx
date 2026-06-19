@@ -70,7 +70,7 @@ function CarritoSidebar({ abierto, cerrar }) {
           h-full
           w-full sm:w-[380px]
           bg-[#0f172a]
-          shadow-[-5px_0_20px_rgba(0,0,0,0.5)]
+          shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]
           z-[999]
           transition-transform
           duration-300
@@ -85,12 +85,12 @@ function CarritoSidebar({ abierto, cerrar }) {
             justify-between
             p-4 md:p-5
             border-b
-            border-[#00ffc3]
+            border-[#5C7CFA]
           "
         >
-          <h2 className="text-xl md:text-2xl text-[#00ffc3] font-bold flex items-center gap-2">
-            <ShoppingCart size={22} className="text-[#00ffc3]" />
-            {t("cart.title")}
+          <h2 className="text-xl md:text-2xl text-[#86E1FF] font-bold flex items-center gap-2">
+            <ShoppingCart size={22} className="text-[#86E1FF]" />
+            Mi carrito
           </h2>
 
           <button
@@ -104,9 +104,7 @@ function CarritoSidebar({ abierto, cerrar }) {
         {/* PRODUCTOS */}
         <div className="p-4 md:p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
           {carrito.length === 0 ? (
-            <p className="text-gray-400 text-center mt-10">
-              {t("cart.empty")}
-            </p>
+            <p className="text-gray-400 text-center mt-10">{t("cart.empty")}</p>
           ) : (
             carrito.map((juego) => (
               <div
@@ -161,7 +159,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                   )}
                   <h3 className="text-white font-bold">{juego.nombre}</h3>
 
-                  <p className="text-[#00ffc3] font-bold">
+                  <p className="text-[#86E1FF] font-bold">
                     S/ {(juego.precio * juego.cantidad).toFixed(2)}
                   </p>
 
@@ -201,7 +199,7 @@ function CarritoSidebar({ abierto, cerrar }) {
                       ${
                         juego.cantidad >= juego.stock
                           ? "bg-gray-500 text-white cursor-not-allowed"
-                          : "bg-[#00ffc3] text-black"
+                          : "bg-[#86E1FF] text-black"
                       }
                     `}
                     >
@@ -233,14 +231,14 @@ function CarritoSidebar({ abierto, cerrar }) {
             w-full
             p-4 md:p-5
             border-t
-            border-[#00ffc3]
+            border-[#86E1FF]
             bg-[#111827]
           "
         >
           <div className="flex justify-between text-white text-lg md:text-xl mb-4">
             <span>Total:</span>
 
-            <span className="text-[#00ffc3] font-bold">
+            <span className="text-[#86E1FF] font-bold">
               S/ {total.toFixed(2)}
             </span>
           </div>
@@ -257,7 +255,7 @@ function CarritoSidebar({ abierto, cerrar }) {
               ${
                 carrito.length === 0
                   ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                  : "bg-[#00ffc3] text-black hover:bg-[#00d7aa]"
+                  : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA]"
               }
            `}
           >

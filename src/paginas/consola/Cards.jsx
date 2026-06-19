@@ -25,18 +25,18 @@ function Consolas() {
   );
 
   return (
-   <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
+    <div className="flex gap-8 p-8">
       <FiltroConsolas
         productos={productos}
         filtros={filtros}
         setFiltros={handleSetFiltros}
       />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1">
         {/* Estado de carga */}
         {loading && (
           <div className="flex items-center justify-center h-64">
-            <span className="text-[#00ffc3] text-lg animate-pulse">
+            <span className="text-[#86E1FF] text-lg animate-pulse">
               {t("consolesList.loading")}
             </span>
           </div>
@@ -61,7 +61,7 @@ function Consolas() {
         {/* Grid de productos */}
         {!loading && !error && productos.length > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {productosPaginados.map((producto) => (
                 <Card key={producto.id} producto={producto} />
               ))}
@@ -69,13 +69,13 @@ function Consolas() {
 
             {/* Paginación */}
             {totalPaginas > 1 && (
-              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mt-8 sm:mt-10">
+              <div className="flex justify-center items-center gap-3 mt-10">
                 <button
                   onClick={() =>
                     setPaginaActual((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={paginaActual === 1}
-                  className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
+                  className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#5C7CFA] transition"
                 >
                   {t("common.previous")}
                 </button>
@@ -86,10 +86,10 @@ function Consolas() {
                     <button
                       key={numeroPagina}
                       onClick={() => setPaginaActual(numeroPagina)}
-                      className={`w-8 h-8 sm:w-10 sm:h-10 text-sm sm:text-base rounded-lg font-bold transition ${
+                      className={`w-10 h-10 rounded-lg font-bold transition ${
                         paginaActual === numeroPagina
-                          ? "bg-[#00ffc3] text-black"
-                          : "bg-[#1e293b] text-white hover:bg-[#334155]"
+                          ? "bg-[#86E1FF] text-black"
+                          : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
                       }`}
                     >
                       {numeroPagina}
@@ -102,7 +102,7 @@ function Consolas() {
                     setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
                   }
                   disabled={paginaActual === totalPaginas}
-                  className="px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
+                  className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#5C7CFA] transition"
                 >
                   {t("common.next")}
                 </button>

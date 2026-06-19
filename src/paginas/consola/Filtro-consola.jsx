@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Gamepad } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 function FiltroConsolas({ productos, filtros, setFiltros }) {
@@ -25,19 +26,18 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
   return (
     <aside
       className="
-    w-full
-    lg:w-[260px]
-    lg:min-w-[260px]
-    lg:sticky
-    lg:top-5
-    bg-zinc-900
-    text-white
-    p-4
-    sm:p-6
-    rounded-2xl
-  "
+        w-[260px]
+        min-w-[260px]
+        sticky
+        top-5
+        bg-zinc-900
+        text-white
+        p-6
+        rounded-2xl
+      "
     >
-      <h2 className="text-center mb-5 text-lg sm:text-xl font-bold">
+      <h2 className="text-center mb-5 text-xl font-bold">
+        <Gamepad size={20} className="inline-block mr-2 text-[#86E1FF]" />
         {t("consolesFilter.title")}
       </h2>
 
@@ -47,22 +47,13 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
         value={busqueda}
         onChange={handleBusqueda}
         className="
-          w-full
-          bg-zinc-800
-          rounded-lg
-          p-2.5
-          sm:p-3
-          mb-5
-          text-sm
-          sm:text-base
-          outline-none
-          border
-          border-zinc-700
+          w-full bg-zinc-800 rounded-lg p-3 mb-5
+          outline-none border border-zinc-700
           focus:border-cyan-400
         "
       />
 
-      <div className="space-y-1 sm:space-y-2 max-h-60 overflow-y-auto">
+      <div className="space-y-2">
         {marcas.map((marca) => (
           <label
             key={marca}
@@ -75,11 +66,9 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
               type="checkbox"
               checked={seleccionadas.includes(marca)}
               onChange={() => handleCheckbox(marca)}
-              className="mr-3 accent-cyan-400 w-4 h-4 shrink-0"
+              className="mr-3 accent-cyan-400 w-4 h-4"
             />
-            <span className="text-sm sm:text-base break-words">
-              {marca}
-            </span>
+            <span>{marca}</span>
           </label>
         ))}
       </div>
@@ -91,26 +80,21 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
             value={tipoFiltro}
             onChange={(e) => setFiltros({ tipo: e.target.value })}
             className="
-              w-full
-              bg-zinc-900
-              border
-              border-zinc-700
-              rounded-md
-              p-2 
-              text-sm
-              sm:text-base
-              text-white
+              bg-zinc-900 border border-zinc-700
+              rounded-md p-2 text-white
             "
           >
             <option value="default">{t("common.recommended")}</option>
             <option value="recientes">{t("consolesFilter.recent")}</option>
-            <option value="exclusivos">{t("consolesFilter.onlyExclusive")}</option>
+            <option value="exclusivos">
+              {t("consolesFilter.onlyExclusive")}
+            </option>
             <option value="limitados">{t("consolesFilter.onlyLimited")}</option>
           </select>
         </div>
       </div>
 
-     <div className="mt-5 bg-zinc-950 p-3 rounded-xl text-xs sm:text-sm">
+      <div className="mt-5 bg-zinc-950 p-3 rounded-xl text-sm">
         <span>
           {t("consolesFilter.showing")} {productos.length}{" "}
           {productos.length !== 1 ? t("common.products") : t("common.product")}
@@ -119,20 +103,11 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
 
       <button
         onClick={limpiarFiltros}
-       className="
-  mt-5
-  w-full
-  py-2.5
-  sm:py-3
-  text-sm
-  sm:text-base
-  bg-cyan-400
-  text-black
-  rounded-xl
-  font-bold
-  hover:bg-cyan-500
-  duration-300
-"
+        className="
+          mt-5 w-full py-3
+          bg-red-500 text-black rounded-xl font-bold
+          hover:bg-red-600 duration-300
+        "
       >
         {t("consolesFilter.clear")}
       </button>

@@ -325,7 +325,8 @@
     "bankTransfer": "Transferência bancária",
     "cashOnDelivery": "Pagamento na entrega",
     "quantity": "Quantidade:",
-    "total": "Total:"
+    "total": "Total:",
+    "processing": "Processando compra..."
   },
   "login": {
     "completeFields": "Preencha todos os campos.",

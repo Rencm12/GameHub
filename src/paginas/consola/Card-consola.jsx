@@ -66,14 +66,14 @@ function Card({ producto, addToast }) {
     stock,
   } = producto;
 
-  const favorito = esFavorito ? esFavorito(producto.id, 'consola') : false;
+  const favorito = esFavorito ? esFavorito(producto.id, "consola") : false;
 
   const [mostrarModal, setMostrarModal] = useState(false);
-   const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState([]);
   const [descExpandida, setDescExpandida] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(0);
   const autoplayRef = useRef(null);
-   const localAddToast = (mensaje, consolaId) => {
+  const localAddToast = (mensaje, consolaId) => {
     const id = Date.now();
 
     setToasts((prev) => [
@@ -127,12 +127,11 @@ function Card({ producto, addToast }) {
     setDescExpandida(false);
   };
 
-  
   return (
     <>
       {/* ── CARD ── */}
-      <div className="relative bg-[#1a1a1a] p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#00ffc3]">
-        <div className="absolute top-2 right-2 flex gap-1 sm:gap-2 items-center flex-wrap justify-end">
+      <div className="relative bg-[#1a1a1a] p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#86E1FF]">
+        <div className="absolute top-3 right-3 flex gap-2 items-center">
           {exclusivo && (
             <span className="bg-cyan-400 text-black px-2 py-1 rounded-lg text-xs font-bold">
               Exclusiva
@@ -151,42 +150,49 @@ function Card({ producto, addToast }) {
                 favorito
                   ? `${titulo} eliminado de favoritos`
                   : `${titulo} agregado a favoritos`,
-                producto.id
+                producto.id,
               );
             }}
-            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 ${
-              favorito ? "bg-white/90 text-gray-500" : "bg-gray-200 text-gray-500"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-90 ${
+              favorito
+                ? "bg-white/90 text-gray-500"
+                : "bg-gray-200 text-gray-500"
             }`}
           >
-            <Heart size={18} className={favorito ? "text-red-500 fill-red-500" : "text-gray-400"} />
+            <Heart
+              size={18}
+              className={
+                favorito ? "text-red-500 fill-red-500" : "text-gray-400"
+              }
+            />
           </button>
         </div>
 
         <img
           src={imagen}
           alt={titulo}
-          className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg"
+          className="w-full h-[260px] object-cover rounded-lg"
         />
 
         <div className="p-4">
-          <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold">{titulo}</h3>
+          <h3 className="text-white text-xl font-bold">{titulo}</h3>
           <p className="text-cyan-400">{consola}</p>
-          <p className="text-[#00ffc3] text-xl sm:text-2xl font-bold mt-2">S/ {precio}</p>
+          <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
 
           <button
             onClick={() => {
-  agregarAlCarrito({ ...producto, tipo: "consola" });
-  toastFn(`${titulo} agregado al carrito`, producto.id);
-}}
+              agregarAlCarrito({ ...producto, tipo: "consola" });
+              toastFn(`${titulo} agregado al carrito`, producto.id);
+            }}
             disabled={stock === 0}
-           className="mt-4 sm:mt-6 w-full bg-[#00ffc3] text-black py-2 sm:py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#00ffc3]"
+            className="mt-6 w-full bg-[#86E1FF] text-black py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#86E1FF]"
           >
             {stock === 0 ? "Sin stock" : "Agregar al carrito"}
           </button>
 
           <button
             onClick={abrirModal}
-            className="w-full mt-3 border border-[#00ffc3] text-[#00ffc3] py-2 rounded-lg font-bold hover:bg-[#00ffc3] hover:text-black transition"
+            className="w-full mt-3 border border-[#86E1FF] text-[#86E1FF] py-2 rounded-lg font-bold hover:bg-[#5C7CFA] hover:text-white transition"
           >
             Ver más
           </button>
@@ -201,17 +207,17 @@ function Card({ producto, addToast }) {
             e.target === e.currentTarget && setMostrarModal(false)
           }
         >
-          <div className="bg-[#111827] w-full max-w-md sm:max-w-lg md:max-w-xl rounded-2xl overflow-hidden relative shadow-[0_0_30px_rgba(0,255,195,0.5)] flex flex-col max-h-[95vh]">
+          <div className="bg-[#111827] w-full max-w-[480px] rounded-2xl overflow-hidden border border-[#5C7CFA] relative shadow-[0_0_30px_rgba(134,225,255,0.5)] flex flex-col max-h-[90vh]">
             {/* Botón cerrar */}
             <button
               onClick={() => setMostrarModal(false)}
-              className="absolute top-4 right-4 text-[#00ffc3] text-xl font-bold z-50 bg-[#111827]/80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#00ffc3] hover:text-black transition"
+              className="absolute top-4 right-4 text-[#86E1FF] text-xl font-bold z-50 bg-[#111827]/80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#86E1FF] hover:text-black transition"
             >
               ✕
             </button>
 
             {/* ── CARRUSEL ── */}
-           <div className="relative w-full h-56 sm:h-72 md:h-80 bg-black flex-shrink-0">
+            <div className="relative w-full h-[260px] bg-black flex-shrink-0">
               {/* Slide actual */}
               <div className="w-full h-full">
                 <Slide slide={slides[mediaIndex]} isActive={true} />
@@ -220,7 +226,7 @@ function Card({ producto, addToast }) {
               {/* Badge de tipo */}
               {(slides[mediaIndex]?.tipo === "video" ||
                 getYoutubeId(slides[mediaIndex]?.src)) && (
-                <div className="absolute top-3 left-3 bg-black/70 text-[#00ffc3] text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
+                <div className="absolute top-3 left-3 bg-black/70 text-[#86E1FF] text-xs px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
                   <span>▶</span>
                   <span>
                     {getYoutubeId(slides[mediaIndex]?.src)
@@ -232,7 +238,7 @@ function Card({ producto, addToast }) {
 
               {/* Indicador de pausa del carrusel cuando hay video */}
               {currentIsVideo && slides.length > 1 && (
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-[#00ffc3]/70 text-[10px] px-2 py-0.5 rounded-full pointer-events-none whitespace-nowrap"></div>
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/60 text-[#86E1FF]/70 text-[10px] px-2 py-0.5 rounded-full pointer-events-none whitespace-nowrap"></div>
               )}
 
               {/* Flechas */}
@@ -240,13 +246,13 @@ function Card({ producto, addToast }) {
                 <>
                   <button
                     onClick={irAnterior}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-[#00ffc3] rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/90 transition text-lg"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-[#86E1FF] rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/90 transition text-lg"
                   >
                     ‹
                   </button>
                   <button
                     onClick={irSiguiente}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-[#00ffc3] rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/90 transition text-lg"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-[#86E1FF] rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/90 transition text-lg"
                   >
                     ›
                   </button>
@@ -263,7 +269,7 @@ function Card({ producto, addToast }) {
                           title={isYT ? "YouTube" : isVid ? "Video" : "Imagen"}
                           className={`transition rounded-full flex items-center justify-center ${
                             i === mediaIndex
-                              ? "bg-[#00ffc3] w-4 h-2"
+                              ? "bg-[#86E1FF] w-4 h-2"
                               : "bg-white/30 w-2 h-2"
                           }`}
                         />
@@ -278,7 +284,7 @@ function Card({ producto, addToast }) {
                 <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white/10">
                   <div
                     key={mediaIndex} // re-monta la animación en cada cambio
-                    className="h-full bg-[#00ffc3]"
+                    className="h-full bg-[#86E1FF]"
                     style={{
                       animation: "progressBar 5s linear forwards",
                     }}
@@ -288,8 +294,8 @@ function Card({ producto, addToast }) {
             </div>
 
             {/* ── CONTENIDO SCROLLEABLE ── */}
-          <div className="overflow-y-auto flex-1 p-4 sm:p-6 scrollbar-thin scrollbar-thumb-[#00ffc3]/40 scrollbar-track-transparent">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#00ffc3]">{titulo}</h2>
+            <div className="overflow-y-auto flex-1 p-6 scrollbar-thin scrollbar-thumb-[#86E1FF]/40 scrollbar-track-transparent">
+              <h2 className="text-3xl font-bold text-[#86E1FF]">{titulo}</h2>
               <p className="text-gray-300 mt-2">{consola}</p>
 
               <div className="mt-3 text-xl flex gap-2 flex-wrap">
@@ -300,21 +306,21 @@ function Card({ producto, addToast }) {
               {/* Descripción colapsable */}
               <div className="mt-4">
                 <p
-                  className={`text-gray-400 text-sm sm:text-base leading-6 sm:leading-7 transition-all ${descExpandida ? "" : "line-clamp-3"}`}
+                  className={`text-gray-400 leading-7 transition-all ${descExpandida ? "" : "line-clamp-3"}`}
                 >
                   {descripcion}
                 </p>
                 {descripcion && descripcion.length > 0 && (
                   <button
                     onClick={() => setDescExpandida(!descExpandida)}
-                    className="text-[#00ffc3] text-sm mt-1 hover:underline"
+                    className="text-[#86E1FF] text-sm mt-1 hover:underline"
                   >
                     {descExpandida ? "Ver menos ▲" : "Ver más ▼"}
                   </button>
                 )}
               </div>
 
-              <p className="text-[#00ffc3] text-2xl sm:text-3xl font-bold mt-6">
+              <p className="text-[#86E1FF] text-3xl font-bold mt-6">
                 S/ {precio}
               </p>
 
@@ -335,12 +341,12 @@ function Card({ producto, addToast }) {
               </div>
 
               <button
-               onClick={() => {
-  agregarAlCarrito({ ...producto, tipo: "consola" });
-  toastFn(`${titulo} agregado al carrito`, producto.id);
-}}
+                onClick={() => {
+                  agregarAlCarrito({ ...producto, tipo: "consola" });
+                  toastFn(`${titulo} agregado al carrito`, producto.id);
+                }}
                 disabled={stock === 0}
-                className="mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#00ffc3]"
+                className="mt-6 w-full bg-[#86E1FF] text-black py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#86E1FF]"
               >
                 {stock === 0 ? "Sin stock" : "Agregar al carrito"}
               </button>
