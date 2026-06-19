@@ -39,7 +39,8 @@ function CardJuegoHome({ juego, addToast }) {
     const actualizarStock = (event) => {
       const productoActualizado = event.detail?.productos?.find(
         (producto) =>
-          producto.tipo === "juego" && String(producto.id) === String(juego?.id),
+          producto.tipo === "juego" &&
+          String(producto.id) === String(juego?.id),
       );
 
       if (productoActualizado) {
@@ -67,7 +68,10 @@ function CardJuegoHome({ juego, addToast }) {
       productoConStock.nombre || productoConStock.titulo || "Producto";
 
     if (agregado) {
-      addToast(`${nombreProducto} ${t("common.addedToCart")}`, productoConStock.id);
+      addToast(
+        `${nombreProducto} ${t("common.addedToCart")}`,
+        productoConStock.id,
+      );
     } else {
       addToast(t("common.noMoreUnits"), productoConStock.id);
     }
@@ -84,6 +88,9 @@ function CardJuegoHome({ juego, addToast }) {
           transition
           hover:scale-105
           hover:shadow-[0_0_15px_#86E1FF]
+          flex
+          flex-col
+          h-full
         "
       >
         <Link to="/juegos">
@@ -99,10 +106,12 @@ function CardJuegoHome({ juego, addToast }) {
           />
         </Link>
 
-        <div className="p-4">
-          <h3 className="text-xl font-bold">{titulo}</h3>
+        <div className="p-3 flex flex-col flex-grow">
+          <h3 className="text-xl font-bold text-[#86E1FF]">{titulo}</h3>
 
-          <p className="text-gray-400 mt-2">{descripcion}</p>
+          <p className="text-gray-400 mt-2 h-12 overflow-hidden">
+            {descripcion}
+          </p>
 
           <p className="text-[#86E1FF] text-2xl font-bold mt-3">S/ {precio}</p>
 

@@ -5,6 +5,7 @@ import { Heart, HeartCrack } from "lucide-react";
 import CardJuego from "../../components/CardJuego";
 import CardConsola from "../consola/Card-consola";
 import Toast from "../../components/Toast";
+import CardAccesorio from "../accesorios/Cardaccesorios";
 
 function Favoritos() {
   const { t } = useTranslation();
@@ -77,18 +78,33 @@ function Favoritos() {
           "
         >
           {favoritos.map((item) => {
-            // Determinar si el favorito es una consola (usa la propiedad `titulo`) o un juego
-            if (item && (item.titulo || item.consola) && !item.nombre) {
+            if (item.tipo === "accesorio") {
               return (
-                <CardConsola
-                  key={item.id}
+                <CardAccesorio
+                  key={`${item.tipo}-${item.id}`}
                   producto={item}
                   addToast={addToast}
                 />
               );
             }
 
-            return <CardJuego key={item.id} juego={item} addToast={addToast} />;
+            if (item.tipo === "consola") {
+              return (
+                <CardConsola
+                  key={`${item.tipo}-${item.id}`}
+                  producto={item}
+                  addToast={addToast}
+                />
+              );
+            }
+
+            return (
+              <CardJuego
+                key={`${item.tipo}-${item.id}`}
+                juego={item}
+                addToast={addToast}
+              />
+            );
           })}
         </div>
       )}

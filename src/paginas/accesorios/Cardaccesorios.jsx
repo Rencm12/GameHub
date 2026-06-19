@@ -1,14 +1,40 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
 import { useTranslation } from "react-i18next";
+import { X, Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
+import { FavoritosContext } from "../../context/FavoritosContext";
 
-function Card({ producto }) {
+function Card({ producto, addToast }) {
   const { t } = useTranslation();
   const { agregarAlCarrito } = useContext(CarritoContext);
+  const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
+
+  const favorito = esFavorito(producto.id, "accesorio");
+
   // Asumo que los accesorios también tienen estas propiedades en tu base de datos
-  const { imagen, titulo, consola, descripcion, precio, exclusivo, limitada } =
-    producto;
+  const {
+    imagen,
+    titulo,
+    consola,
+    descripcion,
+    precio,
+    exclusivo,
+    limitada,
+    stock,
+  } = producto;
   const [mostrarModal, setMostrarModal] = useState(false);
+  const handleCarrito = () => {
+    const agregado = agregarAlCarrito({
+      ...producto,
+      tipo: "accesorio",
+    });
+
+    if (agregado) {
+      addToast(`${producto.titulo} ${t("common.addedToCart")}`, producto.id);
+    } else {
+      addToast(t("common.noMoreUnits"), producto.id);
+    }
+  };
 
   return (
     <>
@@ -24,6 +50,34 @@ function Card({ producto }) {
          hover:shadow-[0_0_15px_#86E1FF]
         "
       >
+        {/* FAVORITOS */}
+        <button
+          onClick={() => {
+            agregarFavorito({
+              ...producto,
+              tipo: "accesorio",
+            });
+
+            addToast(
+              favorito
+                ? `${producto.titulo} eliminado de favoritos`
+                : `${producto.titulo} agregado a favoritos`,
+              producto.id,
+            );
+          }}
+          className={`
+    absolute top-3 right-3 w-10 h-10 rounded-full
+    flex items-center justify-center transition-all duration-200
+    hover:scale-110 active:scale-90
+    ${favorito ? "bg-white/90 text-gray-500" : "bg-gray-200 text-gray-500"}
+  `}
+        >
+          <Heart
+            size={20}
+            className={favorito ? "text-red-500 fill-red-500" : "text-gray-400"}
+          />
+        </button>
+
         {/* Etiquetas */}
         <div className="absolute top-3 right-3 flex gap-2">
           {exclusivo && (
@@ -48,14 +102,49 @@ function Card({ producto }) {
           <p className="text-cyan-400">{consola}</p>
 
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
+          <div className="mt-2 mb-4 flex justify-center">
+            {stock > 5 && (
+              <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                <CircleCheck size={14} />
+                {t("common.available")}
+              </span>
+            )}
+
+            {stock > 0 && stock <= 5 && (
+              <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                <TriangleAlert size={14} />
+                {t("common.lastUnits")}
+              </span>
+            )}
+
+            {stock === 0 && (
+              <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                <CircleX size={14} />
+                {t("common.soldOut")}
+              </span>
+            )}
+          </div>
 
           {descripcion && <p className="text-gray-400 mt-2">{descripcion}</p>}
 
           <button
-            onClick={() => agregarAlCarrito(producto)}
-            className="w-full mt-4 bg-[#86E1FF] text-black py-2 rounded-lg font-bold transition hover:bg-[#5C7CFA] hover:text-white"
+            onClick={handleCarrito}
+            disabled={stock === 0}
+            className={`
+    w-full
+    mt-4
+    py-2
+    rounded-lg
+    font-bold
+    transition
+    ${
+      stock === 0
+        ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+        : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
+    }
+  `}
           >
-            {t("common.addToCart")}
+            {stock === 0 ? t("common.noStock") : t("common.addToCart")}
           </button>
 
           <button
@@ -103,12 +192,42 @@ function Card({ producto }) {
               <p className="text-[#86E1FF] text-3xl font-bold mt-6">
                 S/ {precio}
               </p>
+              {stock > 5 && (
+                <p className="text-green-400 mt-2 text-sm font-semibold">
+                  {t("common.available")}
+                </p>
+              )}
+
+              {stock > 0 && stock <= 5 && (
+                <p className="text-yellow-400 mt-2 text-sm font-semibold">
+                  {t("common.lastUnits")}
+                </p>
+              )}
+
+              {stock === 0 && (
+                <p className="text-red-400 mt-2 text-sm font-semibold">
+                  {t("common.soldOut")}
+                </p>
+              )}
 
               <button
-                onClick={() => agregarAlCarrito(producto)}
-                className="mt-6 w-full bg-[#86E1FF] text-black py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
+                onClick={handleCarrito}
+                disabled={stock === 0}
+                className={`
+    mt-6
+    w-full
+    py-3
+    rounded-xl
+    font-bold
+    transition
+    ${
+      stock === 0
+        ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+        : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
+    }
+  `}
               >
-                {t("common.addToCart")}
+                {stock === 0 ? t("common.noStock") : t("common.addToCart")}
               </button>
             </div>
           </div>

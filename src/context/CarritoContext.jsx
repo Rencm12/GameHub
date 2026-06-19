@@ -143,7 +143,12 @@ export function CarritoProvider({ children }) {
       .maybeSingle();
 
     if (existe) {
-      // ...
+      await supabase
+        .from("carrito")
+        .update({
+          cantidad: cantidad,
+        })
+        .eq("id", existe.id);
     } else {
       const datosParaInsertar = {
         usuario_id: usuarioId,

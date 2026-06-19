@@ -186,13 +186,13 @@ const Header = () => {
               h-11
               rounded-lg
               border
-              border-[#00ffc3]
-              text-[#00ffc3]
+              border-[#86E1FF]
+              text-[#86E1FF]
               flex
               items-center
               justify-center
-              hover:bg-[#00ffc3]
-              hover:text-black
+              hover:bg-[#5C7CFA]
+              hover:text-white
               transition
             "
           >

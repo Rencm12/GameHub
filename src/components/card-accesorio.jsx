@@ -56,7 +56,6 @@ function CardAccesorio({ producto }) {
     <>
       <div
         className="
-          relative
           bg-[#1a1a1a]
           p-4
           rounded-xl
@@ -64,6 +63,9 @@ function CardAccesorio({ producto }) {
           transition
           hover:scale-105
           hover:shadow-[0_0_15px_#86E1FF]
+          flex
+          flex-col
+          h-full
         "
       >
         <Link to="/accesorios">
@@ -78,10 +80,10 @@ function CardAccesorio({ producto }) {
     "
           />
         </Link>
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-grow">
           <h3
             className="
-              text-white
+              text-[#86E1FF]
               text-xl
               font-bold
             "
@@ -89,7 +91,9 @@ function CardAccesorio({ producto }) {
             {nombre}
           </h3>
 
-          <p className="text-gray-400 mt-2">{descripcion}</p>
+          <p className="text-gray-400 mt-2 h-12 overflow-hidden">
+            {descripcion}
+          </p>
 
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
 

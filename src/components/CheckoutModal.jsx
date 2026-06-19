@@ -126,6 +126,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [correo, setCorreo] = useState("");
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [usuario, setUsuario] = useState(null);
   const [metodoPago, setMetodoPago] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -366,11 +367,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         return;
       }
 
-      await reducirStock();
       window.dispatchEvent(new Event("stockActualizado"));
-      const { data } = await supabase
-        .from("juegos")
-        .select("id, nombre, stock");
 
       if (comprobante) {
         const nombreArchivo = `${user.id}-${orden.id}-${Date.now()}`;

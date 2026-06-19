@@ -7,11 +7,11 @@ function Consolaspag() {
     <>
       <div className="bg-[#0f172a] min-h-screen">
         <Carrusel />
+        <div>
+          <Consolas />
+        </div>
+        <Footer />
       </div>
-      <div>
-        <Consolas />
-      </div>
-      <Footer />
     </>
   );
 }

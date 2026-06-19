@@ -66,7 +66,10 @@ function CardConsolaHome({ producto, addToast }) {
       productoConStock.nombre || productoConStock.titulo || "Producto";
 
     if (agregado) {
-      addToast(`${nombreProducto} ${t("common.addedToCart")}`, productoConStock.id);
+      addToast(
+        `${nombreProducto} ${t("common.addedToCart")}`,
+        productoConStock.id,
+      );
     } else {
       addToast(t("common.noMoreUnits"), productoConStock.id);
     }
@@ -76,7 +79,6 @@ function CardConsolaHome({ producto, addToast }) {
     <>
       <div
         className="
-          relative
           bg-[#1a1a1a]
           p-4
           rounded-xl
@@ -84,6 +86,9 @@ function CardConsolaHome({ producto, addToast }) {
           transition
           hover:scale-105
           hover:shadow-[0_0_15px_#86E1FF]
+          flex
+          flex-col
+          h-full
         "
       >
         <Link to="/consolas">
@@ -99,10 +104,10 @@ function CardConsolaHome({ producto, addToast }) {
           />
         </Link>
 
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-grow">
           <h3
             className="
-              text-white
+              text-[#86E1FF]
               text-xl
               font-bold
             "
@@ -110,7 +115,7 @@ function CardConsolaHome({ producto, addToast }) {
             {titulo}
           </h3>
 
-          <p className="text-cyan-400 mt-2">{consola}</p>
+          <p className="text-gray-400 mt-2 h-12 overflow-hidden">{consola}</p>
 
           <p
             className="
