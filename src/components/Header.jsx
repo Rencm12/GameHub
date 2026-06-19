@@ -8,6 +8,8 @@ import { FavoritosContext } from "../context/FavoritosContext";
 import CheckoutModal from "./CheckoutModal";
 import CarritoSidebar from "./CarritoSidebar";
 import AccessibilityMenu from "./Accesibilidad";
+import Perfil from "./perfil/Perfil";
+import PerfilDropdown from "./PerfilDropdown";
 import { useTranslation } from "react-i18next";
 
 const Header = () => {
@@ -15,6 +17,8 @@ const Header = () => {
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const [mostrarPerfil, setMostrarPerfil] = useState(false);
+  const [seccionPerfil, setSeccionPerfil] = useState("datos");
   const { t } = useTranslation();
   const [usuario, setUsuario] = useState(null);
   const navItems = t("header.nav", { returnObjects: true });
@@ -27,7 +31,9 @@ const Header = () => {
 
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
+    setUsuario(null);
   };
+
   useEffect(() => {
     if (carrito.length > 0) {
       setAnimarCarrito(true);
@@ -146,26 +152,18 @@ const Header = () => {
   "
         >
           {usuario ? (
-            <div className="flex items-center gap-3">
-              <span
-                className="
-                  text-lg
-                  md:text-base
-                  font-bold
-                  text-[#86E1FF]
-                  drop-shadow-[0_0_8px_rgba(134,225,255,0.5)]
-                "
-              >
-                {usuario.user_metadata?.nombre || t("header.customer")}
-              </span>
-
-              <button
-                onClick={cerrarSesion}
-                className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
-              >
-                {t("header.logout")}
-              </button>
-            </div>
+            <PerfilDropdown
+              usuario={usuario}
+              onAbrirPerfil={() => {
+                setSeccionPerfil("datos");
+                setMostrarPerfil(true);
+              }}
+              onAbrirOrdenes={() => {
+                setSeccionPerfil("ordenes");
+                setMostrarPerfil(true);
+              }}
+              onCerrarSesion={cerrarSesion}
+            />
           ) : (
             <button
               className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
@@ -273,6 +271,19 @@ const Header = () => {
           </div>
         </div>
       </header>
+
+      {/* PERFIL */}
+      {mostrarPerfil && (
+        <Perfil
+          abierto={mostrarPerfil}
+          cerrar={() => setMostrarPerfil(false)}
+          seccionInicial={seccionPerfil}
+          onLogout={() => {
+            cerrarSesion();
+            setMostrarPerfil(false);
+          }}
+        />
+      )}
 
       {/* LOGIN */}
       <CheckoutModal

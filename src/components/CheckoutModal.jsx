@@ -329,13 +329,20 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     setMensaje("");
 
     try {
+      // Determinar estado según método de pago
+      const estado = metodoPago === "Tarjeta" ? "pagado" : "pendiente";
+
       const { data: orden, error: errorOrden } = await supabase
         .from("ordenes")
         .insert({
           usuario_id: user.id,
           total,
-          estado: "pendiente",
+          estado: estado,
           metodo_pago: metodoPago,
+          nombre: nombre,
+          telefono: telefono,
+          direccion: direccion,
+          correo: correo,
         })
         .select()
         .single();
@@ -349,7 +356,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       const items = carrito.map((item) => ({
         orden_id: orden.id,
         producto_key: item._key,
-        producto_id: String(item.id),
+        producto_id: Number(item.id),
         tipo: item.tipo,
         nombre: item.nombre,
         imagen: item.imagen,

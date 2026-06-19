@@ -300,6 +300,19 @@ export default function Login({ onClose }) {
                 placeholder={t("login.password")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (esRegistro) {
+                      if (nombre && email && password) {
+                        registrarUsuario();
+                      }
+                    } else {
+                      if (email && password) {
+                        iniciarSesion();
+                      }
+                    }
+                  }
+                }}
                 className="
                   w-full
                   rounded-xl
