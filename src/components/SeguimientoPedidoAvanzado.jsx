@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabase/client";
 import {
   MapContainer,
-  TileLayer,
   Marker,
-  Popup,
   Polyline,
+  Popup,
+  TileLayer,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Clock, CheckCircle, Truck, Package, MapPin } from "lucide-react";
+import { CheckCircle, Clock, MapPin, Package, Truck } from "lucide-react";
 
-// Icono personalizado para el marcador
 const defaultIcon = L.icon({
   iconUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
@@ -23,6 +23,33 @@ const defaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
+const estadosInfo = {
+  pendiente: {
+    nombre: "Pendiente de pago",
+    icon: Clock,
+    color: "bg-yellow-500",
+    descripcion: "Esperando confirmacion de pago",
+  },
+  pagado: {
+    nombre: "Pagado",
+    icon: CheckCircle,
+    color: "bg-blue-500",
+    descripcion: "Preparando envio",
+  },
+  enviado: {
+    nombre: "Enviado",
+    icon: Truck,
+    color: "bg-purple-500",
+    descripcion: "En transito",
+  },
+  entregado: {
+    nombre: "Entregado",
+    icon: Package,
+    color: "bg-green-500",
+    descripcion: "Entrega completada",
+  },
+};
+
 function SeguimientoPedidoAvanzado({
   ordenId,
   estado,
@@ -31,37 +58,7 @@ function SeguimientoPedidoAvanzado({
 }) {
   const [ubicaciones, setUbicaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
-
-  const estadosInfo = {
-    pendiente: {
-      nombre: "Pendiente de Pago",
-      icon: Clock,
-      color: "bg-yellow-500",
-      descripcion: "Esperando confirmación de pago",
-    },
-    pagado: {
-      nombre: "Pagado",
-      icon: CheckCircle,
-      color: "bg-blue-500",
-      descripcion: "Preparando envío",
-    },
-    enviado: {
-      nombre: "Enviado",
-      icon: Truck,
-      color: "bg-purple-500",
-      descripcion: "En tránsito",
-    },
-    entregado: {
-      nombre: "Entregado",
-      icon: Package,
-      color: "bg-green-500",
-      descripcion: "Entrega completada",
-    },
-  };
-
-  useEffect(() => {
-    cargarUbicaciones();
-  }, [ordenId]);
+  const [indiceActivo, setIndiceActivo] = useState(0);
 
   const cargarUbicaciones = async () => {
     const { data } = await supabase
@@ -70,30 +67,88 @@ function SeguimientoPedidoAvanzado({
       .eq("orden_id", ordenId)
       .order("created_at", { ascending: true });
 
-    if (data) {
-      setUbicaciones(data);
-    }
+    setUbicaciones(data || []);
     setCargando(false);
   };
 
-  // Usar las coordenadas de entrega de la orden
-  const coordenadasBase = [
+  useEffect(() => {
+    cargarUbicaciones();
+
+    const channel = supabase
+      .channel(`seguimiento-${ordenId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "seguimiento_ubicaciones",
+          filter: `orden_id=eq.${ordenId}`,
+        },
+        () => cargarUbicaciones(),
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [ordenId]);
+
+  const ubicacionesOrdenadas = useMemo(
+    () =>
+      [...ubicaciones].sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      ),
+    [ubicaciones],
+  );
+
+  useEffect(() => {
+    if (estado !== "enviado" || ubicacionesOrdenadas.length <= 1) {
+      setIndiceActivo(Math.max(ubicacionesOrdenadas.length - 1, 0));
+      return undefined;
+    }
+
+    setIndiceActivo(0);
+    const timer = setInterval(() => {
+      setIndiceActivo((actual) => {
+        if (actual >= ubicacionesOrdenadas.length - 1) {
+          clearInterval(timer);
+          return actual;
+        }
+
+        return actual + 1;
+      });
+    }, 1800);
+
+    return () => clearInterval(timer);
+  }, [estado, ubicacionesOrdenadas.length]);
+
+  const coordenadasEntrega = [
     latitudEntrega || -12.0462,
     longitudEntrega || -77.0428,
   ];
 
-  const coordenadas =
-    ubicaciones.length > 0
-      ? ubicaciones.map((u) => [u.latitud, u.longitud])
-      : [coordenadasBase];
+  const ubicacionActual =
+    ubicacionesOrdenadas[
+      Math.min(indiceActivo, Math.max(ubicacionesOrdenadas.length - 1, 0))
+    ];
 
-  const centerMap =
-    ubicaciones.length > 0
-      ? [
-          ubicaciones[ubicaciones.length - 1].latitud,
-          ubicaciones[ubicaciones.length - 1].longitud,
-        ]
-      : coordenadasBase;
+  const centroMapa = ubicacionActual
+    ? [ubicacionActual.latitud, ubicacionActual.longitud]
+    : coordenadasEntrega;
+
+  const puntosRuta =
+    ubicacionesOrdenadas.length > 0
+      ? ubicacionesOrdenadas.map((u) => [u.latitud, u.longitud])
+      : [coordenadasEntrega];
+
+  const progreso =
+    ubicacionesOrdenadas.length > 0
+      ? Math.round(
+          ((Math.min(indiceActivo, ubicacionesOrdenadas.length - 1) + 1) /
+            ubicacionesOrdenadas.length) *
+            100,
+        )
+      : 0;
 
   if (cargando) {
     return <p className="text-gray-400">Cargando seguimiento...</p>;
@@ -102,13 +157,12 @@ function SeguimientoPedidoAvanzado({
   return (
     <div className="bg-[#1e293b] p-6 rounded-xl border border-gray-700 space-y-6">
       <h4 className="text-[#86E1FF] font-bold text-lg">
-        Seguimiento en Tiempo Real
+        Seguimiento en tiempo real
       </h4>
 
-      {/* MAPA */}
       <div className="rounded-xl overflow-hidden border border-gray-700 h-[500px]">
         <MapContainer
-          center={centerMap}
+          center={centroMapa}
           zoom={13}
           style={{ height: "100%", width: "100%" }}
         >
@@ -117,18 +171,16 @@ function SeguimientoPedidoAvanzado({
             attribution="&copy; OpenStreetMap contributors"
           />
 
-          {/* Marcador de ubicación de entrega */}
-          <Marker position={coordenadasBase} icon={defaultIcon}>
+          <Marker position={coordenadasEntrega} icon={defaultIcon}>
             <Popup>
               <div className="text-black">
-                <p className="font-bold">Tu Ubicación de Entrega</p>
-                <p className="text-sm">Aquí recibirás tu pedido</p>
+                <p className="font-bold">Ubicacion de entrega</p>
+                <p className="text-sm">Aqui recibiras tu pedido</p>
               </div>
             </Popup>
           </Marker>
 
-          {/* Markers de ubicaciones de seguimiento */}
-          {ubicaciones.map((ubicacion) => (
+          {ubicacionesOrdenadas.map((ubicacion) => (
             <Marker
               key={ubicacion.id}
               position={[ubicacion.latitud, ubicacion.longitud]}
@@ -143,10 +195,23 @@ function SeguimientoPedidoAvanzado({
             </Marker>
           ))}
 
-          {/* Línea de ruta */}
-          {ubicaciones.length > 0 && (
+          {ubicacionActual && estado === "enviado" && (
+            <Marker
+              position={[ubicacionActual.latitud, ubicacionActual.longitud]}
+              icon={defaultIcon}
+            >
+              <Popup>
+                <div className="text-black">
+                  <p className="font-bold">Ubicacion actual del pedido</p>
+                  <p className="text-sm">{ubicacionActual.descripcion}</p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {puntosRuta.length > 0 && (
             <Polyline
-              positions={ubicaciones.map((u) => [u.latitud, u.longitud])}
+              positions={puntosRuta}
               color="#86E1FF"
               weight={3}
               opacity={0.7}
@@ -155,95 +220,83 @@ function SeguimientoPedidoAvanzado({
         </MapContainer>
       </div>
 
-      {/* TIMELINE VERTICAL */}
       <div className="space-y-4">
-        <h5 className="text-gray-300 font-bold">Historial de Estado</h5>
+        <h5 className="text-gray-300 font-bold">Historial de estado</h5>
 
         <div className="relative">
-          {/* Línea vertical */}
-          <div className="absolute left-5 top-0 bottom-0 w-1 bg-gray-700"></div>
+          <div className="absolute left-5 top-0 bottom-0 w-1 bg-gray-700" />
 
-          {/* Items de timeline */}
           <div className="space-y-6">
-            {["pendiente", "pagado", "enviado", "entregado"].map(
-              (est, index) => {
-                const info = estadosInfo[est];
-                const Icon = info.icon;
-                const estaCompletado = [
-                  "pendiente",
-                  "pagado",
-                  "enviado",
-                  "entregado",
-                ]
-                  .slice(
-                    0,
-                    ["pendiente", "pagado", "enviado", "entregado"].indexOf(
-                      estado,
-                    ) + 1,
-                  )
-                  .includes(est);
+            {["pendiente", "pagado", "enviado", "entregado"].map((est) => {
+              const info = estadosInfo[est];
+              const Icon = info.icon;
+              const ordenEstados = ["pendiente", "pagado", "enviado", "entregado"];
+              const estaCompletado = ordenEstados
+                .slice(0, ordenEstados.indexOf(estado) + 1)
+                .includes(est);
+              const ubicacionEste = ubicacionesOrdenadas.find(
+                (u) => u.estado === est,
+              );
 
-                const ubicacionEste = ubicaciones.find((u) => u.estado === est);
+              return (
+                <div key={est} className="flex gap-4 relative z-10">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      estaCompletado ? info.color : "bg-gray-700"
+                    }`}
+                  >
+                    <Icon size={20} className="text-white" />
+                  </div>
 
-                return (
-                  <div key={est} className="flex gap-4 relative z-10">
-                    {/* Icono */}
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        estaCompletado ? info.color : "bg-gray-700"
+                  <div className="flex-1">
+                    <p
+                      className={`font-bold ${
+                        estaCompletado ? "text-[#86E1FF]" : "text-gray-400"
                       }`}
                     >
-                      <Icon size={20} className="text-white" />
-                    </div>
+                      {info.nombre}
+                    </p>
+                    <p className="text-sm text-gray-400">{info.descripcion}</p>
 
-                    {/* Contenido */}
-                    <div className="flex-1">
-                      <p
-                        className={`font-bold ${
-                          estaCompletado ? "text-[#86E1FF]" : "text-gray-400"
-                        }`}
-                      >
-                        {info.nombre}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        {info.descripcion}
-                      </p>
+                    {ubicacionEste && (
+                      <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                        <MapPin size={14} />
+                        {ubicacionEste.descripcion}
+                      </div>
+                    )}
 
-                      {ubicacionEste && (
-                        <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
-                          <MapPin size={14} />
-                          {ubicacionEste.descripcion}
-                        </div>
-                      )}
-
-                      {ubicacionEste && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(
-                            ubicacionEste.created_at,
-                          ).toLocaleDateString("es-PE", {
+                    {ubicacionEste && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(ubicacionEste.created_at).toLocaleDateString(
+                          "es-PE",
+                          {
                             month: "short",
                             day: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
                             timeZone: "America/Lima",
-                          })}
-                        </p>
-                      )}
-                    </div>
+                          },
+                        )}
+                      </p>
+                    )}
                   </div>
-                );
-              },
-            )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* INFO ACTUAL */}
       <div className="bg-black/30 p-4 rounded-lg border border-gray-700">
         <p className="text-sm text-gray-300">
-          <span className="text-[#86E1FF] font-bold">Estado Actual: </span>
-          {estadosInfo[estado].nombre}
+          <span className="text-[#86E1FF] font-bold">Estado actual: </span>
+          {estadosInfo[estado]?.nombre || estado}
         </p>
+        {estado === "enviado" && ubicacionesOrdenadas.length > 0 && (
+          <p className="text-xs text-gray-400 mt-2">
+            Avance automatico: {progreso}%
+          </p>
+        )}
       </div>
     </div>
   );

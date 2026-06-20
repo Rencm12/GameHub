@@ -21,6 +21,7 @@ const Header = () => {
   const [seccionPerfil, setSeccionPerfil] = useState("datos");
   const { t } = useTranslation();
   const [usuario, setUsuario] = useState(null);
+  const [esAdministrador, setEsAdministrador] = useState(false);
   const navItems = t("header.nav", { returnObjects: true });
 
   const { carrito } = useContext(CarritoContext);
@@ -32,6 +33,22 @@ const Header = () => {
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
     setUsuario(null);
+    setEsAdministrador(false);
+  };
+
+  const verificarAdministrador = async (userId) => {
+    if (!userId) {
+      setEsAdministrador(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("Roles")
+      .eq("id", userId)
+      .maybeSingle();
+
+    setEsAdministrador(!error && data?.Roles === "administrador");
   };
 
   useEffect(() => {
@@ -68,7 +85,9 @@ const Header = () => {
         data: { session },
       } = await supabase.auth.getSession();
 
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     };
 
     obtenerSesion();
@@ -76,7 +95,9 @@ const Header = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     });
 
     return () => subscription.unsubscribe();
@@ -138,6 +159,24 @@ const Header = () => {
                 <Link to={item.path}>{item.label}</Link>
               </li>
             ))}
+            {esAdministrador && (
+              <li
+                className="
+            relative
+            cursor-pointer
+            after:absolute
+            after:left-0
+            after:-bottom-1
+            after:h-[2px]
+            after:w-0
+            after:bg-[#86E1FF]
+            after:transition-all
+            hover:after:w-full
+          "
+              >
+                <Link to="/admin">Admin</Link>
+              </li>
+            )}
           </ul>
         </nav>
 
