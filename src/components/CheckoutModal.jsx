@@ -325,17 +325,42 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       return;
     }
 
+    // Obtener ubicación del usuario
+    let latitudEntrega = null;
+    let longitudEntrega = null;
+
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitudEntrega = position.coords.latitude;
+        longitudEntrega = position.coords.longitude;
+      } catch (error) {
+        console.log("No se pudo obtener ubicación");
+      }
+    }
+
     setCargando(true);
     setMensaje("");
 
     try {
+      // Determinar estado según método de pago
+      const estado = metodoPago === "Tarjeta" ? "pagado" : "pendiente";
+
       const { data: orden, error: errorOrden } = await supabase
         .from("ordenes")
         .insert({
           usuario_id: user.id,
           total,
-          estado: "pendiente",
+          estado: estado,
           metodo_pago: metodoPago,
+          nombre: nombre,
+          telefono: telefono,
+          direccion: direccion,
+          correo: correo,
+          latitud_entrega: latitudEntrega,
+          longitud_entrega: longitudEntrega,
         })
         .select()
         .single();
@@ -346,10 +371,33 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         return;
       }
 
+      // Crear registro de seguimiento inicial CON UBICACIÓN DE LA EMPRESA
+      if (orden) {
+        // Obtener ubicación de la empresa
+        const { data: empresa } = await supabase
+          .from("configuracion_empresa")
+          .select("latitud, longitud")
+          .limit(1)
+          .single();
+
+        const { error: errorSeguimiento } = await supabase
+          .from("seguimiento_ubicaciones")
+          .insert({
+            orden_id: orden.id,
+            estado: estado,
+            latitud: empresa?.latitud || -12.0462,
+            longitud: empresa?.longitud || -77.0428,
+            descripcion:
+              estado === "pagado"
+                ? "Pagado - Preparando envío desde GameHub"
+                : "Pendiente de pago - En almacén",
+          });
+      }
+
       const items = carrito.map((item) => ({
         orden_id: orden.id,
         producto_key: item._key,
-        producto_id: String(item.id),
+        producto_id: Number(item.id),
         tipo: item.tipo,
         nombre: item.nombre,
         imagen: item.imagen,
