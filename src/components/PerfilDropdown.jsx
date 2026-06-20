@@ -63,7 +63,7 @@ function PerfilDropdown({
             className="w-full flex items-center gap-2 px-4 py-3 text-[#86E1FF] hover:bg-[#5C7CFA] hover:text-white transition text-left border-b border-[#5C7CFA]"
           >
             <History size={18} />
-            Mis Órdenes
+            Mis Ordenes
           </button>
 
           <button

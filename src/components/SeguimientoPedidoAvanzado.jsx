@@ -1,16 +1,25 @@
-/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../supabase/client";
 import {
   MapContainer,
-  Marker,
-  Polyline,
-  Popup,
   TileLayer,
+  Marker,
+  Popup,
+  Polyline,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { CheckCircle, Clock, MapPin, Package, Truck } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  Truck,
+  Package,
+  MapPin,
+  Send,
+  Star,
+  Phone,
+  MessageSquare,
+} from "lucide-react";
 
 const defaultIcon = L.icon({
   iconUrl:
@@ -23,33 +32,6 @@ const defaultIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-const estadosInfo = {
-  pendiente: {
-    nombre: "Pendiente de pago",
-    icon: Clock,
-    color: "bg-yellow-500",
-    descripcion: "Esperando confirmacion de pago",
-  },
-  pagado: {
-    nombre: "Pagado",
-    icon: CheckCircle,
-    color: "bg-blue-500",
-    descripcion: "Preparando envio",
-  },
-  enviado: {
-    nombre: "Enviado",
-    icon: Truck,
-    color: "bg-purple-500",
-    descripcion: "En transito",
-  },
-  entregado: {
-    nombre: "Entregado",
-    icon: Package,
-    color: "bg-green-500",
-    descripcion: "Entrega completada",
-  },
-};
-
 function SeguimientoPedidoAvanzado({
   ordenId,
   estado,
@@ -57,112 +39,289 @@ function SeguimientoPedidoAvanzado({
   longitudEntrega,
 }) {
   const [ubicaciones, setUbicaciones] = useState([]);
+  const [repartidor, setRepartidor] = useState(null);
+  const [mensajes, setMensajes] = useState([]);
+  const [nuevoMensaje, setNuevoMensaje] = useState("");
   const [cargando, setCargando] = useState(true);
-  const [indiceActivo, setIndiceActivo] = useState(0);
+  const [posicionActual, setPosicionActual] = useState(null);
+  const [progreso, setProgreso] = useState(0);
+  const [eta, setEta] = useState(null);
+  const chatRef = useRef(null);
 
-  const cargarUbicaciones = async () => {
-    const { data } = await supabase
-      .from("seguimiento_ubicaciones")
-      .select("*")
-      .eq("orden_id", ordenId)
-      .order("created_at", { ascending: true });
-
-    setUbicaciones(data || []);
-    setCargando(false);
+  const estadosInfo = {
+    pendiente: {
+      nombre: "Pendiente de Pago",
+      icon: Clock,
+      color: "bg-yellow-500",
+      descripcion: "Esperando confirmación de pago",
+    },
+    pagado: {
+      nombre: "Pagado",
+      icon: CheckCircle,
+      color: "bg-blue-500",
+      descripcion: "Preparando envío",
+    },
+    enviado: {
+      nombre: "Enviado",
+      icon: Truck,
+      color: "bg-purple-500",
+      descripcion: "En tránsito",
+    },
+    entregado: {
+      nombre: "Entregado",
+      icon: Package,
+      color: "bg-green-500",
+      descripcion: "Entrega completada",
+    },
   };
 
   useEffect(() => {
-    cargarUbicaciones();
+    cargarDatos();
 
-    const channel = supabase
-      .channel(`seguimiento-${ordenId}`)
+    // Escuchar cambios en tiempo real
+    const suscripcion = supabase
+      .channel(`posiciones:${ordenId}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
-          table: "seguimiento_ubicaciones",
+          table: "posiciones_repartidor",
           filter: `orden_id=eq.${ordenId}`,
         },
-        () => cargarUbicaciones(),
+        (payload) => {
+          console.log("Posición actualizada:", payload.new);
+          if (payload.new) {
+            setPosicionActual(payload.new);
+            // Actualizar progreso
+            if (ubicaciones.length > 0) {
+              const index = ubicaciones.findIndex(
+                (u) =>
+                  Math.abs(u.latitud - payload.new.latitud) < 0.0001 &&
+                  Math.abs(u.longitud - payload.new.longitud) < 0.0001,
+              );
+              if (index >= 0) {
+                setProgreso((index / ubicaciones.length) * 100);
+              }
+            }
+          }
+        },
       )
       .subscribe();
 
+    const interval = setInterval(cargarDatos, 10000);
+
     return () => {
-      supabase.removeChannel(channel);
+      suscripcion.unsubscribe();
+      clearInterval(interval);
     };
   }, [ordenId]);
 
-  const ubicacionesOrdenadas = useMemo(
-    () =>
-      [...ubicaciones].sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at),
-      ),
-    [ubicaciones],
-  );
-
   useEffect(() => {
-    if (estado !== "enviado" || ubicacionesOrdenadas.length <= 1) {
-      setIndiceActivo(Math.max(ubicacionesOrdenadas.length - 1, 0));
-      return undefined;
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [mensajes]);
+
+  const cargarDatos = async () => {
+    // Cargar ubicaciones
+    const { data: ubicacionesData } = await supabase
+      .from("seguimiento_ubicaciones")
+      .select("*")
+      .eq("orden_id", ordenId)
+      .order("created_at", { ascending: true });
+
+    if (ubicacionesData) {
+      setUbicaciones(ubicacionesData);
+
+      // Calcular posición actual y progreso
+      if (ubicacionesData.length > 0) {
+        const posicion =
+          ubicacionesData[
+            Math.min(
+              Math.floor((Date.now() / 12000) % ubicacionesData.length),
+              ubicacionesData.length - 1,
+            )
+          ];
+        setPosicionActual(posicion);
+        setProgreso(
+          (ubicacionesData.indexOf(posicion) / ubicacionesData.length) * 100,
+        );
+      }
     }
 
-    setIndiceActivo(0);
-    const timer = setInterval(() => {
-      setIndiceActivo((actual) => {
-        if (actual >= ubicacionesOrdenadas.length - 1) {
-          clearInterval(timer);
-          return actual;
-        }
+    // Cargar repartidor
+    const { data: ordenData } = await supabase
+      .from("ordenes")
+      .select("repartidor_id")
+      .eq("id", ordenId)
+      .single();
 
-        return actual + 1;
-      });
-    }, 1800);
+    if (ordenData?.repartidor_id) {
+      const { data: repartidorData } = await supabase
+        .from("repartidores")
+        .select("*")
+        .eq("id", ordenData.repartidor_id)
+        .single();
 
-    return () => clearInterval(timer);
-  }, [estado, ubicacionesOrdenadas.length]);
+      setRepartidor(repartidorData);
+    }
 
-  const coordenadasEntrega = [
-    latitudEntrega || -12.0462,
-    longitudEntrega || -77.0428,
-  ];
+    // Cargar mensajes
+    const { data: mensajesData } = await supabase
+      .from("chat_seguimiento")
+      .select("*")
+      .eq("orden_id", ordenId)
+      .order("created_at", { ascending: true });
 
-  const ubicacionActual =
-    ubicacionesOrdenadas[
-      Math.min(indiceActivo, Math.max(ubicacionesOrdenadas.length - 1, 0))
-    ];
+    setMensajes(mensajesData || []);
+    setCargando(false);
+  };
 
-  const centroMapa = ubicacionActual
-    ? [ubicacionActual.latitud, ubicacionActual.longitud]
-    : coordenadasEntrega;
+  const enviarMensaje = async () => {
+    if (!nuevoMensaje.trim()) return;
 
-  const puntosRuta =
-    ubicacionesOrdenadas.length > 0
-      ? ubicacionesOrdenadas.map((u) => [u.latitud, u.longitud])
-      : [coordenadasEntrega];
+    const { error } = await supabase.from("chat_seguimiento").insert({
+      orden_id: ordenId,
+      remitente: "cliente",
+      mensaje: nuevoMensaje,
+    });
 
-  const progreso =
-    ubicacionesOrdenadas.length > 0
-      ? Math.round(
-          ((Math.min(indiceActivo, ubicacionesOrdenadas.length - 1) + 1) /
-            ubicacionesOrdenadas.length) *
-            100,
-        )
-      : 0;
+    if (!error) {
+      setNuevoMensaje("");
+      cargarDatos();
+    }
+  };
+
+  const calcularETA = () => {
+    if (!posicionActual || ubicaciones.length === 0) return null;
+
+    const distanciaRestante =
+      ubicaciones.length - ubicaciones.indexOf(posicionActual);
+    const tiempoRestante = distanciaRestante * 12; // 12 segundos por punto
+    const minutos = Math.ceil(tiempoRestante / 60);
+
+    return minutos > 0 ? `${minutos} min` : "Llegando...";
+  };
+
+  const calcularDistancia = () => {
+    if (!posicionActual || !latitudEntrega || !longitudEntrega) return 0;
+
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = ((latitudEntrega - posicionActual.latitud) * Math.PI) / 180;
+    const dLon = ((longitudEntrega - posicionActual.longitud) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((posicionActual.latitud * Math.PI) / 180) *
+        Math.cos((latitudEntrega * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return (R * c).toFixed(2);
+  };
 
   if (cargando) {
     return <p className="text-gray-400">Cargando seguimiento...</p>;
   }
 
-  return (
-    <div className="bg-[#1e293b] p-6 rounded-xl border border-gray-700 space-y-6">
-      <h4 className="text-[#86E1FF] font-bold text-lg">
-        Seguimiento en tiempo real
-      </h4>
+  const centerMap = posicionActual
+    ? [posicionActual.latitud, posicionActual.longitud]
+    : [latitudEntrega || -12.0462, longitudEntrega || -77.0428];
 
-      <div className="rounded-xl overflow-hidden border border-gray-700 h-[500px]">
+  return (
+    <div className="space-y-6">
+      {/* CARD INFORMACIÓN DEL REPARTIDOR */}
+      {repartidor && estado === "enviado" && (
+        <div className="bg-gradient-to-r from-[#1e293b] to-[#2d3748] p-6 rounded-xl border border-[#86E1FF]/30">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <img
+                src={repartidor.foto_url}
+                alt={repartidor.nombre}
+                className="w-16 h-16 rounded-full border-2 border-[#86E1FF]"
+              />
+              <div>
+                <p className="text-white font-bold text-lg">
+                  {repartidor.nombre}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < Math.floor(repartidor.rating)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-500"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-300">
+                    {repartidor.rating}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {repartidor.ordenes_entregadas} entregas completadas
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <a
+                href={`tel:${repartidor.telefono}`}
+                className="bg-[#86E1FF] hover:bg-[#5C7CFA] text-black px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition"
+              >
+                <Phone size={18} />
+                Llamar
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ESTADÍSTICAS */}
+      {estado === "enviado" && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-[#1e293b] p-4 rounded-lg border border-gray-700 text-center">
+            <p className="text-gray-400 text-sm">ETA</p>
+            <p className="text-[#86E1FF] font-bold text-xl mt-2">
+              {calcularETA()}
+            </p>
+          </div>
+          <div className="bg-[#1e293b] p-4 rounded-lg border border-gray-700 text-center">
+            <p className="text-gray-400 text-sm">Distancia</p>
+            <p className="text-[#86E1FF] font-bold text-xl mt-2">
+              {calcularDistancia()} km
+            </p>
+          </div>
+          <div className="bg-[#1e293b] p-4 rounded-lg border border-gray-700 text-center">
+            <p className="text-gray-400 text-sm">Progreso</p>
+            <p className="text-[#86E1FF] font-bold text-xl mt-2">
+              {Math.round(progreso)}%
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* BARRA DE PROGRESO */}
+      {estado === "enviado" && (
+        <div className="bg-[#1e293b] p-4 rounded-xl border border-gray-700">
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div
+              className="bg-[#86E1FF] h-2 rounded-full transition-all duration-500"
+              style={{ width: `${progreso}%` }}
+            ></div>
+          </div>
+        </div>
+      )}
+
+      {/* MAPA */}
+      <div className="rounded-xl overflow-hidden border border-gray-700 h-96">
         <MapContainer
-          center={centroMapa}
+          center={centerMap}
           zoom={13}
           style={{ height: "100%", width: "100%" }}
         >
@@ -171,47 +330,37 @@ function SeguimientoPedidoAvanzado({
             attribution="&copy; OpenStreetMap contributors"
           />
 
-          <Marker position={coordenadasEntrega} icon={defaultIcon}>
-            <Popup>
-              <div className="text-black">
-                <p className="font-bold">Ubicacion de entrega</p>
-                <p className="text-sm">Aqui recibiras tu pedido</p>
-              </div>
-            </Popup>
+          {/* Marcador de destino */}
+          <Marker
+            position={[latitudEntrega || -12.0462, longitudEntrega || -77.0428]}
+            icon={defaultIcon}
+          >
+            <Popup>Tu ubicación de entrega</Popup>
           </Marker>
 
-          {ubicacionesOrdenadas.map((ubicacion) => (
+          {/* Marcador actual (repartidor) */}
+          {posicionActual && estado === "enviado" && (
             <Marker
-              key={ubicacion.id}
-              position={[ubicacion.latitud, ubicacion.longitud]}
-              icon={defaultIcon}
+              position={[posicionActual.latitud, posicionActual.longitud]}
+              icon={L.icon({
+                iconUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+                iconSize: [32, 45],
+                iconAnchor: [16, 45],
+                popupAnchor: [0, -45],
+                shadowSize: [41, 41],
+              })}
             >
-              <Popup>
-                <div className="text-black">
-                  <p className="font-bold">{ubicacion.estado}</p>
-                  <p className="text-sm">{ubicacion.descripcion}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-
-          {ubicacionActual && estado === "enviado" && (
-            <Marker
-              position={[ubicacionActual.latitud, ubicacionActual.longitud]}
-              icon={defaultIcon}
-            >
-              <Popup>
-                <div className="text-black">
-                  <p className="font-bold">Ubicacion actual del pedido</p>
-                  <p className="text-sm">{ubicacionActual.descripcion}</p>
-                </div>
-              </Popup>
+              <Popup>Repartidor: {repartidor?.nombre || "En ruta"}</Popup>
             </Marker>
           )}
 
-          {puntosRuta.length > 0 && (
+          {/* Línea de ruta */}
+          {ubicaciones.length > 1 && (
             <Polyline
-              positions={puntosRuta}
+              positions={ubicaciones.map((u) => [u.latitud, u.longitud])}
               color="#86E1FF"
               weight={3}
               opacity={0.7}
@@ -220,23 +369,30 @@ function SeguimientoPedidoAvanzado({
         </MapContainer>
       </div>
 
+      {/* TIMELINE */}
       <div className="space-y-4">
-        <h5 className="text-gray-300 font-bold">Historial de estado</h5>
-
+        <h5 className="text-gray-300 font-bold">Historial de Estado</h5>
         <div className="relative">
-          <div className="absolute left-5 top-0 bottom-0 w-1 bg-gray-700" />
-
+          <div className="absolute left-5 top-0 bottom-0 w-1 bg-gray-700"></div>
           <div className="space-y-6">
             {["pendiente", "pagado", "enviado", "entregado"].map((est) => {
               const info = estadosInfo[est];
               const Icon = info.icon;
-              const ordenEstados = ["pendiente", "pagado", "enviado", "entregado"];
-              const estaCompletado = ordenEstados
-                .slice(0, ordenEstados.indexOf(estado) + 1)
+              const estaCompletado = [
+                "pendiente",
+                "pagado",
+                "enviado",
+                "entregado",
+              ]
+                .slice(
+                  0,
+                  ["pendiente", "pagado", "enviado", "entregado"].indexOf(
+                    estado,
+                  ) + 1,
+                )
                 .includes(est);
-              const ubicacionEste = ubicacionesOrdenadas.find(
-                (u) => u.estado === est,
-              );
+
+              const ubicacionEste = ubicaciones.find((u) => u.estado === est);
 
               return (
                 <div key={est} className="flex gap-4 relative z-10">
@@ -247,7 +403,6 @@ function SeguimientoPedidoAvanzado({
                   >
                     <Icon size={20} className="text-white" />
                   </div>
-
                   <div className="flex-1">
                     <p
                       className={`font-bold ${
@@ -257,28 +412,6 @@ function SeguimientoPedidoAvanzado({
                       {info.nombre}
                     </p>
                     <p className="text-sm text-gray-400">{info.descripcion}</p>
-
-                    {ubicacionEste && (
-                      <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
-                        <MapPin size={14} />
-                        {ubicacionEste.descripcion}
-                      </div>
-                    )}
-
-                    {ubicacionEste && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(ubicacionEste.created_at).toLocaleDateString(
-                          "es-PE",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            timeZone: "America/Lima",
-                          },
-                        )}
-                      </p>
-                    )}
                   </div>
                 </div>
               );
@@ -287,17 +420,67 @@ function SeguimientoPedidoAvanzado({
         </div>
       </div>
 
-      <div className="bg-black/30 p-4 rounded-lg border border-gray-700">
-        <p className="text-sm text-gray-300">
-          <span className="text-[#86E1FF] font-bold">Estado actual: </span>
-          {estadosInfo[estado]?.nombre || estado}
-        </p>
-        {estado === "enviado" && ubicacionesOrdenadas.length > 0 && (
-          <p className="text-xs text-gray-400 mt-2">
-            Avance automatico: {progreso}%
-          </p>
-        )}
-      </div>
+      {/* CHAT EN VIVO */}
+      {estado === "enviado" && (
+        <div className="bg-[#1e293b] rounded-xl border border-gray-700 overflow-hidden flex flex-col h-80">
+          <div className="bg-[#0f172a] p-4 border-b border-gray-700 flex items-center gap-2">
+            <MessageSquare size={20} className="text-[#86E1FF]" />
+            <p className="text-[#86E1FF] font-bold">Chat con el Repartidor</p>
+          </div>
+
+          <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+            {mensajes.length === 0 ? (
+              <p className="text-center text-gray-500 text-sm mt-4">
+                Inicia una conversación
+              </p>
+            ) : (
+              mensajes.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${
+                    msg.remitente === "cliente"
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-xs rounded-lg px-4 py-2 ${
+                      msg.remitente === "cliente"
+                        ? "bg-[#86E1FF] text-black"
+                        : "bg-gray-700 text-white"
+                    }`}
+                  >
+                    <p className="text-sm">{msg.mensaje}</p>
+                    <p className="text-xs opacity-70 mt-1">
+                      {new Date(msg.created_at).toLocaleTimeString("es-PE", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="bg-[#0f172a] p-4 border-t border-gray-700 flex gap-2">
+            <input
+              type="text"
+              value={nuevoMensaje}
+              onChange={(e) => setNuevoMensaje(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && enviarMensaje()}
+              placeholder="Escribe un mensaje..."
+              className="flex-1 bg-gray-800 text-white px-3 py-2 rounded-lg outline-none focus:ring-1 focus:ring-[#86E1FF]"
+            />
+            <button
+              onClick={enviarMensaje}
+              className="bg-[#86E1FF] hover:bg-[#5C7CFA] text-black px-4 py-2 rounded-lg font-bold transition"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

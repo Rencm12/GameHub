@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Jura:wght@300..700&family=Slackey&display=swap');
 
 @theme {
 
@@ -9,8 +8,12 @@
 
 }
 @layer base {
-  body {
-    @apply bg-black m-0 font-jura antialiased;
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    @apply font-jura;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -21,7 +24,7 @@
   }
 
   code {
-    @apply font-slackey text-[#00ffc3] bg-slate-950 px-1 rounded;
+    @apply font-slackey text-[#86e1ff] bg-slate-950 px-1 rounded;
   }
 }
 

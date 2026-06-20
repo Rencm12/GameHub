@@ -9,78 +9,123 @@ function DatosPersonales({ usuarioId }) {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState("");
+  const [tipoMensaje, setTipoMensaje] = useState("");
 
-  // Cambiar contraseña
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [passwordActual, setPasswordActual] = useState("");
   const [passwordNueva, setPasswordNueva] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [cambiandoPassword, setCambiandoPassword] = useState(false);
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+  const mostrarMensaje = (tipo, texto) => {
+    setTipoMensaje(tipo);
+    setMensaje(texto);
+  };
 
-  const cargarDatos = async () => {
-    const { data: profile } = await supabase
+  async function cargarDatos() {
+    setCargando(true);
+
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("nombre, telefono, direccion")
       .eq("id", usuarioId)
-      .single();
+      .maybeSingle();
 
-    if (profile) {
+    if (!error && profile) {
       setNombre(profile.nombre || "");
       setTelefono(profile.telefono || "");
       setDireccion(profile.direccion || "");
     }
+
     setCargando(false);
-  };
+  }
+
+  useEffect(() => {
+    if (usuarioId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      cargarDatos();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usuarioId]);
 
   const guardarDatos = async () => {
+    const nombreLimpio = nombre.trim();
+    const telefonoLimpio = telefono.trim();
+    const direccionLimpia = direccion.trim();
+
+    if (!nombreLimpio) {
+      mostrarMensaje("error", "Ingresa tu nombre");
+      return;
+    }
+
+    if (telefonoLimpio && telefonoLimpio.length !== 9) {
+      mostrarMensaje("error", "El teléfono debe tener 9 dígitos");
+      return;
+    }
+
     setGuardando(true);
     setMensaje("");
+    setTipoMensaje("");
 
     const { error } = await supabase
       .from("profiles")
-      .update({
-        nombre,
-        telefono,
-        direccion,
-      })
-      .eq("id", usuarioId);
+      .upsert(
+        {
+          id: usuarioId,
+          nombre: nombreLimpio,
+          telefono: telefonoLimpio,
+          direccion: direccionLimpia,
+        },
+        { onConflict: "id" },
+      );
 
     if (error) {
-      setMensaje("Error al guardar los datos");
+      mostrarMensaje("error", "Error al guardar los datos");
     } else {
-      setMensaje("Datos guardados correctamente");
+      await supabase.auth.updateUser({
+        data: { nombre: nombreLimpio },
+      });
+
+      setNombre(nombreLimpio);
+      setTelefono(telefonoLimpio);
+      setDireccion(direccionLimpia);
+      mostrarMensaje("exito", "Datos guardados correctamente");
+      window.dispatchEvent(new Event("gamehub-profile-updated"));
       setTimeout(() => setMensaje(""), 3000);
     }
+
     setGuardando(false);
   };
 
   const cambiarPassword = async () => {
     if (!passwordActual || !passwordNueva || !passwordConfirm) {
-      setMensaje("Completa todos los campos");
+      mostrarMensaje("error", "Completa todos los campos");
       return;
     }
 
     if (passwordNueva !== passwordConfirm) {
-      setMensaje("Las contraseñas no coinciden");
+      mostrarMensaje("error", "Las contraseñas no coinciden");
       return;
     }
 
     if (passwordNueva.length < 6) {
-      setMensaje("La contraseña debe tener al menos 6 caracteres");
+      mostrarMensaje("error", "La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
     setCambiandoPassword(true);
     setMensaje("");
+    setTipoMensaje("");
 
-    // Primero verificar contraseña actual
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
+    if (!session?.user?.email) {
+      mostrarMensaje("error", "No se pudo validar la sesión actual");
+      setCambiandoPassword(false);
+      return;
+    }
 
     const { error: errorSignIn } = await supabase.auth.signInWithPassword({
       email: session.user.email,
@@ -88,20 +133,19 @@ function DatosPersonales({ usuarioId }) {
     });
 
     if (errorSignIn) {
-      setMensaje("Contraseña actual incorrecta");
+      mostrarMensaje("error", "Contraseña actual incorrecta");
       setCambiandoPassword(false);
       return;
     }
 
-    // Cambiar contraseña
     const { error } = await supabase.auth.updateUser({
       password: passwordNueva,
     });
 
     if (error) {
-      setMensaje("Error al cambiar la contraseña");
+      mostrarMensaje("error", "Error al cambiar la contraseña");
     } else {
-      setMensaje("Contraseña cambiada correctamente");
+      mostrarMensaje("exito", "Contraseña cambiada correctamente");
       setPasswordActual("");
       setPasswordNueva("");
       setPasswordConfirm("");
@@ -117,26 +161,24 @@ function DatosPersonales({ usuarioId }) {
 
   return (
     <div className="space-y-8">
-      {/* MENSAJE */}
       {mensaje && (
         <div
           className={`p-3 rounded-lg border flex items-center gap-2 ${
-            mensaje.includes("✓")
+            tipoMensaje === "exito"
               ? "bg-green-500/10 border-green-500 text-green-400"
               : "bg-red-500/10 border-red-500 text-red-400"
           }`}
         >
-          {mensaje.includes("✓") ? (
+          {tipoMensaje === "exito" ? (
             <CheckCircle size={20} />
           ) : (
             <CircleAlert size={20} />
           )}
 
-          <span>{mensaje.replace("✓", "")}</span>
+          <span>{mensaje}</span>
         </div>
       )}
 
-      {/* DATOS PERSONALES */}
       <div>
         <h3 className="text-[#86E1FF] font-bold mb-4">Datos Personales</h3>
         <div className="space-y-3">
@@ -187,7 +229,6 @@ function DatosPersonales({ usuarioId }) {
         </button>
       </div>
 
-      {/* CAMBIAR CONTRASEÑA */}
       <div className="border-t border-[#5C7CFA] pt-8">
         <h3 className="text-[#86e1ff] font-bold mb-4">Cambiar Contraseña</h3>
         <div className="space-y-3">

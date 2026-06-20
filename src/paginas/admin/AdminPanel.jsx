@@ -15,6 +15,7 @@ import {
 import { supabase } from "../../supabase/client";
 import {
   iniciarSimulacionSeguimiento,
+  iniciarSimulacionGPS,
   registrarPuntoEstado,
 } from "../../utils/trackingSimulation";
 
@@ -101,6 +102,7 @@ function AdminPanel() {
   const [tab, setTab] = useState("pedidos");
   const [ordenes, setOrdenes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [repartidores, setRepartidores] = useState([]);
   const [comprobantes, setComprobantes] = useState([]);
   const [itemsOrden, setItemsOrden] = useState({});
   const [productoTipo, setProductoTipo] = useState("juegos");
@@ -109,24 +111,35 @@ function AdminPanel() {
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
-  const [formulario, setFormulario] = useState(crearFormularioInicial("juegos"));
+  const [formulario, setFormulario] = useState(
+    crearFormularioInicial("juegos"),
+  );
+  const [formRepartidor, setFormRepartidor] = useState({
+    nombre: "",
+    telefono: "",
+    foto_url: "",
+    rating: 5,
+  });
 
   const cargarPanel = async () => {
     setCargando(true);
     setMensaje("");
 
-    const [ordenesRes, usuariosRes, comprobantesRes] = await Promise.all([
-      supabase
-        .from("ordenes")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase.from("profiles").select("*"),
-      supabase.from("comprobantes").select("*"),
-    ]);
+    const [ordenesRes, usuariosRes, comprobantesRes, repartidoresRes] =
+      await Promise.all([
+        supabase
+          .from("ordenes")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase.from("profiles").select("*"),
+        supabase.from("comprobantes").select("*"),
+        supabase.from("repartidores").select("*"),
+      ]);
 
     setOrdenes(ordenesRes.data || []);
     setUsuarios(usuariosRes.data || []);
     setComprobantes(comprobantesRes.data || []);
+    setRepartidores(repartidoresRes.data || []);
 
     const ids = (ordenesRes.data || []).map((orden) => orden.id);
     if (ids.length > 0) {
@@ -203,35 +216,90 @@ function AdminPanel() {
     if (data?.publicUrl) window.open(data.publicUrl, "_blank");
   };
 
+  const asignarRepartidor = async (ordenId, repartidorId) => {
+    await supabase
+      .from("ordenes")
+      .update({ repartidor_id: repartidorId })
+      .eq("id", ordenId);
+
+    setOrdenes((actuales) =>
+      actuales.map((item) =>
+        item.id === ordenId ? { ...item, repartidor_id: repartidorId } : item,
+      ),
+    );
+  };
+
   const actualizarEstadoOrden = async (orden, nuevoEstado) => {
     setGuardando(true);
     setMensaje("");
 
-    const { data, error } = await supabase
-      .from("ordenes")
-      .update({ estado: nuevoEstado })
-      .eq("id", orden.id)
-      .select()
-      .single();
+    try {
+      const { error } = await supabase
+        .from("ordenes")
+        .update({ estado: nuevoEstado })
+        .eq("id", orden.id);
 
-    if (error) {
-      setMensaje("No se pudo actualizar el estado del pedido");
-      setGuardando(false);
-      return;
-    }
+      if (error) {
+        setMensaje(`Error: ${error.message}`);
+        setGuardando(false);
+        return;
+      }
 
-    if (nuevoEstado === "enviado") {
-      const simulacion = await iniciarSimulacionSeguimiento(data);
-      setMensaje(simulacion.message);
-    } else {
-      await registrarPuntoEstado(data, nuevoEstado);
+      if (nuevoEstado === "entregado" && orden.repartidor_id) {
+        const repartidor = repartidores.find(
+          (r) => r.id === orden.repartidor_id,
+        );
+
+        if (repartidor) {
+          await supabase
+            .from("repartidores")
+            .update({
+              ordenes_entregadas: (repartidor.ordenes_entregadas || 0) + 1,
+            })
+            .eq("id", orden.repartidor_id);
+
+          setRepartidores((actuales) =>
+            actuales.map((rep) =>
+              rep.id === orden.repartidor_id
+                ? {
+                    ...rep,
+                    ordenes_entregadas: (rep.ordenes_entregadas || 0) + 1,
+                  }
+                : rep,
+            ),
+          );
+        }
+      }
+
+      const { data: ordenActualizada } = await supabase
+        .from("ordenes")
+        .select("*")
+        .eq("id", orden.id)
+        .single();
+
+      if (nuevoEstado === "enviado" && ordenActualizada) {
+        console.log("Iniciando simulación...");
+        const resultado = await iniciarSimulacionSeguimiento(ordenActualizada);
+        console.log("Resultado simulación:", resultado);
+
+        if (resultado.ok) {
+          const resultadoGPS = await iniciarSimulacionGPS(ordenActualizada);
+          console.log("Resultado GPS:", resultadoGPS);
+        }
+      }
+
+      setOrdenes((actuales) =>
+        actuales.map((item) =>
+          item.id === orden.id ? { ...item, estado: nuevoEstado } : item,
+        ),
+      );
       setMensaje("Estado actualizado");
+      setGuardando(false);
+    } catch (err) {
+      console.error("Error:", err);
+      setMensaje("Error al actualizar");
+      setGuardando(false);
     }
-
-    setOrdenes((actuales) =>
-      actuales.map((item) => (item.id === data.id ? data : item)),
-    );
-    setGuardando(false);
   };
 
   const guardarProducto = async (event) => {
@@ -279,9 +347,42 @@ function AdminPanel() {
     window.dispatchEvent(new Event("stockActualizado"));
   };
 
+  const guardarRepartidor = async (event) => {
+    event.preventDefault();
+    setGuardando(true);
+    setMensaje("");
+
+    if (!formRepartidor.nombre || !formRepartidor.telefono) {
+      setMensaje("Nombre y teléfono son obligatorios");
+      setGuardando(false);
+      return;
+    }
+
+    const { error } = await supabase.from("repartidores").insert({
+      nombre: formRepartidor.nombre,
+      telefono: formRepartidor.telefono,
+      foto_url:
+        formRepartidor.foto_url ||
+        `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 100)}`,
+      rating: Number(formRepartidor.rating),
+    });
+
+    if (error) {
+      setMensaje("No se pudo agregar el repartidor");
+      setGuardando(false);
+      return;
+    }
+
+    setMensaje("Repartidor agregado correctamente");
+    setFormRepartidor({ nombre: "", telefono: "", foto_url: "", rating: 5 });
+    await cargarPanel();
+    setGuardando(false);
+  };
+
   const tabs = [
     { id: "pedidos", label: "Pedidos", icon: ClipboardList },
     { id: "usuarios", label: "Usuarios", icon: Users },
+    { id: "repartidores", label: "Repartidores", icon: Truck },
     { id: "catalogo", label: "Catalogo", icon: Gamepad2 },
   ];
 
@@ -312,10 +413,18 @@ function AdminPanel() {
         )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <ResumenCard icon={ClipboardList} label="Pendientes" value={resumen.pendientes} />
+          <ResumenCard
+            icon={ClipboardList}
+            label="Pendientes"
+            value={resumen.pendientes}
+          />
           <ResumenCard icon={Truck} label="En envio" value={resumen.enviados} />
           <ResumenCard icon={Users} label="Usuarios" value={resumen.usuarios} />
-          <ResumenCard icon={Boxes} label="Stock bajo" value={resumen.stockBajo} />
+          <ResumenCard
+            icon={Boxes}
+            label="Stock bajo"
+            value={resumen.stockBajo}
+          />
         </section>
 
         <nav className="flex flex-wrap gap-3 border-b border-white/10 pb-4">
@@ -346,14 +455,25 @@ function AdminPanel() {
               <PedidosTab
                 ordenes={ordenes}
                 itemsOrden={itemsOrden}
+                repartidores={repartidores}
                 obtenerComprobante={obtenerComprobante}
                 descargarComprobante={descargarComprobante}
+                asignarRepartidor={asignarRepartidor}
                 actualizarEstadoOrden={actualizarEstadoOrden}
                 guardando={guardando}
               />
             )}
 
             {tab === "usuarios" && <UsuariosTab usuarios={usuarios} />}
+            {tab === "repartidores" && (
+              <RepartidoresTab
+                repartidores={repartidores}
+                formRepartidor={formRepartidor}
+                setFormRepartidor={setFormRepartidor}
+                guardarRepartidor={guardarRepartidor}
+                guardando={guardando}
+              />
+            )}
 
             {tab === "catalogo" && (
               <CatalogoTab
@@ -391,8 +511,10 @@ function ResumenCard({ icon: Icon, label, value }) {
 function PedidosTab({
   ordenes,
   itemsOrden,
+  repartidores,
   obtenerComprobante,
   descargarComprobante,
+  asignarRepartidor,
   actualizarEstadoOrden,
   guardando,
 }) {
@@ -401,6 +523,9 @@ function PedidosTab({
       {ordenes.map((orden) => {
         const comprobante = obtenerComprobante(orden.id);
         const items = itemsOrden[orden.id] || [];
+        const repartidorActual = repartidores.find(
+          (r) => r.id === orden.repartidor_id,
+        );
 
         return (
           <article
@@ -415,7 +540,16 @@ function PedidosTab({
                   </h2>
                   <span
                     className={`rounded-full border px-3 py-1 text-xs font-bold ${
-                      estadoColor[orden.estado] || estadoColor.pendiente
+                      {
+                        pendiente:
+                          "bg-yellow-500/10 text-yellow-300 border-yellow-500/40",
+                        pagado:
+                          "bg-blue-500/10 text-blue-300 border-blue-500/40",
+                        enviado:
+                          "bg-purple-500/10 text-purple-300 border-purple-500/40",
+                        entregado:
+                          "bg-green-500/10 text-green-300 border-green-500/40",
+                      }[orden.estado] || "bg-gray-500/10"
                     }`}
                   >
                     {orden.estado}
@@ -425,7 +559,10 @@ function PedidosTab({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                   <Info label="Cliente" value={orden.nombre || "Sin nombre"} />
                   <Info label="Correo" value={orden.correo || "Sin correo"} />
-                  <Info label="Total" value={`S/ ${Number(orden.total || 0).toFixed(2)}`} />
+                  <Info
+                    label="Total"
+                    value={`S/ ${Number(orden.total || 0).toFixed(2)}`}
+                  />
                   <Info label="Metodo" value={orden.metodo_pago || "N/A"} />
                   <Info label="Telefono" value={orden.telefono || "N/A"} />
                   <Info label="Direccion" value={orden.direccion || "N/A"} />
@@ -444,20 +581,46 @@ function PedidosTab({
               </div>
 
               <div className="flex flex-col gap-3 min-w-[250px]">
-                <label className="text-sm text-gray-400">Estado del pedido</label>
+                <label className="text-sm text-gray-400">Repartidor</label>
                 <select
-                  value={orden.estado}
-                  disabled={guardando}
+                  value={orden.repartidor_id || ""}
                   onChange={(event) =>
-                    actualizarEstadoOrden(orden, event.target.value)
+                    asignarRepartidor(orden.id, event.target.value)
                   }
                   className="bg-[#0f172a] border border-white/10 rounded-lg px-3 py-3 text-white"
                 >
-                  {ESTADOS.map((estado) => (
-                    <option key={estado} value={estado}>
-                      {estado}
+                  <option value="">Seleccionar repartidor</option>
+                  {repartidores.map((rep) => (
+                    <option key={rep.id} value={rep.id}>
+                      {rep.nombre} ({rep.rating}⭐)
                     </option>
                   ))}
+                </select>
+
+                {repartidorActual && (
+                  <p className="text-xs text-gray-400">
+                    Asignado: {repartidorActual.nombre}
+                  </p>
+                )}
+
+                <label className="text-sm text-gray-400">
+                  Estado del pedido
+                </label>
+                <select
+                  value={orden.estado}
+                  disabled={guardando || !orden.repartidor_id}
+                  onChange={(event) =>
+                    actualizarEstadoOrden(orden, event.target.value)
+                  }
+                  className="bg-[#0f172a] border border-white/10 rounded-lg px-3 py-3 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {["pendiente", "pagado", "enviado", "entregado"].map(
+                    (estado) => (
+                      <option key={estado} value={estado}>
+                        {estado}
+                      </option>
+                    ),
+                  )}
                 </select>
 
                 <button
@@ -472,7 +635,7 @@ function PedidosTab({
                 {orden.estado === "enviado" && (
                   <p className="flex items-center gap-2 text-xs text-purple-300">
                     <CheckCircle size={16} />
-                    Simulacion GPS automatica activa
+                    Simulacion GPS activa
                   </p>
                 )}
               </div>
@@ -522,6 +685,56 @@ function CatalogoTab({
   actualizarStock,
   guardando,
 }) {
+  const PRODUCTOS = {
+    juegos: {
+      label: "Juegos",
+      tabla: "juegos",
+      nombreCampo: "nombre",
+      campos: [
+        "nombre",
+        "plataforma",
+        "categoria",
+        "anio",
+        "estrellas",
+        "precio",
+        "stock",
+        "imagen",
+        "descripcion",
+      ],
+    },
+    consolas: {
+      label: "Consolas",
+      tabla: "consolas",
+      nombreCampo: "titulo",
+      campos: [
+        "titulo",
+        "consola",
+        "precio",
+        "stock",
+        "imagen",
+        "descripcion",
+        "exclusivo",
+        "limitada",
+        "activo",
+      ],
+    },
+    accesorios: {
+      label: "Accesorios",
+      tabla: "accesorios",
+      nombreCampo: "titulo",
+      campos: [
+        "titulo",
+        "consola",
+        "precio",
+        "stock",
+        "imagen",
+        "descripcion",
+        "exclusivo",
+        "limitada",
+      ],
+    },
+  };
+
   const config = PRODUCTOS[productoTipo];
 
   return (
@@ -572,9 +785,13 @@ function CatalogoTab({
           return (
             <input
               key={campo}
-              type={["precio", "stock", "anio"].includes(campo) ? "number" : "text"}
+              type={
+                ["precio", "stock", "anio"].includes(campo) ? "number" : "text"
+              }
               step={campo === "precio" ? "0.01" : undefined}
-              min={["precio", "stock", "anio"].includes(campo) ? "0" : undefined}
+              min={
+                ["precio", "stock", "anio"].includes(campo) ? "0" : undefined
+              }
               placeholder={campo}
               value={formulario[campo]}
               onChange={(event) =>
@@ -640,7 +857,9 @@ function CatalogoTab({
                 type="number"
                 min="0"
                 value={producto.stock ?? 0}
-                onChange={(event) => actualizarStock(producto, event.target.value)}
+                onChange={(event) =>
+                  actualizarStock(producto, event.target.value)
+                }
                 className="bg-[#1e293b] border border-white/10 rounded-lg px-3 py-2 text-white"
               />
             </div>
@@ -657,6 +876,147 @@ function Info({ label, value }) {
       <p className="text-gray-500">{label}</p>
       <p className="font-semibold text-gray-200 break-words">{value}</p>
     </div>
+  );
+}
+
+function RepartidoresTab({
+  repartidores,
+  formRepartidor,
+  setFormRepartidor,
+  guardarRepartidor,
+  guardando,
+}) {
+  return (
+    <section className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-6">
+      {/* FORMULARIO */}
+      <form
+        onSubmit={guardarRepartidor}
+        className="bg-[#1e293b] border border-white/10 rounded-lg p-5 space-y-4"
+      >
+        <div className="flex items-center gap-2 text-[#86E1FF] font-bold">
+          <Truck size={20} />
+          Agregar Repartidor
+        </div>
+
+        <input
+          type="text"
+          placeholder="Nombre completo"
+          value={formRepartidor.nombre}
+          onChange={(e) =>
+            setFormRepartidor({ ...formRepartidor, nombre: e.target.value })
+          }
+          className="w-full bg-[#0f172a] border border-white/10 rounded-lg px-3 py-3 text-white placeholder:text-gray-500"
+        />
+
+        <input
+          type="tel"
+          placeholder="Teléfono"
+          value={formRepartidor.telefono}
+          onChange={(e) =>
+            setFormRepartidor({ ...formRepartidor, telefono: e.target.value })
+          }
+          className="w-full bg-[#0f172a] border border-white/10 rounded-lg px-3 py-3 text-white placeholder:text-gray-500"
+        />
+
+        <input
+          type="url"
+          placeholder="URL de foto (opcional)"
+          value={formRepartidor.foto_url}
+          onChange={(e) =>
+            setFormRepartidor({ ...formRepartidor, foto_url: e.target.value })
+          }
+          className="w-full bg-[#0f172a] border border-white/10 rounded-lg px-3 py-3 text-white placeholder:text-gray-500"
+        />
+
+        <div>
+          <label className="text-sm text-gray-400 block mb-2">
+            Rating: {formRepartidor.rating} ⭐
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            step="0.1"
+            value={formRepartidor.rating}
+            onChange={(e) =>
+              setFormRepartidor({
+                ...formRepartidor,
+                rating: parseFloat(e.target.value),
+              })
+            }
+            className="w-full"
+          />
+        </div>
+
+        <button
+          disabled={guardando}
+          className="w-full bg-[#86E1FF] text-black px-4 py-3 rounded-lg font-bold hover:bg-[#5C7CFA] hover:text-white transition disabled:opacity-50"
+        >
+          Agregar Repartidor
+        </button>
+      </form>
+
+      {/* LISTA */}
+      <div className="bg-[#1e293b] border border-white/10 rounded-lg p-5 space-y-4">
+        <h2 className="text-xl font-bold text-[#86E1FF]">
+          Repartidores ({repartidores.length})
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {repartidores.map((rep) => (
+            <div
+              key={rep.id}
+              className="bg-[#0f172a] rounded-lg p-4 border border-gray-700"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <img
+                  src={rep.foto_url}
+                  alt={rep.nombre}
+                  className="w-12 h-12 rounded-full border-2 border-[#86E1FF]"
+                />
+                <div>
+                  <p className="font-bold text-white">{rep.nombre}</p>
+                  <p className="text-sm text-gray-400">{rep.telefono}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Rating:</span>
+                  <span className="text-[#86E1FF] font-bold">
+                    {rep.rating} ⭐
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Entregas:</span>
+                  <span className="text-white font-bold">
+                    {rep.ordenes_entregadas || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Estado:</span>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-bold ${
+                      rep.activo
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {rep.activo ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {repartidores.length === 0 && (
+          <p className="text-center text-gray-400">
+            No hay repartidores agregados
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
 

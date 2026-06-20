@@ -80,6 +80,15 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const refrescarUsuario = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUsuario(user ?? null);
+      verificarAdministrador(user?.id);
+    };
+
     const obtenerSesion = async () => {
       const {
         data: { session },
@@ -100,7 +109,12 @@ const Header = () => {
       verificarAdministrador(user?.id);
     });
 
-    return () => subscription.unsubscribe();
+    window.addEventListener("gamehub-profile-updated", refrescarUsuario);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("gamehub-profile-updated", refrescarUsuario);
+    };
   }, []);
 
   return (

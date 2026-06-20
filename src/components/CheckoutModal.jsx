@@ -126,7 +126,6 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [correo, setCorreo] = useState("");
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [usuario, setUsuario] = useState(null);
   const [metodoPago, setMetodoPago] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -147,13 +146,27 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
   const metodosDePago = getMetodosDePago(total);
 
+  async function cargarDatosUsuario(usuarioId, email) {
+    setCorreo(email);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nombre, telefono, direccion")
+      .eq("id", usuarioId)
+      .maybeSingle();
+
+    if (profile) {
+      setNombre(profile.nombre || "");
+      setTelefono(profile.telefono || "");
+      setDireccion(profile.direccion || "");
+    }
+  }
+
   useEffect(() => {
     const getSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      setUsuario(session?.user || null);
-
       if (session?.user) {
         cargarDatosUsuario(session.user.id, session.user.email);
       }
@@ -164,30 +177,44 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user || null);
       if (session?.user) {
         cargarDatosUsuario(session.user.id, session.user.email);
       }
     });
 
-    return () => subscription.unsubscribe();
+    const recargarPerfil = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        cargarDatosUsuario(session.user.id, session.user.email);
+      }
+    };
+
+    window.addEventListener("gamehub-profile-updated", recargarPerfil);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("gamehub-profile-updated", recargarPerfil);
+    };
   }, []);
 
-  const cargarDatosUsuario = async (usuarioId, email) => {
-    setCorreo(email);
+  useEffect(() => {
+    if (!abierto) return;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("nombre, telefono, direccion")
-      .eq("id", usuarioId)
-      .single();
+    const recargarDatosAlAbrir = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    if (profile) {
-      setNombre(profile.nombre || "");
-      setTelefono(profile.telefono || "");
-      setDireccion(profile.direccion || "");
-    }
-  };
+      if (session?.user) {
+        cargarDatosUsuario(session.user.id, session.user.email);
+      }
+    };
+
+    recargarDatosAlAbrir();
+  }, [abierto]);
 
   const limpiarFormulario = () => {
     setNombre("");

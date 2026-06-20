@@ -55,6 +55,7 @@ export default function Login({ onClose }) {
 
     if (error || !data?.user) {
       setErrorAuth(t("login.loginError"));
+      setCargando(false);
       return;
     }
 
@@ -70,7 +71,7 @@ export default function Login({ onClose }) {
       .from("profiles")
       .select("nombre")
       .eq("id", data.user.id)
-      .single();
+      .maybeSingle();
 
     setMensajeAuth(
       `${t("login.welcome")} ${profile?.nombre || data.user.email}`,
@@ -105,6 +106,18 @@ export default function Login({ onClose }) {
     if (error) {
       setErrorAuth(error.message);
       return;
+    }
+
+    if (data?.user) {
+      await supabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          nombre: nombre.trim(),
+          telefono: "",
+          direccion: "",
+        },
+        { onConflict: "id" },
+      );
     }
 
     setMensajeAuth(t("login.accountCreated"));
