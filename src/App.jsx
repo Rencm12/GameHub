@@ -11,7 +11,7 @@ import "./App.css";
 import Consolaspag from "./paginas/consola/consolas";
 import Accesorios from "./paginas/accesorios/Accesorios";
 import LibroReclamaciones from "./paginas/libro-reclamaciones/LibroReclamaciones";
-
+import ChatBot from "./components/ChatBot";
 
 function App() {
   return (
@@ -27,6 +27,8 @@ function App() {
         <Route path="/accesorios" element={<Accesorios />} />
         <Route path="/libro-reclamaciones" element={<LibroReclamaciones />} />
       </Routes>
+
+      <ChatBot />
     </BrowserRouter>
   );
 }
