@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Gamepad } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 function FiltroConsolas({ productos, filtros, setFiltros }) {
@@ -36,6 +37,7 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
       "
     >
       <h2 className="text-center mb-5 text-xl font-bold">
+        <Gamepad size={20} className="inline-block mr-2 text-[#86E1FF]" />
         {t("consolesFilter.title")}
       </h2>
 
@@ -84,7 +86,9 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
           >
             <option value="default">{t("common.recommended")}</option>
             <option value="recientes">{t("consolesFilter.recent")}</option>
-            <option value="exclusivos">{t("consolesFilter.onlyExclusive")}</option>
+            <option value="exclusivos">
+              {t("consolesFilter.onlyExclusive")}
+            </option>
             <option value="limitados">{t("consolesFilter.onlyLimited")}</option>
           </select>
         </div>
@@ -101,8 +105,8 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
         onClick={limpiarFiltros}
         className="
           mt-5 w-full py-3
-          bg-cyan-400 text-black rounded-xl font-bold
-          hover:bg-cyan-500 duration-300
+          bg-red-500 text-black rounded-xl font-bold
+          hover:bg-red-600 duration-300
         "
       >
         {t("consolesFilter.clear")}

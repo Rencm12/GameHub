@@ -11,7 +11,7 @@ function CardJuego({ juego, addToast }) {
   const { agregarAlCarrito } = useContext(CarritoContext);
   const { agregarFavorito, esFavorito } = useContext(FavoritosContext);
 
-  const favorito = esFavorito ? esFavorito(juego.id, 'juego') : false;
+  const favorito = esFavorito ? esFavorito(juego.id, "juego") : false;
 
   // CARRITO
   const handleCarrito = (data) => {
@@ -44,7 +44,7 @@ function CardJuego({ juego, addToast }) {
   return (
     <>
       {/* CARD */}
-      <div className="relative bg-[#1a1a1a] p-3 md:p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#00ffc3]">
+      <div className="relative bg-[#1a1a1a] p-3 md:p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#86E1FF]">
         {/* FAVORITOS */}
         <button
           onClick={handleFavorito}
@@ -69,7 +69,7 @@ function CardJuego({ juego, addToast }) {
         />
 
         {/* NOMBRE */}
-        <h3 className="text-white text-lg md:text-xl mt-3 font-bold">
+        <h3 className="text-[#86E1FF] text-lg md:text-xl mt-3 font-bold">
           {juego.nombre}
         </h3>
 
@@ -82,7 +82,7 @@ function CardJuego({ juego, addToast }) {
         <div className="mt-2 text-yellow-400 text-lg">{juego.estrellas}</div>
 
         {/* PRECIO */}
-        <p className="text-[#00ffc3] text-lg md:text-xl font-bold mt-2">
+        <p className="text-[#86E1FF] text-lg md:text-xl font-bold mt-2">
           S/ {juego.precio}
         </p>
 
@@ -116,17 +116,17 @@ function CardJuego({ juego, addToast }) {
           onClick={() => handleCarrito(juego)}
           className={`
             w-full 
-            bg-[#00ffc3] 
+            bg-[#86E1FF] 
             text-black 
             py-2 
             rounded-lg 
             font-bold 
             transition 
-            hover:bg-[#00d7aa]
+            hover:bg-[#5C7CFA] hover:text-white
             ${
               juego.stock === 0
                 ? "bg-gray-500 cursor-not-allowed text-white"
-                : "bg-[#00ffc3] text-black hover:bg-[#00d7aa]"
+                : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
             }
           `}
         >
@@ -136,7 +136,7 @@ function CardJuego({ juego, addToast }) {
         {/* BOTÓN VER MÁS */}
         <button
           onClick={() => setMostrarModal(true)}
-          className="w-full mt-3 border border-[#00ffc3] text-[#00ffc3] py-2 rounded-lg font-bold hover:bg-[#00ffc3] hover:text-black transition"
+          className="w-full mt-3 border border-[#86E1FF] text-[#86E1FF] py-2 rounded-lg font-bold hover:bg-[#5C7CFA] hover:text-white transition"
         >
           {t("common.seeMore")}
         </button>
@@ -150,12 +150,12 @@ function CardJuego({ juego, addToast }) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-[#111827] w-full max-w-[380px] rounded-2xl overflow-hidden relative"
+            className="bg-[#111827] w-full max-w-[380px] rounded-2xl overflow-hidden relative border border-[#5C7CFA] shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]"
           >
             {/* CERRAR */}
             <button
               onClick={() => setMostrarModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              className="absolute top-4 right-4 text-[#86E1FF] text-xl font-bold z-50 bg-[#111827]/80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#86E1FF] hover:text-black transition"
             >
               <X size={26} />
             </button>
@@ -169,7 +169,7 @@ function CardJuego({ juego, addToast }) {
 
             {/* CONTENIDO */}
             <div className="p-4">
-              <h2 className="text-2xl font-bold text-[#00ffc3]">
+              <h2 className="text-2xl font-bold text-[#86E1FF]">
                 {juego.nombre}
               </h2>
 
@@ -179,7 +179,7 @@ function CardJuego({ juego, addToast }) {
 
               <p className="text-gray-400 mt-4">{juego.descripcion}</p>
 
-              <p className="text-[#00ffc3] text-2xl font-bold mt-4">
+              <p className="text-[#86E1FF] text-2xl font-bold mt-4">
                 S/ {juego.precio}
               </p>
 
@@ -188,7 +188,7 @@ function CardJuego({ juego, addToast }) {
                 disabled={juego.stock === 0}
                 onClick={() => handleCarrito(juego)}
                 className={`
-                  mt-6 w-full bg-[#00ffc3] text-black py-3 rounded-xl font-bold hover:bg-[#00d9a8] transition
+                  mt-6 w-full bg-[#86E1FF] text-black py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition
                   ${juego.stock === 0 ? "bg-gray-500 cursor-not-allowed text-white" : ""}
                 `}
               >

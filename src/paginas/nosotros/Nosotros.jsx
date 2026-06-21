@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Footer from "../../components/Footer";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 function Nosotros() {
   const { t } = useTranslation();
@@ -42,207 +43,247 @@ function Nosotros() {
   const terminos = t("about.terms.items", { returnObjects: true });
 
   return (
-    <div className="text-white p-10 max-w-7xl mx-auto">
-      <h1 className="text-5xl font-bold text-[#00ffc3] text-center mb-10">
-        {t("about.title")}
-      </h1>
+    <>
+      <div className="text-white bg-[#0f172a] min-h-screen p-20">
+        <h1 className="text-5xl font-bold text-[#86E1FF] text-center mb-10">
+          {t("about.title")}
+        </h1>
 
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-4">
-          {t("about.whoWeAre.heading")}
-        </h2>
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold text-[#86E1FF] mb-4">
+            {t("about.whoWeAre.heading")}
+          </h2>
 
-        <p className="leading-8 text-lg">{t("about.whoWeAre.text")}</p>
-      </section>
+          <p className="leading-8 text-lg">{t("about.whoWeAre.text")}</p>
+        </section>
 
-      <section className="mb-6">
-        <button
-          onClick={() => setMisionVisionAbierto(!misionVisionAbierto)}
-          className="
+        <section className="mb-6">
+          <button
+            onClick={() => setMisionVisionAbierto(!misionVisionAbierto)}
+            className="
       w-full
       text-left
+      flex
+      items-center
+      gap-2
       bg-slate-900
       border
-      border-[#00ffc3]
+      border-[#5C7CFA]
       p-4
       rounded-xl
       font-bold
-      text-[#00ffc3]
+      text-[#86E1FF]
+      shadow-[0_0_10px_#86E1FF]
     "
-        >
-          {misionVisionAbierto ? "▼ " : "► "}
-          {t("about.missionVision.toggle")}
-        </button>
+          >
+            {misionVisionAbierto ? (
+              <ChevronDown size={18} />
+            ) : (
+              <ChevronRight size={18} />
+            )}
+            {t("about.missionVision.toggle")}
+          </button>
 
-        {misionVisionAbierto && (
-          <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
-            <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
-              {t("about.missionVision.missionTitle")}
-            </h3>
+          {misionVisionAbierto && (
+            <div className="bg-slate-950 border border-[#5C7CFA] p-6 rounded-xl mt-3 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]">
+              <h3 className="font-bold text-xl text-[#86E1FF] mb-2">
+                {t("about.missionVision.missionTitle")}
+              </h3>
 
-            <p className="mb-6">{t("about.missionVision.missionText")}</p>
+              <p className="mb-6">{t("about.missionVision.missionText")}</p>
 
-            <h3 className="font-bold text-xl text-[#00ffc3] mb-2">
-              {t("about.missionVision.visionTitle")}
-            </h3>
+              <h3 className="font-bold text-xl text-[#86E1FF] mb-2">
+                {t("about.missionVision.visionTitle")}
+              </h3>
 
-            <p>{t("about.missionVision.visionText")}</p>
-          </div>
-        )}
-      </section>
+              <p>{t("about.missionVision.visionText")}</p>
+            </div>
+          )}
+        </section>
 
-      <section className="mb-12">
-        <button
-          onClick={() => setValoresAbierto(!valoresAbierto)}
-          className="
+        <section className="mb-12">
+          <button
+            onClick={() => setValoresAbierto(!valoresAbierto)}
+            className="
       w-full
       text-left
+      flex
+      items-center
+      gap-2
       bg-slate-900
       border
-      border-[#00ffc3]
+      border-[#5C7CFA]
       p-4
       rounded-xl
       font-bold
-      text-[#00ffc3]
+      text-[#86E1FF]
+      shadow-[0_0_10px_#86E1FF]
     "
-        >
-          {valoresAbierto ? "▼ " : "► "}
-          {t("about.values.toggle")}
-        </button>
+          >
+            {valoresAbierto ? (
+              <ChevronDown size={18} />
+            ) : (
+              <ChevronRight size={18} />
+            )}{" "}
+            {t("about.values.toggle")}
+          </button>
 
-        {valoresAbierto && (
-          <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
-            <ul className="list-disc pl-6 space-y-3 text-lg">
-              {valores.map((valor, index) => (
-                <li key={index}>
-                  <strong>{valor.title}</strong> {valor.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+          {valoresAbierto && (
+            <div className="bg-slate-950 border border-[#5C7CFA] p-6 rounded-xl mt-3 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]">
+              <ul className="list-disc pl-6 space-y-3 text-lg marker:text-[#86E1FF]">
+                {valores.map((valor, index) => (
+                  <li key={index}>
+                    <strong className="text-[#86E1FF]">{valor.title}</strong>{" "}
+                    {valor.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
 
-      <section>
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-8">
-          {t("about.team.heading")}
-        </h2>
+        <section>
+          <h2 className="text-3xl font-bold text-[#86E1FF] mb-8">
+            {t("about.team.heading")}
+          </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {integrantesData.map((integrante, index) => {
-            const miembro = miembros[index];
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {integrantesData.map((integrante, index) => {
+              const miembro = miembros[index];
 
-            return (
-              <div
-                key={miembro.name}
-                className="
-                bg-slate-900
+              return (
+                <div
+                  key={miembro.name}
+                  className="
+                bg-[#1a1a1a]
                 border
-                border-[#00ffc3]
+                border-[#5C7CFA]
                 rounded-2xl
                 overflow-hidden
-                shadow-lg
+                hover:scale-105
+                hover:shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]
+                transition
               "
-              >
-                <img
-                  src={integrante.imagen}
-                  alt={miembro.name}
-                  className="w-full h-64 object-cover"
-                />
+                >
+                  <img
+                    src={integrante.imagen}
+                    alt={miembro.name}
+                    className="w-full h-64 object-cover"
+                  />
 
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-[#00ffc3]">
-                    {miembro.name}
-                  </h3>
+                  <div className="p-5">
+                    <h3 className="text-xl font-bold text-[#86E1FF]">
+                      {miembro.name}
+                    </h3>
 
-                  <p className="font-semibold mt-2">{miembro.role}</p>
+                    <p className="font-semibold mt-2">{miembro.role}</p>
 
-                  <p className="text-sm mt-3 text-gray-300">
-                    {miembro.description}
-                  </p>
+                    <p className="text-sm mt-3 text-gray-300">
+                      {miembro.description}
+                    </p>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-16">
+          <h2 className="text-3xl font-bold text-[#86E1FF] mb-6">
+            {t("about.additionalInfo.heading")}
+          </h2>
+
+          {/* FAQ */}
+          <div className="mb-6">
+            <button
+              onClick={() => setFaqAbierto(!faqAbierto)}
+              className="
+        w-full
+        text-left
+        flex
+        items-center
+        gap-2
+        bg-slate-900
+        border
+        border-[#5C7CFA]
+        p-4
+        rounded-xl
+        font-bold
+        text-[#86E1FF]
+        shadow-[0_0_10px_#86E1FF]
+      "
+            >
+              {faqAbierto ? (
+                <ChevronDown size={18} />
+              ) : (
+                <ChevronRight size={18} />
+              )}
+              {t("about.faq.toggle")}
+            </button>
+
+            {faqAbierto && (
+              <div className="bg-slate-950 border border-[#5C7CFA] p-6 rounded-xl mt-3 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]">
+                {faqs.map((faq, index) => (
+                  <div key={index}>
+                    <h3 className="font-bold text-xl mb-2 text-[#86E1FF]">
+                      {faq.question}
+                    </h3>
+                    <p className={index === faqs.length - 1 ? "" : "mb-4"}>
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))}
               </div>
-            );
-          })}
-        </div>
-      </section>
+            )}
+          </div>
 
-      <section className="mt-16">
-        <h2 className="text-3xl font-bold text-[#00ffc3] mb-6">
-          {t("about.additionalInfo.heading")}
-        </h2>
+          {/* TERMINOS */}
+          <div>
+            <button
+              onClick={() => setTerminosAbierto(!terminosAbierto)}
+              className="
+               w-full
+               text-left
+               flex
+               items-center
+               gap-2
+               bg-slate-900
+               border
+               border-[#5C7CFA]
+               p-4
+               rounded-xl
+               font-bold
+               text-[#86E1FF]
+               shadow-[0_0_10px_#86E1FF]
+             "
+            >
+              {terminosAbierto ? (
+                <ChevronDown size={18} />
+              ) : (
+                <ChevronRight size={18} />
+              )}
+              {t("about.terms.toggle")}
+            </button>
 
-        {/* FAQ */}
-        <div className="mb-6">
-          <button
-            onClick={() => setFaqAbierto(!faqAbierto)}
-            className="
-        w-full
-        text-left
-        bg-slate-900
-        border
-        border-[#00ffc3]
-        p-4
-        rounded-xl
-        font-bold
-        text-[#00ffc3]
-      "
-          >
-            {faqAbierto ? "▼ " : "► "}
-            {t("about.faq.toggle")}
-          </button>
-
-          {faqAbierto && (
-            <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
-              {faqs.map((faq, index) => (
-                <div key={index}>
-                  <h3 className="font-bold text-xl mb-2">{faq.question}</h3>
-                  <p className={index === faqs.length - 1 ? "" : "mb-4"}>
-                    {faq.answer}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* TERMINOS */}
-        <div>
-          <button
-            onClick={() => setTerminosAbierto(!terminosAbierto)}
-            className="
-        w-full
-        text-left
-        bg-slate-900
-        border
-        border-[#00ffc3]
-        p-4
-        rounded-xl
-        font-bold
-        text-[#00ffc3]
-      "
-          >
-            {terminosAbierto ? "▼ " : "► "}
-            {t("about.terms.toggle")}
-          </button>
-
-          {terminosAbierto && (
-            <div className="bg-slate-950 border border-[#00ffc3] p-6 rounded-xl mt-3">
-              {terminos.map((termino, index) => (
-                <div key={index}>
-                  <h3 className="font-bold text-xl mb-2">{termino.title}</h3>
-                  <p className={index === terminos.length - 1 ? "" : "mb-4"}>
-                    {termino.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
+            {terminosAbierto && (
+              <div className="bg-slate-950 border border-[#5C7CFA] p-6 rounded-xl mt-3 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]">
+                {terminos.map((termino, index) => (
+                  <div key={index}>
+                    <h3 className="font-bold text-xl mb-2 text-[#86E1FF]">
+                      {termino.title}
+                    </h3>
+                    <p className={index === terminos.length - 1 ? "" : "mb-4"}>
+                      {termino.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
       <Footer />
-    </div>
+    </>
   );
 }
 

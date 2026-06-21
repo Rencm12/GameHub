@@ -47,12 +47,24 @@ function Juegos() {
 
   useEffect(() => {
     obtenerJuegos();
+
+    const actualizarCatalogo = () => {
+      obtenerJuegos();
+    };
+
+    window.addEventListener("stockActualizado", actualizarCatalogo);
+
+    return () => {
+      window.removeEventListener("stockActualizado", actualizarCatalogo);
+    };
   }, []);
 
   let juegosFiltrados = [...juegos];
+  juegosFiltrados = juegosFiltrados.filter((juego) => juego.stock > 0);
 
   juegosFiltrados = juegosFiltrados.filter((juego) => {
     return (
+      juego.stock > 0 &&
       juego.nombre.toLowerCase().includes(busqueda.toLowerCase()) &&
       (plataforma === "" || juego.plataforma === plataforma) &&
       (categoria === "" || juego.categoria === categoria)
@@ -77,7 +89,7 @@ function Juegos() {
       <Carrusel />
 
       <section className="p-10">
-        <h2 className="text-center text-4xl text-[#00ffc3] font-bold mb-10">
+        <h2 className="text-center text-4xl text-[#86E1FF] font-bold mb-10">
           {t("games.title")}
         </h2>
 
@@ -173,7 +185,17 @@ function Juegos() {
             <button
               onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
               disabled={paginaActual === 1}
-              className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
+              className="
+                px-4
+                py-2
+                rounded-lg
+                bg-[#1e293b]
+                text-white 
+                disabled:opacity-40
+                disabled:cursor-not-allowed
+                hover:bg-[#5C7CFA] hover:text-white
+                transition
+              "
             >
               {t("common.previous")}
             </button>
@@ -187,8 +209,8 @@ function Juegos() {
                   onClick={() => setPaginaActual(numeroPagina)}
                   className={`w-10 h-10 rounded-lg font-bold transition ${
                     paginaActual === numeroPagina
-                      ? "bg-[#00ffc3] text-black"
-                      : "bg-[#1e293b] text-white hover:bg-[#334155]"
+                      ? "bg-[#86E1FF] text-black"
+                      : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
                   }`}
                 >
                   {numeroPagina}
@@ -201,7 +223,17 @@ function Juegos() {
                 setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))
               }
               disabled={paginaActual === totalPaginas}
-              className="px-4 py-2 rounded-lg bg-[#1e293b] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#334155] transition"
+              className="
+                px-4
+                py-2
+                rounded-lg
+                bg-[#1e293b]
+                text-white
+                disabled:opacity-40
+                disabled:cursor-not-allowed
+                hover:bg-[#5C7CFA] hover:text-white
+                transition
+              "
             >
               {t("common.next")}
             </button>

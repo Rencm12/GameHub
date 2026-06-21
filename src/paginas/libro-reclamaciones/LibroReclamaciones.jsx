@@ -86,9 +86,7 @@ function LibroReclamaciones() {
 
     if (supabaseError) {
       console.error("Error al registrar reclamacion:", supabaseError);
-      setError(
-        `${t("claims.messages.error")} ${supabaseError.message}`,
-      );
+      setError(`${t("claims.messages.error")} ${supabaseError.message}`);
       setEnviando(false);
       return;
     }
@@ -103,28 +101,24 @@ function LibroReclamaciones() {
     <div className="bg-[#0f172a] min-h-screen text-white">
       <main className="max-w-7xl mx-auto px-5 md:px-10 py-12">
         <section className="grid lg:grid-cols-[0.85fr_1.15fr] gap-8 items-start">
-          <div className="bg-[#020617] border border-[#00ffc3] rounded-2xl p-6 md:p-8 shadow-[0_0_25px_rgba(0,255,195,0.12)]">
-            <div className="flex items-center gap-3 text-[#00ffc3] mb-5">
+          <div className="bg-[#020617] border border-[#5C7CFA] rounded-2xl p-6 md:p-8 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]">
+            <div className="flex items-center gap-3 text-[#86E1FF] mb-5">
               <BookOpenCheck size={36} />
               <h1 className="text-4xl md:text-5xl font-bold">
                 {t("claims.title")}
               </h1>
             </div>
 
-            <p className="text-gray-300 leading-7 mb-6">
-              {t("claims.intro")}
-            </p>
+            <p className="text-gray-300 leading-7 mb-6">{t("claims.intro")}</p>
 
             <div className="space-y-4 text-gray-300">
               <div className="flex gap-3">
-                <ShieldCheck className="text-[#00ffc3] shrink-0 mt-1" />
-                <p>
-                  {t("claims.privacy")}
-                </p>
+                <ShieldCheck className="text-[#86E1FF] shrink-0 mt-1" />
+                <p>{t("claims.privacy")}</p>
               </div>
 
               <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
-                <h2 className="text-[#00ffc3] font-bold mb-2">
+                <h2 className="text-[#86E1FF] font-bold mb-2">
                   {t("claims.differenceTitle")}
                 </h2>
                 <p className="text-sm leading-6">
@@ -136,12 +130,14 @@ function LibroReclamaciones() {
 
           <form
             onSubmit={manejarEnvio}
-            className="bg-[#020617] border border-slate-700 rounded-2xl p-6 md:p-8"
+            className="bg-[#020617] border border-[#5C7CFA] rounded-2xl p-6 md:p-8 shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)] "
           >
             {enviado && (
-              <div className="mb-6 rounded-xl border border-[#00ffc3] bg-[#00ffc3]/10 px-4 py-3 text-[#00ffc3] font-semibold">
+              <div className="mb-6 rounded-xl border border-[#86E1FF] bg-[#86E1FF]/10 px-4 py-3 text-[#86E1FF] font-semibold">
                 {t("claims.messages.success")}
-                {registro?.id ? ` ${t("claims.messages.withNumber")} ${registro.id}.` : "."}
+                {registro?.id
+                  ? ` ${t("claims.messages.withNumber")} ${registro.id}.`
+                  : "."}
               </div>
             )}
 
@@ -307,10 +303,12 @@ function LibroReclamaciones() {
             <button
               type="submit"
               disabled={enviando}
-              className="mt-6 w-full md:w-auto bg-[#00ffc3] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#00d9a8] disabled:opacity-60 disabled:cursor-not-allowed transition inline-flex items-center justify-center gap-2"
+              className="mt-6 w-full md:w-auto bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white disabled:opacity-60 disabled:cursor-not-allowed transition inline-flex items-center justify-center gap-2"
             >
               <Send size={20} />
-              {enviando ? t("claims.actions.sending") : t("claims.actions.submit")}
+              {enviando
+                ? t("claims.actions.sending")
+                : t("claims.actions.submit")}
             </button>
           </form>
         </section>

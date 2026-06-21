@@ -1,13 +1,30 @@
 @import "tailwindcss";
 
+@theme {
 
+  --font-jura: 'Jura', sans-serif;
+
+  --font-slackey: 'Slackey', cursive;
+
+}
 @layer base {
-  body {
-    @apply bg-black m-0 font-sans antialiased;
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    @apply font-jura;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-slackey;
+  }
+  p  {
+    @apply font-jura text-white;
   }
 
   code {
-    @apply font-mono;
+    @apply font-slackey text-[#86e1ff] bg-slate-950 px-1 rounded;
   }
 }
 
@@ -93,26 +110,32 @@ html.a11y-cursor-3 * {
   position: fixed;
   z-index: 2147483647;
   pointer-events: none;
-  border: 3px solid #ffffff;
-  border-radius: 999px;
-  background: #00ffc3;
-  box-shadow: 0 0 0 2px #000000, 0 0 14px rgba(0, 255, 195, 0.7);
-  transform: translate(-25%, -25%);
+
+  width: 0;
+  height: 0;
+
+  border-top: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 28px solid #86E1FF;
+
+  transform: rotate(-35deg);
+
+  filter:
+    drop-shadow(0 0 6px #86E1FF)
+    drop-shadow(0 0 16px #5C7CFA);
 }
 
 .a11y-custom-cursor-1 {
-  width: 24px;
-  height: 24px;
+  transform: rotate(-35deg) scale(1);
 }
 
 .a11y-custom-cursor-2 {
-  width: 36px;
-  height: 36px;
+  transform: rotate(-35deg) scale(1.4);
 }
 
 .a11y-custom-cursor-3 {
-  width: 48px;
-  height: 48px;
+  transform: rotate(-35deg) scale(1.8);
 }
 
 body.a11y-reading-mask::before,
@@ -187,8 +210,8 @@ body:has([data-a11y-menu='true']) .a11y-readable-hover {
     border
     border-slate-800
     outline-none
-    focus:border-[#00ffc3]
-    focus:shadow-[0_0_10px_#00ffc3];
+    focus:border-[#5C7CFA]
+    focus:shadow-[0_0_10px_#86E1FF];
   }
 
 }

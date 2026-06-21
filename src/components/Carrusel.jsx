@@ -1,26 +1,30 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 
 const Carousel = ({ slides = [] }) => {
-
   const [currentIndex, setCurrentIndex] = useState(0);
-  useEffect(() => {
-  const interval = setInterval(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-  }, 7000); // cambia cada 3 segundos
 
-  return () => clearInterval(interval);
-}, [slides.length]);
+  useEffect(() => {
+    if (!slides.length) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [slides.length]);
 
   if (!slides.length) {
     return <p>No hay imágenes disponibles</p>;
   }
 
   const nextSlide = () => {
-    setCurrentIndex((currentIndex + 1) % slides.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((currentIndex - 1 + slides.length) % slides.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + slides.length) % slides.length,
+    );
   };
 
   return (
@@ -32,24 +36,28 @@ const Carousel = ({ slides = [] }) => {
         shadow-[0_10px_25px_rgba(255,255,255,0.05)]
       "
     >
-      {/* Track */}
-      <div
-        className="flex transition-transform duration-500 ease-in-out"
-        style={{
-          transform: `translateX(-${currentIndex * 100}%)`,
-        }}
-      >
+      {/* Imágenes con efecto fade */}
+      <div className="relative w-full h-[800px]">
         {slides.map((slide, index) => (
-          <div
+          <img
             key={index}
-            className="min-w-full"
-          >
-            <img
-              src={slide}
-              alt={`Slide ${index + 1}`}
-              className="w-full h-200 object-cover"
-            />
-          </div>
+            src={slide}
+            alt={`Slide ${index + 1}`}
+            className="
+              absolute
+              inset-0
+              w-full
+              h-full
+              object-cover
+              transition-all
+              duration-1000
+              ease-in-out
+            "
+            style={{
+              opacity: index === currentIndex ? 1 : 0,
+              transform: index === currentIndex ? "scale(1)" : "scale(1.05)",
+            }}
+          />
         ))}
       </div>
 
@@ -66,6 +74,8 @@ const Carousel = ({ slides = [] }) => {
           p-3
           rounded-full
           cursor-pointer
+          hover:bg-black/80
+          transition
         "
       >
         ❮
@@ -84,6 +94,8 @@ const Carousel = ({ slides = [] }) => {
           p-3
           rounded-full
           cursor-pointer
+          hover:bg-black/80
+          transition
         "
       >
         ❯
@@ -92,12 +104,28 @@ const Carousel = ({ slides = [] }) => {
       {/* Dots */}
       <div
         className="
-          text-center
-          bg-[#333]
-          p-[10px]
+          absolute
+          bottom-5
+          left-1/2
+          -translate-x-1/2
+          flex
+          gap-2
         "
       >
-       
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`
+              w-3
+              h-3
+              rounded-full
+              transition-all
+              duration-300
+              ${index === currentIndex ? "bg-white scale-125" : "bg-white/50"}
+            `}
+          />
+        ))}
       </div>
     </div>
   );

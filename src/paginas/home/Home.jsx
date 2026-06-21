@@ -40,8 +40,8 @@ function Home() {
     <div className="bg-[#0f172a] min-h-screen text-white">
       <CarruselHome />
 
-      <section className="text-center py-16 px-5">
-        <h1 className="text-5xl md:text-6xl font-bold text-[#00ffc3] mb-6">
+      <section className="text-center py-10 px-5">
+        <h1 className="text-5xl md:text-6xl font-bold text-[#86E1FF] mb-6">
           {t("home.title")}
         </h1>
 
@@ -53,8 +53,8 @@ function Home() {
         </p>
       </section>
 
-      <section className="px-8 py-10">
-        <h2 className="text-4xl font-bold text-[#00ffc3] mb-10 text-center">
+      <section className="px-8 py-8">
+        <h2 className="text-4xl font-bold text-[#86E1FF] mb-10 text-center">
           {t("home.featuredGames")}
         </h2>
 
@@ -66,7 +66,7 @@ function Home() {
       </section>
 
       <section className="px-8 py-10">
-        <h2 className="text-4xl font-bold text-[#00ffc3] mb-10 text-center">
+        <h2 className="text-4xl font-bold text-[#86E1FF] mb-10 text-center">
           {t("home.featuredConsoles")}
         </h2>
 
@@ -82,7 +82,7 @@ function Home() {
       </section>
 
       <section className="px-8 py-10">
-        <h2 className="text-4xl font-bold text-[#00ffc3] mb-10 text-center">
+        <h2 className="text-4xl font-bold text-[#86E1FF] mb-10 text-center">
           {t("home.featuredAccessories")}
         </h2>
 
@@ -104,7 +104,9 @@ function HomeCardsCarousel({ children }) {
   const trackRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [lastUsefulIndex, setLastUsefulIndex] = useState(0);
-  const items = Array.isArray(children) ? children.filter(Boolean) : [children].filter(Boolean);
+  const items = Array.isArray(children)
+    ? children.filter(Boolean)
+    : [children].filter(Boolean);
   const hasControls = items.length > 1;
 
   const calculateLastUsefulIndex = useCallback(() => {
@@ -112,7 +114,10 @@ function HomeCardsCarousel({ children }) {
     const firstCard = track?.children[0];
     if (!track || !firstCard) return Math.max(items.length - 1, 0);
 
-    const visibleCards = Math.max(1, Math.floor(track.clientWidth / firstCard.clientWidth));
+    const visibleCards = Math.max(
+      1,
+      Math.floor(track.clientWidth / firstCard.clientWidth),
+    );
     return Math.max(items.length - visibleCards, 0);
   }, [items.length]);
 
@@ -151,7 +156,9 @@ function HomeCardsCarousel({ children }) {
     const cards = Array.from(track.children);
     const nearestIndex = cards.reduce((nearest, card, index) => {
       const currentDistance = Math.abs(card.offsetLeft - track.scrollLeft);
-      const nearestDistance = Math.abs(cards[nearest].offsetLeft - track.scrollLeft);
+      const nearestDistance = Math.abs(
+        cards[nearest].offsetLeft - track.scrollLeft,
+      );
       return currentDistance < nearestDistance ? index : nearest;
     }, 0);
 
@@ -161,7 +168,7 @@ function HomeCardsCarousel({ children }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="relative mx-auto max-w-7xl">
+    <div className="relative mx-auto max-w-8xl">
       {hasControls && (
         <>
           <CarouselArrow
@@ -187,7 +194,7 @@ function HomeCardsCarousel({ children }) {
       <div
         ref={trackRef}
         onScroll={updateActiveCard}
-        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth px-1 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth px-1 py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, index) => (
           <div
@@ -209,8 +216,8 @@ function HomeCardsCarousel({ children }) {
               aria-label={`${t("common.product")} ${index + 1}`}
               className={`h-2.5 rounded-full transition-all ${
                 activeIndex === index
-                  ? "w-8 bg-[#00ffc3]"
-                  : "w-2.5 bg-white/30 hover:bg-white/60"
+                  ? "w-8 bg-[#86E1FF] hover:bg-[#5C7CFA]"
+                  : "w-2.5 bg-white/30 hover:bg-[#5C7CFA]"
               }`}
             />
           ))}
@@ -220,8 +227,15 @@ function HomeCardsCarousel({ children }) {
   );
 }
 
-function CarouselArrow({ label, position, disabled = false, onClick, children }) {
-  const positionClass = position === "left" ? "-left-3 md:-left-6" : "-right-3 md:-right-6";
+function CarouselArrow({
+  label,
+  position,
+  disabled = false,
+  onClick,
+  children,
+}) {
+  const positionClass =
+    position === "left" ? "-left-3 md:-left-6" : "-right-3 md:-right-6";
 
   return (
     <button
@@ -229,7 +243,7 @@ function CarouselArrow({ label, position, disabled = false, onClick, children })
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#00ffc3] bg-black/85 text-[#00ffc3] shadow-[0_0_18px_rgba(0,255,195,0.35)] transition hover:bg-[#00ffc3] hover:text-black disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-black/85 disabled:hover:text-[#00ffc3] ${positionClass}`}
+      className={`absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#86E1FF] bg-black/85 text-[#86E1FF] shadow-[0_0_18px_rgba(134,225,255,0.35)] transition hover:bg-[#5C7CFA] hover:text-white disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-black/85 disabled:hover:text-[#86E1FF] ${positionClass}`}
     >
       {children}
     </button>

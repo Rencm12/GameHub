@@ -11,7 +11,7 @@ function Toast({ toasts = [] }) {
           className="
             w-[260px]
             bg-[#111827]
-            border border-[#00ffc3]
+            border border-[#86E1FF]
             text-white
             px-4 py-3
             rounded-xl
@@ -23,7 +23,7 @@ function Toast({ toasts = [] }) {
             {t.mensaje.includes("No hay más") ? (
               <TriangleAlert size={20} className="text-yellow-400" />
             ) : (
-              <CheckCircle size={20} className="text-[#00ffc3]" />
+              <CheckCircle size={20} className="text-[#86E1FF]" />
             )}
             <p className="text-sm text-gray-300">{t.mensaje}</p>
           </div>

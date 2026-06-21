@@ -8,6 +8,8 @@ import { FavoritosContext } from "../context/FavoritosContext";
 import CheckoutModal from "./CheckoutModal";
 import CarritoSidebar from "./CarritoSidebar";
 import AccessibilityMenu from "./Accesibilidad";
+import Perfil from "./perfil/Perfil";
+import PerfilDropdown from "./PerfilDropdown";
 import { useTranslation } from "react-i18next";
 
 const Header = () => {
@@ -15,8 +17,11 @@ const Header = () => {
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const [mostrarPerfil, setMostrarPerfil] = useState(false);
+  const [seccionPerfil, setSeccionPerfil] = useState("datos");
   const { t } = useTranslation();
   const [usuario, setUsuario] = useState(null);
+  const [esAdministrador, setEsAdministrador] = useState(false);
   const navItems = t("header.nav", { returnObjects: true });
 
   const { carrito } = useContext(CarritoContext);
@@ -27,7 +32,25 @@ const Header = () => {
 
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
+    setUsuario(null);
+    setEsAdministrador(false);
   };
+
+  const verificarAdministrador = async (userId) => {
+    if (!userId) {
+      setEsAdministrador(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("Roles")
+      .eq("id", userId)
+      .maybeSingle();
+
+    setEsAdministrador(!error && data?.Roles === "administrador");
+  };
+
   useEffect(() => {
     if (carrito.length > 0) {
       setAnimarCarrito(true);
@@ -57,12 +80,23 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const refrescarUsuario = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUsuario(user ?? null);
+      verificarAdministrador(user?.id);
+    };
+
     const obtenerSesion = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     };
 
     obtenerSesion();
@@ -70,10 +104,17 @@ const Header = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     });
 
-    return () => subscription.unsubscribe();
+    window.addEventListener("gamehub-profile-updated", refrescarUsuario);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("gamehub-profile-updated", refrescarUsuario);
+    };
   }, []);
 
   return (
@@ -91,11 +132,11 @@ const Header = () => {
     justify-between
     gap-4
     border-b-2
-    border-[#00ffc3]
+    border-[#5C7CFA]
   "
       >
         {/* LOGO */}
-        <div className="text-[20px] md:text-[24px] text-[#00ffc3] font-bold">
+        <div className="text-[20px] md:text-[24px] text-[#86E1FF] font-bold">
           GameHub
         </div>
 
@@ -114,9 +155,9 @@ const Header = () => {
     "
           >
             {navItems.map((item) => (
-                <li
-                  key={item.path}
-                  className="
+              <li
+                key={item.path}
+                className="
             relative
             cursor-pointer
             after:absolute
@@ -124,14 +165,32 @@ const Header = () => {
             after:-bottom-1
             after:h-[2px]
             after:w-0
-            after:bg-[#00ffc3]
+            after:bg-[#86E1FF]
             after:transition-all
             hover:after:w-full
           "
-                >
-                  <Link to={item.path}>{item.label}</Link>
-                </li>
-              ))}
+              >
+                <Link to={item.path}>{item.label}</Link>
+              </li>
+            ))}
+            {esAdministrador && (
+              <li
+                className="
+            relative
+            cursor-pointer
+            after:absolute
+            after:left-0
+            after:-bottom-1
+            after:h-[2px]
+            after:w-0
+            after:bg-[#86E1FF]
+            after:transition-all
+            hover:after:w-full
+          "
+              >
+                <Link to="/admin">Admin</Link>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -146,26 +205,21 @@ const Header = () => {
   "
         >
           {usuario ? (
-            <div className="flex items-center gap-3">
-              <span
-                className="
-                  text-lg
-                  md:text-base
-                  font-bold
-                  text-[#00ffc3]
-                  drop-shadow-[0_0_8px_rgba(0,255,195,0.5)]
-                "
-              >
-                {usuario.user_metadata?.nombre || t("header.customer")}
-              </span>
-
-              <button onClick={cerrarSesion} className="btn-primary">
-                {t("header.logout")}
-              </button>
-            </div>
+            <PerfilDropdown
+              usuario={usuario}
+              onAbrirPerfil={() => {
+                setSeccionPerfil("datos");
+                setMostrarPerfil(true);
+              }}
+              onAbrirOrdenes={() => {
+                setSeccionPerfil("ordenes");
+                setMostrarPerfil(true);
+              }}
+              onCerrarSesion={cerrarSesion}
+            />
           ) : (
             <button
-              className="btn-primary"
+              className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
               onClick={() => setMostrarLogin(true)}
             >
               {t("header.login")}
@@ -183,13 +237,13 @@ const Header = () => {
               h-11
               rounded-lg
               border
-              border-[#00ffc3]
-              text-[#00ffc3]
+              border-[#86E1FF]
+              text-[#86E1FF]
               flex
               items-center
               justify-center
-              hover:bg-[#00ffc3]
-              hover:text-black
+              hover:bg-[#5C7CFA]
+              hover:text-white
               transition
             "
           >
@@ -213,7 +267,7 @@ const Header = () => {
                   absolute
                   -top-2
                   -right-2
-                  bg-[#00ffc3]
+                  bg-[#86E1FF]
                   text-black
                   text-xs
                   font-bold
@@ -235,7 +289,7 @@ const Header = () => {
             onClick={() => setMostrarCarrito(true)}
             className={`
               relative
-              text-white
+              text-[#86E1FF]
               text-2xl 
               md:text-3xl
               cursor-pointer
@@ -252,7 +306,7 @@ const Header = () => {
                   absolute
                   -top-2
                   -right-2
-                  bg-[#00ffc3]
+                  bg-[#86E1FF]
                   text-black
                   text-xs
                   font-bold
@@ -270,6 +324,19 @@ const Header = () => {
           </div>
         </div>
       </header>
+
+      {/* PERFIL */}
+      {mostrarPerfil && (
+        <Perfil
+          abierto={mostrarPerfil}
+          cerrar={() => setMostrarPerfil(false)}
+          seccionInicial={seccionPerfil}
+          onLogout={() => {
+            cerrarSesion();
+            setMostrarPerfil(false);
+          }}
+        />
+      )}
 
       {/* LOGIN */}
       <CheckoutModal
@@ -300,7 +367,7 @@ const Header = () => {
       bottom-6
       right-6
       z-[999]
-      bg-[#00ffc3]
+      bg-[#86E1FF]
       text-black
       w-16
       h-16
@@ -308,7 +375,7 @@ const Header = () => {
       flex
       items-center
       justify-center
-      shadow-[0_0_25px_rgba(0,255,195,0.7)]
+      shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]
       hover:scale-110
       transition
       animate-fadeIn

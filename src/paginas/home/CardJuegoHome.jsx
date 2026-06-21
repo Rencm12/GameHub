@@ -39,7 +39,8 @@ function CardJuegoHome({ juego, addToast }) {
     const actualizarStock = (event) => {
       const productoActualizado = event.detail?.productos?.find(
         (producto) =>
-          producto.tipo === "juego" && String(producto.id) === String(juego?.id),
+          producto.tipo === "juego" &&
+          String(producto.id) === String(juego?.id),
       );
 
       if (productoActualizado) {
@@ -67,7 +68,10 @@ function CardJuegoHome({ juego, addToast }) {
       productoConStock.nombre || productoConStock.titulo || "Producto";
 
     if (agregado) {
-      addToast(`${nombreProducto} ${t("common.addedToCart")}`, productoConStock.id);
+      addToast(
+        `${nombreProducto} ${t("common.addedToCart")}`,
+        productoConStock.id,
+      );
     } else {
       addToast(t("common.noMoreUnits"), productoConStock.id);
     }
@@ -83,7 +87,10 @@ function CardJuegoHome({ juego, addToast }) {
           text-center
           transition
           hover:scale-105
-          hover:shadow-[0_0_15px_#00ffc3]
+          hover:shadow-[0_0_15px_#86E1FF]
+          flex
+          flex-col
+          h-full
         "
       >
         <Link to="/juegos">
@@ -99,12 +106,14 @@ function CardJuegoHome({ juego, addToast }) {
           />
         </Link>
 
-        <div className="p-4">
-          <h3 className="text-xl font-bold">{titulo}</h3>
+        <div className="p-3 flex flex-col flex-grow">
+          <h3 className="text-xl font-bold text-[#86E1FF]">{titulo}</h3>
 
-          <p className="text-gray-400 mt-2">{descripcion}</p>
+          <p className="text-gray-400 mt-2 h-12 overflow-hidden">
+            {descripcion}
+          </p>
 
-          <p className="text-[#00ffc3] text-2xl font-bold mt-3">S/ {precio}</p>
+          <p className="text-[#86E1FF] text-2xl font-bold mt-3">S/ {precio}</p>
 
           {stock !== undefined && (
             <div className="mt-2 mb-4 flex justify-center gap-2">
@@ -137,13 +146,13 @@ function CardJuegoHome({ juego, addToast }) {
             className={`
               w-full
               mt-4
-              bg-[#00ffc3]
+              bg-[#86E1FF]
               text-black
               py-2
               rounded-lg
               font-bold
               transition
-              ${stock === 0 || stock === undefined ? "opacity-60 cursor-not-allowed" : "hover:bg-[#00d7aa]"}
+              ${stock === 0 || stock === undefined ? "opacity-60 cursor-not-allowed" : "hover:bg-[#5C7CFA] hover:text-white"}
             `}
           >
             {stock === 0
@@ -159,11 +168,14 @@ function CardJuegoHome({ juego, addToast }) {
               w-full
               mt-3
               border
-              border-[#00ffc3]
-              text-[#00ffc3]
+              border-[#86E1FF]
+              text-[#86E1FF]
               py-2
               rounded-lg
               font-bold
+              hover:bg-[#5C7CFA]
+              hover:text-white
+              transition
             "
           >
             {t("common.seeMore")}
@@ -193,18 +205,13 @@ function CardJuegoHome({ juego, addToast }) {
               rounded-2xl
               overflow-hidden
               relative
+              border border-[#5C7CFA] shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)]
             "
           >
             <button
               onClick={() => setMostrarModal(false)}
               className="
-                absolute
-                top-4
-                right-4
-                text-[#00ffc3]
-                text-2xl
-                font-bold
-                z-50
+                absolute top-4 right-4 text-[#86E1FF] text-xl font-bold z-50 bg-[#111827]/80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#86E1FF] hover:text-black transition
               "
             >
               ✕
@@ -222,7 +229,7 @@ function CardJuegoHome({ juego, addToast }) {
             />
 
             <div className="p-6">
-              <h2 className="text-3xl font-bold text-[#00ffc3]">{titulo}</h2>
+              <h2 className="text-3xl font-bold text-[#86E1FF]">{titulo}</h2>
 
               <p className="mt-4 text-gray-400">{descripcion}</p>
 
@@ -251,7 +258,7 @@ function CardJuegoHome({ juego, addToast }) {
                 </div>
               )}
 
-              <p className="text-[#00ffc3] text-3xl font-bold mt-5">
+              <p className="text-[#86E1FF] text-3xl font-bold mt-5">
                 S/ {precio}
               </p>
             </div>

@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../supabase/client";
+import { supabase } from "../../supabase/client";
 import { X, LogOut } from "lucide-react";
-import DatosPersonales from "./perfil/DatosPersonales";
-import HistorialOrdenes from "./perfil/HistorialOrdenes";
-import DetalleOrden from "./perfil/DetalleOrden";
+import DatosPersonales from "./DatosPersonales";
+import HistorialOrdenes from "./HistorialOrdenes";
+import DetalleOrden from "./DetalleOrden";
 
-function Perfil({ abierto, cerrar, onLogout }) {
+function Perfil({ abierto, cerrar, seccionInicial = "datos", onLogout }) {
   const [usuario, setUsuario] = useState(null);
-  const [seccion, setSeccion] = useState("datos"); // datos, ordenes
+  const [seccion, setSeccion] = useState(seccionInicial);
   const [ordenSeleccionada, setOrdenSeleccionada] = useState(null);
+
+  useEffect(() => {
+    setSeccion(seccionInicial);
+  }, [seccionInicial]);
+
+  // ... resto del código igual
 
   useEffect(() => {
     if (abierto) {
@@ -33,20 +39,20 @@ function Perfil({ abierto, cerrar, onLogout }) {
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] p-5">
-      <div className="bg-[#111827] w-full max-w-[900px] rounded-2xl shadow-[0_0_30px_rgba(0,255,195,0.5)] overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-[#111827] w-full max-w-[900px] rounded-2xl border border-[#5C7CFA] shadow-[0_0_15px_rgba(134,225,255,0.4),0_0_30px_rgba(134,225,255,0.2)] overflow-hidden max-h-[90vh] flex flex-col">
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-[#1e293b] to-[#0f172a] p-6 border-b border-gray-700 flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-[#00ffc3]">Mi Perfil</h2>
+        <div className="bg-gradient-to-r from-[#1e293b] to-[#0f172a] p-6 border-b border-[#5C7CFA] flex justify-between items-center">
+          <h2 className="text-3xl font-bold text-[#86E1FF]">Mi Perfil</h2>
           <button
             onClick={cerrar}
-            className="text-white text-2xl hover:text-[#00ffc3]"
+            className="text-[#86E1FF] text-xl font-bold z-50 bg-[#111827]/80 rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#86E1FF] hover:text-black transition"
           >
-            <X />
+            <X size={26} />
           </button>
         </div>
 
         {/* TABS */}
-        <div className="flex gap-4 p-6 border-b border-gray-700 bg-[#0f1115]">
+        <div className="flex gap-4 p-6 border-b border-[#5C7CFA] bg-[#0f1115]">
           <button
             onClick={() => {
               setSeccion("datos");
@@ -54,8 +60,8 @@ function Perfil({ abierto, cerrar, onLogout }) {
             }}
             className={`px-4 py-2 rounded-lg font-bold transition ${
               seccion === "datos"
-                ? "bg-[#00ffc3] text-black"
-                : "bg-[#1e293b] text-white hover:bg-[#2d3748]"
+                ? "bg-[#86E1FF] text-black"
+                : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
             }`}
           >
             Datos Personales
@@ -67,11 +73,11 @@ function Perfil({ abierto, cerrar, onLogout }) {
             }}
             className={`px-4 py-2 rounded-lg font-bold transition ${
               seccion === "ordenes"
-                ? "bg-[#00ffc3] text-black"
-                : "bg-[#1e293b] text-white hover:bg-[#2d3748]"
+                ? "bg-[#86E1FF] text-black"
+                : "bg-[#1e293b] text-white hover:bg-[#5C7CFA]"
             }`}
           >
-            Historial de Órdenes
+            Historial de Ordenes
           </button>
         </div>
 
@@ -93,10 +99,10 @@ function Perfil({ abierto, cerrar, onLogout }) {
         </div>
 
         {/* FOOTER */}
-        <div className="border-t border-gray-700 p-6 bg-[#0f1115]">
+        <div className="border-t border-[#5C7CFA] p-6 bg-[#0f1115]">
           <button
             onClick={handleCerrarSesion}
-            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition"
+            className="w-full bg-[#86E1FF] hover:bg-[#5C7CFA] hover:text-white text-black py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition"
           >
             <LogOut size={20} />
             Cerrar Sesión
