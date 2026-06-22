@@ -274,40 +274,6 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     }
   };
 
-  const reducirStock = async () => {
-    for (const item of carrito) {
-      let tabla = "";
-      if (item.tipo === "juego") tabla = "juegos";
-      else if (item.tipo === "consola") tabla = "consolas";
-      else if (item.tipo === "accesorio") tabla = "accesorios";
-
-      const idNumerico = Number(item.id);
-
-      if (tabla && Number.isFinite(idNumerico)) {
-        const { data: producto, error: errorProducto } = await supabase
-          .from(tabla)
-          .select("stock")
-          .eq("id", idNumerico)
-          .single();
-
-        if (errorProducto || !producto) {
-          throw new Error(`No se pudo verificar el stock de ${item.nombre}`);
-        }
-
-        if (producto.stock < item.cantidad) {
-          throw new Error(`${item.nombre} ya no tiene stock suficiente`);
-        }
-
-        const nuevoStock = Math.max(0, producto.stock - item.cantidad);
-
-        await supabase
-          .from(tabla)
-          .update({ stock: nuevoStock })
-          .eq("id", idNumerico);
-      }
-    }
-  };
-
   const finalizarCompra = async () => {
     const {
       data: { session },
@@ -363,7 +329,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         });
         latitudEntrega = position.coords.latitude;
         longitudEntrega = position.coords.longitude;
-      } catch (error) {
+      } catch {
         console.log("No se pudo obtener ubicación");
       }
     }
@@ -419,6 +385,10 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
                 ? "Pagado - Preparando envío desde GameHub"
                 : "Pendiente de pago - En almacén",
           });
+
+        if (errorSeguimiento) {
+          console.log("No se pudo crear el seguimiento inicial", errorSeguimiento);
+        }
       }
 
       const items = carrito.map((item) => ({
@@ -484,7 +454,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         limpiarFormulario();
         cerrar();
       }, 2000);
-    } catch (error) {
+    } catch {
       setMensaje("Error en el proceso de compra");
       setCargando(false);
     }

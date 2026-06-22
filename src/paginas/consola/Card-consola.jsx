@@ -1,4 +1,4 @@
-import React, {
+import {
   useContext,
   useState,
   useEffect,
@@ -19,7 +19,7 @@ function getYoutubeId(src) {
   return match ? match[1] : null;
 }
 
-function Slide({ slide, isActive }) {
+function Slide({ slide }) {
   const youtubeId = getYoutubeId(slide.src);
 
   if (youtubeId) {

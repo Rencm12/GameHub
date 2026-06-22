@@ -101,6 +101,12 @@ function CarritoSidebar({ abierto, cerrar }) {
           </button>
         </div>
 
+        {mensaje && (
+          <div className="mx-4 mt-4 rounded-lg border border-yellow-400/40 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-200">
+            {mensaje}
+          </div>
+        )}
+
         {/* PRODUCTOS */}
         <div className="p-4 md:p-5 flex flex-col gap-4 overflow-y-auto h-[70%]">
           {carrito.length === 0 ? (

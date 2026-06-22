@@ -1,19 +1,15 @@
-import { useMemo, useState, useEffect, useContext } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAccesorios } from "../../hook/Useaccesorios";
 import Card from "./Cardaccesorios";
 import CarruselAccesorios from "./Carrusel";
 import Footer from "../../components/Footer";
 import Toast from "../../components/Toast";
-import { FavoritosContext } from "../../context/FavoritosContext";
 
 function Accesorios() {
   const { t } = useTranslation();
   const { accesorios: listaDeAccesorios, cargando, error } = useAccesorios();
-  const { agregarFavorito } = useContext(FavoritosContext);
-
-  const [busquedaPedidos, setBusquedaPedidos] = useState("");
-  const [busquedaProductos, setBusquedaProductos] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [orden, setOrden] = useState("Recomendados");
   const [plataforma, setPlataforma] = useState("Todas");
   const [categoria, setCategoria] = useState("Todas");

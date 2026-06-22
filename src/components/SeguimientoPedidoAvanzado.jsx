@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Truck,
   Package,
-  MapPin,
   Send,
   Star,
   Phone,
@@ -45,7 +44,6 @@ function SeguimientoPedidoAvanzado({
   const [cargando, setCargando] = useState(true);
   const [posicionActual, setPosicionActual] = useState(null);
   const [progreso, setProgreso] = useState(0);
-  const [eta, setEta] = useState(null);
   const chatRef = useRef(null);
 
   const estadosInfo = {

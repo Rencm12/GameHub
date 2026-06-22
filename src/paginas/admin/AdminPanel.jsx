@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useState } from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -15,20 +15,14 @@ import {
   Trash2,
   Truck,
   Users,
-  DollarSign,
   TrendingUp,
-  Star,
   FileDown,
 } from "lucide-react";
 import { supabase } from "../../supabase/client";
 import {
   iniciarSimulacionSeguimiento,
   iniciarSimulacionGPS,
-  registrarPuntoEstado,
 } from "../../utils/trackingSimulation";
-
-const ESTADOS = ["pendiente", "pagado", "enviado", "entregado"];
-const ROLES_USUARIO = ["usuario", "administrador"];
 
 const PRODUCTOS = {
   juegos: {
@@ -78,13 +72,6 @@ const PRODUCTOS = {
       "limitada",
     ],
   },
-};
-
-const estadoColor = {
-  pendiente: "bg-yellow-500/10 text-yellow-300 border-yellow-500/40",
-  pagado: "bg-blue-500/10 text-blue-300 border-blue-500/40",
-  enviado: "bg-purple-500/10 text-purple-300 border-purple-500/40",
-  entregado: "bg-green-500/10 text-green-300 border-green-500/40",
 };
 
 function crearFormularioInicial(tipo) {
@@ -404,7 +391,7 @@ function AdminPanel() {
         const resultado = await iniciarSimulacionSeguimiento(ordenActualizada);
 
         if (resultado.ok) {
-          const resultadoGPS = await iniciarSimulacionGPS(ordenActualizada);
+          await iniciarSimulacionGPS(ordenActualizada);
         }
       }
 
@@ -1008,6 +995,7 @@ function AdminPanel() {
                 editarRepartidor={editarRepartidor}
                 eliminarRepartidor={eliminarRepartidor}
                 repartidorEditando={repartidorEditando}
+                setRepartidorEditando={setRepartidorEditando}
                 guardando={guardando}
               />
             )}
@@ -1558,6 +1546,7 @@ function RepartidoresTab({
   editarRepartidor,
   eliminarRepartidor,
   repartidorEditando,
+  setRepartidorEditando,
   guardando,
 }) {
   return (
