@@ -9,8 +9,6 @@ import Toast from "../../components/Toast";
 function Accesorios() {
   const { t } = useTranslation();
   const { accesorios: listaDeAccesorios, cargando, error } = useAccesorios();
-  const [busqueda, setBusqueda] = useState("");
-  const { agregarFavorito } = useContext(FavoritosContext);
   const [busquedaProductos, setBusquedaProductos] = useState("");
   const [orden, setOrden] = useState("Recomendados");
   const [plataforma, setPlataforma] = useState("Todas");
