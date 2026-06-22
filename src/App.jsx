@@ -11,7 +11,12 @@ import "./App.css";
 import Consolaspag from "./paginas/consola/consolas";
 import Accesorios from "./paginas/accesorios/Accesorios";
 import LibroReclamaciones from "./paginas/libro-reclamaciones/LibroReclamaciones";
+
 import ChatBot from "./components/ChatBot";
+
+import AdminPanel from "./paginas/admin/AdminPanel";
+import AdminRoute from "./components/AdminRoute";
+
 
 function App() {
   return (
@@ -26,6 +31,14 @@ function App() {
         <Route path="/favoritos" element={<Favoritos />} />
         <Route path="/accesorios" element={<Accesorios />} />
         <Route path="/libro-reclamaciones" element={<LibroReclamaciones />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
+          }
+        />
       </Routes>
 
       <ChatBot />

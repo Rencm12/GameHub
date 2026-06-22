@@ -126,7 +126,6 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
   const [correo, setCorreo] = useState("");
   const [direccion, setDireccion] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [usuario, setUsuario] = useState(null);
   const [metodoPago, setMetodoPago] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -147,13 +146,27 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
   const metodosDePago = getMetodosDePago(total);
 
+  async function cargarDatosUsuario(usuarioId, email) {
+    setCorreo(email);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nombre, telefono, direccion")
+      .eq("id", usuarioId)
+      .maybeSingle();
+
+    if (profile) {
+      setNombre(profile.nombre || "");
+      setTelefono(profile.telefono || "");
+      setDireccion(profile.direccion || "");
+    }
+  }
+
   useEffect(() => {
     const getSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      setUsuario(session?.user || null);
-
       if (session?.user) {
         cargarDatosUsuario(session.user.id, session.user.email);
       }
@@ -164,30 +177,44 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user || null);
       if (session?.user) {
         cargarDatosUsuario(session.user.id, session.user.email);
       }
     });
 
-    return () => subscription.unsubscribe();
+    const recargarPerfil = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        cargarDatosUsuario(session.user.id, session.user.email);
+      }
+    };
+
+    window.addEventListener("gamehub-profile-updated", recargarPerfil);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("gamehub-profile-updated", recargarPerfil);
+    };
   }, []);
 
-  const cargarDatosUsuario = async (usuarioId, email) => {
-    setCorreo(email);
+  useEffect(() => {
+    if (!abierto) return;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("nombre, telefono, direccion")
-      .eq("id", usuarioId)
-      .single();
+    const recargarDatosAlAbrir = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    if (profile) {
-      setNombre(profile.nombre || "");
-      setTelefono(profile.telefono || "");
-      setDireccion(profile.direccion || "");
-    }
-  };
+      if (session?.user) {
+        cargarDatosUsuario(session.user.id, session.user.email);
+      }
+    };
+
+    recargarDatosAlAbrir();
+  }, [abierto]);
 
   const limpiarFormulario = () => {
     setNombre("");
@@ -325,17 +352,42 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       return;
     }
 
+    // Obtener ubicación del usuario
+    let latitudEntrega = null;
+    let longitudEntrega = null;
+
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitudEntrega = position.coords.latitude;
+        longitudEntrega = position.coords.longitude;
+      } catch (error) {
+        console.log("No se pudo obtener ubicación");
+      }
+    }
+
     setCargando(true);
     setMensaje("");
 
     try {
+      // Determinar estado según método de pago
+      const estado = metodoPago === "Tarjeta" ? "pagado" : "pendiente";
+
       const { data: orden, error: errorOrden } = await supabase
         .from("ordenes")
         .insert({
           usuario_id: user.id,
           total,
-          estado: "pendiente",
+          estado: estado,
           metodo_pago: metodoPago,
+          nombre: nombre,
+          telefono: telefono,
+          direccion: direccion,
+          correo: correo,
+          latitud_entrega: latitudEntrega,
+          longitud_entrega: longitudEntrega,
         })
         .select()
         .single();
@@ -346,10 +398,33 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         return;
       }
 
+      // Crear registro de seguimiento inicial CON UBICACIÓN DE LA EMPRESA
+      if (orden) {
+        // Obtener ubicación de la empresa
+        const { data: empresa } = await supabase
+          .from("configuracion_empresa")
+          .select("latitud, longitud")
+          .limit(1)
+          .single();
+
+        const { error: errorSeguimiento } = await supabase
+          .from("seguimiento_ubicaciones")
+          .insert({
+            orden_id: orden.id,
+            estado: estado,
+            latitud: empresa?.latitud || -12.0462,
+            longitud: empresa?.longitud || -77.0428,
+            descripcion:
+              estado === "pagado"
+                ? "Pagado - Preparando envío desde GameHub"
+                : "Pendiente de pago - En almacén",
+          });
+      }
+
       const items = carrito.map((item) => ({
         orden_id: orden.id,
         producto_key: item._key,
-        producto_id: String(item.id),
+        producto_id: Number(item.id),
         tipo: item.tipo,
         nombre: item.nombre,
         imagen: item.imagen,

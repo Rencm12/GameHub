@@ -12,7 +12,8 @@ function Accesorios() {
   const { accesorios: listaDeAccesorios, cargando, error } = useAccesorios();
   const { agregarFavorito } = useContext(FavoritosContext);
 
-  const [busqueda, setBusqueda] = useState("");
+  const [busquedaPedidos, setBusquedaPedidos] = useState("");
+  const [busquedaProductos, setBusquedaProductos] = useState("");
   const [orden, setOrden] = useState("Recomendados");
   const [plataforma, setPlataforma] = useState("Todas");
   const [categoria, setCategoria] = useState("Todas");

@@ -153,7 +153,7 @@ export function CarritoProvider({ children }) {
       const datosParaInsertar = {
         usuario_id: usuarioId,
         producto_key: productoNormalizado._key,
-        producto_id: String(productoNormalizado.id),
+        producto_id: Number(productoNormalizado.id),
         tipo: productoNormalizado.tipo,
         nombre: productoNormalizado.nombre,
         imagen: productoNormalizado.imagen,

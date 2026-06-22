@@ -96,10 +96,10 @@ function Card({ producto, addToast }) {
         <img src={imagen} alt={titulo} className="w-full h-65 object-cover" />
 
         <div className="p-4">
-          <h3 className="text-white text-xl font-bold">{titulo}</h3>
+          <h3 className="text-[#86E1FF] text-xl font-bold">{titulo}</h3>
 
           {/* Aquí 'consola' indicaría para qué consola es el accesorio (ej. PS5) */}
-          <p className="text-cyan-400">{consola}</p>
+          <p className="text-gray-400">{consola}</p>
 
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
           <div className="mt-2 mb-4 flex justify-center">
@@ -131,12 +131,12 @@ function Card({ producto, addToast }) {
             onClick={handleCarrito}
             disabled={stock === 0}
             className={`
-    w-full
-    mt-4
-    py-2
-    rounded-lg
-    font-bold
-    transition
+             w-full
+             mt-4
+             py-2
+             rounded-lg
+             font-bold
+             transition
     ${
       stock === 0
         ? "bg-gray-600 text-gray-300 cursor-not-allowed"

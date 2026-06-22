@@ -8,6 +8,8 @@ import { FavoritosContext } from "../context/FavoritosContext";
 import CheckoutModal from "./CheckoutModal";
 import CarritoSidebar from "./CarritoSidebar";
 import AccessibilityMenu from "./Accesibilidad";
+import Perfil from "./perfil/Perfil";
+import PerfilDropdown from "./PerfilDropdown";
 import { useTranslation } from "react-i18next";
 
 const Header = () => {
@@ -15,8 +17,12 @@ const Header = () => {
   const [mostrarCheckout, setMostrarCheckout] = useState(false);
   const [mostrarCarrito, setMostrarCarrito] = useState(false);
   const [mostrarAccesibilidad, setMostrarAccesibilidad] = useState(false);
+  const [mostrarPerfil, setMostrarPerfil] = useState(false);
+  const [seccionPerfil, setSeccionPerfil] = useState("datos");
   const { t } = useTranslation();
   const [usuario, setUsuario] = useState(null);
+  const [esAdministrador, setEsAdministrador] = useState(false);
+  const [rolUsuario, setRolUsuario] = useState(null);
   const navItems = t("header.nav", { returnObjects: true });
 
   const { carrito } = useContext(CarritoContext);
@@ -27,7 +33,37 @@ const Header = () => {
 
   const cerrarSesion = async () => {
     await supabase.auth.signOut();
+    setUsuario(null);
+    setEsAdministrador(false);
   };
+
+  const verificarAdministrador = async (userId) => {
+    if (!userId) {
+      setEsAdministrador(false);
+      setRolUsuario(null);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("Roles")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.log("ERROR OBTENIENDO ROL:", error);
+      setEsAdministrador(false);
+      setRolUsuario(null);
+      return;
+    }
+
+    const rol = data?.Roles;
+
+    setRolUsuario(rol);
+
+    setEsAdministrador(rol === "administrador");
+  };
+
   useEffect(() => {
     if (carrito.length > 0) {
       setAnimarCarrito(true);
@@ -57,12 +93,23 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const refrescarUsuario = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setUsuario(user ?? null);
+      verificarAdministrador(user?.id);
+    };
+
     const obtenerSesion = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     };
 
     obtenerSesion();
@@ -70,10 +117,17 @@ const Header = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUsuario(session?.user ?? null);
+      const user = session?.user ?? null;
+      setUsuario(user);
+      verificarAdministrador(user?.id);
     });
 
-    return () => subscription.unsubscribe();
+    window.addEventListener("gamehub-profile-updated", refrescarUsuario);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("gamehub-profile-updated", refrescarUsuario);
+    };
   }, []);
 
   return (
@@ -132,6 +186,24 @@ const Header = () => {
                 <Link to={item.path}>{item.label}</Link>
               </li>
             ))}
+            {esAdministrador && (
+              <li
+                className="
+            relative
+            cursor-pointer
+            after:absolute
+            after:left-0
+            after:-bottom-1
+            after:h-[2px]
+            after:w-0
+            after:bg-[#86E1FF]
+            after:transition-all
+            hover:after:w-full
+          "
+              >
+                <Link to="/admin">Admin</Link>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -146,26 +218,19 @@ const Header = () => {
   "
         >
           {usuario ? (
-            <div className="flex items-center gap-3">
-              <span
-                className="
-                  text-lg
-                  md:text-base
-                  font-bold
-                  text-[#86E1FF]
-                  drop-shadow-[0_0_8px_rgba(134,225,255,0.5)]
-                "
-              >
-                {usuario.user_metadata?.nombre || t("header.customer")}
-              </span>
-
-              <button
-                onClick={cerrarSesion}
-                className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
-              >
-                {t("header.logout")}
-              </button>
-            </div>
+            <PerfilDropdown
+              usuario={usuario}
+              rol={rolUsuario}
+              onAbrirPerfil={() => {
+                setSeccionPerfil("datos");
+                setMostrarPerfil(true);
+              }}
+              onAbrirOrdenes={() => {
+                setSeccionPerfil("ordenes");
+                setMostrarPerfil(true);
+              }}
+              onCerrarSesion={cerrarSesion}
+            />
           ) : (
             <button
               className="bg-[#86E1FF] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#5C7CFA] hover:text-white transition"
@@ -273,6 +338,19 @@ const Header = () => {
           </div>
         </div>
       </header>
+
+      {/* PERFIL */}
+      {mostrarPerfil && (
+        <Perfil
+          abierto={mostrarPerfil}
+          cerrar={() => setMostrarPerfil(false)}
+          seccionInicial={seccionPerfil}
+          onLogout={() => {
+            cerrarSesion();
+            setMostrarPerfil(false);
+          }}
+        />
+      )}
 
       {/* LOGIN */}
       <CheckoutModal
