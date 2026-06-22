@@ -144,19 +144,27 @@ function AdminPanel() {
   );
 
   const cargarPanel = async () => {
+    
     setCargando(true);
     setMensaje("");
+   
 
     const [ordenesRes, usuariosRes, comprobantesRes, repartidoresRes] =
-      await Promise.all([
-        supabase
-          .from("ordenes")
-          .select("*")
-          .order("created_at", { ascending: false }),
-        supabase.from("profiles").select("*"),
-        supabase.from("comprobantes").select("*"),
-        supabase.from("repartidores").select("*"),
-      ]);
+  await Promise.all([
+    supabase
+      .from("ordenes")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase.from("profiles").select("*"),
+    supabase.from("comprobantes").select("*"),
+    supabase.from("repartidores").select("*"),
+  ]);
+
+// Agrega estos logs aquí debajo:
+console.log("Comprobantes data:", comprobantesRes.data);
+console.log("Comprobantes error:", comprobantesRes.error);
+console.log("Ordenes IDs:", ordenesRes.data?.map(o => o.id));
+console.log("Comprobantes orden_ids:", comprobantesRes.data?.map(c => c.orden_id));
 
     setOrdenes(ordenesRes.data || []);
     setUsuarios(usuariosRes.data || []);
@@ -234,9 +242,9 @@ function AdminPanel() {
     const ratingPromedio =
       repartidores.length > 0
         ? (
-            repartidores.reduce((sum, r) => sum + (r.rating || 0), 0) /
-            repartidores.length
-          ).toFixed(1)
+          repartidores.reduce((sum, r) => sum + (r.rating || 0), 0) /
+          repartidores.length
+        ).toFixed(1)
         : 0;
 
     return {
@@ -279,14 +287,48 @@ function AdminPanel() {
     setProductoEditando(null);
   };
 
-  const descargarComprobante = (comprobante) => {
+  const descargarComprobante = async (comprobante) => {
     if (!comprobante?.archivo_url) return;
-    const { data } = supabase.storage
-      .from("comprobantes")
-      .getPublicUrl(comprobante.archivo_url);
 
-    if (data?.publicUrl) window.open(data.publicUrl, "_blank");
+    try {
+      // Intentar URL firmada (buckets privados)
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from("comprobantes")
+        .createSignedUrl(comprobante.archivo_url, 120);
+
+      if (!signedError && signedData?.signedUrl) {
+        const a = document.createElement("a");
+        a.href = signedData.signedUrl;
+        a.download = comprobante.archivo_url.split("/").pop() || "comprobante";
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      // Fallback: URL pública (buckets públicos)
+      const { data: publicData } = supabase.storage
+        .from("comprobantes")
+        .getPublicUrl(comprobante.archivo_url);
+
+      if (publicData?.publicUrl) {
+        const a = document.createElement("a");
+        a.href = publicData.publicUrl;
+        a.download = comprobante.archivo_url.split("/").pop() || "comprobante";
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch (err) {
+      console.error("Error al descargar comprobante:", err);
+      setMensaje("No se pudo descargar el comprobante");
+    }
   };
+
 
   const asignarRepartidor = async (ordenId, repartidorId) => {
     await supabase
@@ -372,9 +414,9 @@ function AdminPanel() {
             actuales.map((rep) =>
               rep.id === orden.repartidor_id
                 ? {
-                    ...rep,
-                    ordenes_entregadas: (rep.ordenes_entregadas || 0) + 1,
-                  }
+                  ...rep,
+                  ordenes_entregadas: (rep.ordenes_entregadas || 0) + 1,
+                }
                 : rep,
             ),
           );
@@ -421,10 +463,10 @@ function AdminPanel() {
 
     const consulta = productoEditando
       ? supabase
-          .from(config.tabla)
-          .update(payload)
-          .eq("id", productoEditando.id)
-          .select()
+        .from(config.tabla)
+        .update(payload)
+        .eq("id", productoEditando.id)
+        .select()
       : supabase.from(config.tabla).insert(payload);
 
     const { error } = await consulta;
@@ -942,11 +984,10 @@ function AdminPanel() {
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 font-bold transition ${
-                  tab === item.id
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-3 font-bold transition ${tab === item.id
                     ? "bg-[#86E1FF] text-black"
                     : "bg-[#1e293b] text-gray-300 hover:text-white"
-                }`}
+                  }`}
               >
                 <Icon size={18} />
                 {item.label}
@@ -1027,11 +1068,10 @@ function AdminPanel() {
 function ResumenCard({ icon: Icon, label, value, highlight }) {
   return (
     <div
-      className={`rounded-lg border p-5 ${
-        highlight
+      className={`rounded-lg border p-5 ${highlight
           ? "bg-[#86E1FF]/10 border-[#86E1FF]/40"
           : "bg-[#1e293b] border-white/10"
-      }`}
+        }`}
     >
       <div className="flex items-center justify-between">
         <p className="text-gray-400 text-sm">{label}</p>
@@ -1150,8 +1190,7 @@ function PedidosTab({
                         Pedido #{String(orden.id).slice(0, 8).toUpperCase()}
                       </h2>
                       <span
-                        className={`rounded-full border px-3 py-1 text-xs font-bold ${
-                          {
+                        className={`rounded-full border px-3 py-1 text-xs font-bold ${{
                             pendiente:
                               "bg-yellow-500/10 text-yellow-300 border-yellow-500/40",
                             pagado:
@@ -1161,7 +1200,7 @@ function PedidosTab({
                             entregado:
                               "bg-green-500/10 text-green-300 border-green-500/40",
                           }[orden.estado] || "bg-gray-500/10"
-                        }`}
+                          }`}
                       >
                         {orden.estado.charAt(0).toUpperCase() +
                           orden.estado.slice(1)}
@@ -1182,6 +1221,16 @@ function PedidosTab({
                         value={`S/ ${Number(orden.total || 0).toFixed(2)}`}
                       />
                       <Info label="Metodo" value={orden.metodo_pago || "N/A"} />
+                      <div>
+                        <p className="text-gray-500">Código operación</p>
+                        <p className={`font-semibold break-words ${comprobante?.codigo_operacion
+                            ? "text-[#86E1FF]"
+                            : "text-gray-500"
+                          }`}>
+                          {comprobante?.codigo_operacion || "Sin código"}
+                        </p>
+                      </div>
+                      <Info label="Telefono" value={orden.telefono || "N/A"} />
                       <Info label="Telefono" value={orden.telefono || "N/A"} />
                       <Info
                         label="Direccion"
@@ -1250,7 +1299,9 @@ function PedidosTab({
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#86E1FF] px-4 py-3 font-bold text-[#86E1FF] transition hover:bg-[#86E1FF] hover:text-black disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Download size={18} />
-                      {comprobante ? "Ver comprobante" : "Sin comprobante"}
+                      {comprobante
+                        ? "Descargar comprobante"
+                        : "Sin comprobante"}
                     </button>
 
                     {orden.estado === "enviado" && (
@@ -1485,11 +1536,10 @@ function CatalogoTab({
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`inline-flex flex-1 items-center justify-center rounded-lg border px-3 py-2 text-sm font-bold ${
-                    Number(producto.stock) <= 5
+                  className={`inline-flex flex-1 items-center justify-center rounded-lg border px-3 py-2 text-sm font-bold ${Number(producto.stock) <= 5
                       ? "border-yellow-500/40 text-yellow-300"
                       : "border-green-500/40 text-green-300"
-                  }`}
+                    }`}
                 >
                   Stock {producto.stock ?? 0}
                 </span>
@@ -1684,11 +1734,10 @@ function RepartidoresTab({
                 <div className="flex justify-between">
                   <span className="text-gray-400">Estado:</span>
                   <span
-                    className={`px-2 py-1 rounded text-xs font-bold ${
-                      rep.activo
+                    className={`px-2 py-1 rounded text-xs font-bold ${rep.activo
                         ? "bg-green-500/20 text-green-400"
                         : "bg-red-500/20 text-red-400"
-                    }`}
+                      }`}
                   >
                     {rep.activo ? "Activo" : "Inactivo"}
                   </span>

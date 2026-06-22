@@ -9,7 +9,13 @@ import Toast from "../../components/Toast";
 function Accesorios() {
   const { t } = useTranslation();
   const { accesorios: listaDeAccesorios, cargando, error } = useAccesorios();
+<<<<<<< HEAD
   const [busqueda, setBusqueda] = useState("");
+=======
+  const { agregarFavorito } = useContext(FavoritosContext);
+
+  const [busquedaProductos, setBusquedaProductos] = useState("");
+>>>>>>> origin/main
   const [orden, setOrden] = useState("Recomendados");
   const [plataforma, setPlataforma] = useState("Todas");
   const [categoria, setCategoria] = useState("Todas");
@@ -27,7 +33,7 @@ function Accesorios() {
   ];
 
   const limpiarFiltros = () => {
-    setBusqueda("");
+    setBusquedaProductos("");
     setOrden("Recomendados");
     setPlataforma("Todas");
     setCategoria("Todas");
@@ -55,7 +61,7 @@ function Accesorios() {
     let filtrados = listaDeAccesorios.filter((item) => {
       const coincideBusqueda = item.titulo
         .toLowerCase()
-        .includes(busqueda.toLowerCase());
+        .includes(busquedaProductos.toLowerCase());
       const coincidePlataforma =
         plataforma === "Todas" || item.consola === plataforma;
       const coincideCategoria =
@@ -80,11 +86,11 @@ function Accesorios() {
     }
 
     return filtrados;
-  }, [busqueda, plataforma, categoria, etiqueta, orden, listaDeAccesorios]);
+  }, [busquedaProductos, plataforma, categoria, etiqueta, orden, listaDeAccesorios]);
 
   useEffect(() => {
     setPaginaActual(1);
-  }, [busqueda, plataforma, categoria, etiqueta, orden, listaDeAccesorios]);
+  }, [busquedaProductos, plataforma, categoria, etiqueta, orden, listaDeAccesorios]);
 
   const totalPaginas = Math.ceil(
     productosProcesados.length / accesoriosPorPagina,
@@ -135,8 +141,8 @@ function Accesorios() {
             <input
               type="text"
               placeholder={t("accessories.search")}
-              value={busqueda}
-              onChange={(event) => setBusqueda(event.target.value)}
+              value={busquedaProductos}
+              onChange={(event) => setBusquedaProductos(event.target.value)}
               className="w-full bg-[#1e232d] text-gray-300 placeholder-gray-500 rounded-xl px-5 py-3 focus:outline-none focus:ring-1 focus:ring-[#86E1FF] transition"
             />
           </div>
@@ -232,24 +238,13 @@ function Accesorios() {
                       setPaginaActual((prev) => Math.max(prev - 1, 1))
                     }
                     disabled={paginaActual === 1}
-                    className="
-        px-4
-        py-2
-        rounded-lg
-        bg-[#1e232d]
-        text-white
-        disabled:opacity-40
-        disabled:cursor-not-allowed
-        hover:bg-[#5C7CFA]
-        transition
-      "
+                    className="px-4 py-2 rounded-lg bg-[#1e232d] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#5C7CFA] transition"
                   >
                     {t("common.previous")}
                   </button>
 
                   {[...Array(totalPaginas)].map((_, index) => {
                     const numeroPagina = index + 1;
-
                     return (
                       <button
                         key={numeroPagina}
@@ -272,17 +267,7 @@ function Accesorios() {
                       )
                     }
                     disabled={paginaActual === totalPaginas}
-                    className="
-        px-4
-        py-2
-        rounded-lg
-        bg-[#1e232d]
-        text-white
-        disabled:opacity-40
-        disabled:cursor-not-allowed
-        hover:bg-[#5C7CFA]
-        transition
-      "
+                    className="px-4 py-2 rounded-lg bg-[#1e232d] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#5C7CFA] transition"
                   >
                     {t("common.next")}
                   </button>

@@ -52,6 +52,14 @@ const STOCK_TABLE_BY_TYPE = {
   producto: "accesorios",
 };
 
+const MAX_COMPROBANTE_SIZE = 5 * 1024 * 1024;
+const COMPROBANTE_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "application/pdf",
+];
+
 async function descontarStockDelCarrito(carrito) {
   const productosValidados = [];
 
@@ -228,6 +236,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     setCvv("");
     setComprobante(null);
     setNombreComprobante("");
+    setCodigoOperacion("");
   };
 
   const formatearNumeroTarjeta = (valor) => {
@@ -268,10 +277,28 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
 
   const handleComprobanteChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setComprobante(file);
-      setNombreComprobante(file.name);
+
+    if (!file) return;
+
+    if (!COMPROBANTE_TYPES.includes(file.type)) {
+      setMensaje("El comprobante debe ser PNG, JPG o PDF");
+      e.target.value = "";
+      setComprobante(null);
+      setNombreComprobante("");
+      return;
     }
+
+    if (file.size > MAX_COMPROBANTE_SIZE) {
+      setMensaje("El comprobante no debe superar 5MB");
+      e.target.value = "";
+      setComprobante(null);
+      setNombreComprobante("");
+      return;
+    }
+
+    setMensaje("");
+    setComprobante(file);
+    setNombreComprobante(file.name);
   };
 
   const finalizarCompra = async () => {
@@ -295,24 +322,11 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     if (metodoPago === "Tarjeta" && !validarTarjeta()) {
       return;
     }
-    setProcesando(true);
-    const resultadoStock = await descontarStockDelCarrito(carrito);
-    setProcesando(false);
-
-    if (!resultadoStock.ok) {
-      setMensaje(resultadoStock.message);
+    const metodoObj = metodosDePago.find((m) => m.id === metodoPago);
+    if (metodoObj.requiereComprobante && !comprobante) {
+      setMensaje("Sube el comprobante de pago para confirmar la compra");
       return;
     }
-
-    window.dispatchEvent(
-      new CustomEvent("gamehub-stock-updated", {
-        detail: { productos: resultadoStock.productosActualizados },
-      }),
-    );
-
-    setMensaje(t("checkout.success"));
-
-    const metodoObj = metodosDePago.find((m) => m.id === metodoPago);
     if (metodoObj.requiereComprobante && !codigoOperacion.trim()) {
       setMensaje("Ingresa el código de operación");
       return;
@@ -340,6 +354,22 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     try {
       // Determinar estado según método de pago
       const estado = metodoPago === "Tarjeta" ? "pagado" : "pendiente";
+      let nombreArchivoComprobante = "";
+
+      if (metodoObj.requiereComprobante) {
+        const extension =
+          comprobante.name.split(".").pop()?.toLowerCase() || "pdf";
+        nombreArchivoComprobante = `${user.id}-${Date.now()}.${extension}`;
+        const { error: errorUpload } = await supabase.storage
+          .from("comprobantes")
+          .upload(nombreArchivoComprobante, comprobante);
+
+        if (errorUpload) {
+          setMensaje("No se pudo subir el comprobante. Intenta nuevamente");
+          setCargando(false);
+          return;
+        }
+      }
 
       const { data: orden, error: errorOrden } = await supabase
         .from("ordenes")
@@ -365,6 +395,24 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
       }
 
       // Crear registro de seguimiento inicial CON UBICACIÓN DE LA EMPRESA
+      if (metodoObj.requiereComprobante) {
+        const { error: errorComprobante } = await supabase
+          .from("comprobantes")
+          .insert({
+            orden_id: orden.id,
+            usuario_id: user.id,
+            archivo_url: nombreArchivoComprobante,
+            metodo_pago: metodoPago,
+            codigo_operacion: codigoOperacion.trim(),
+          });
+
+        if (errorComprobante) {
+          setMensaje("No se pudo registrar el comprobante");
+          setCargando(false);
+          return;
+        }
+      }
+
       if (orden) {
         // Obtener ubicación de la empresa
         const { data: empresa } = await supabase
@@ -412,24 +460,23 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
         return;
       }
 
-      window.dispatchEvent(new Event("stockActualizado"));
+      setProcesando(true);
+      const resultadoStock = await descontarStockDelCarrito(carrito);
+      setProcesando(false);
 
-      if (comprobante) {
-        const nombreArchivo = `${user.id}-${orden.id}-${Date.now()}`;
-        const { error: errorUpload } = await supabase.storage
-          .from("comprobantes")
-          .upload(nombreArchivo, comprobante);
-
-        if (!errorUpload) {
-          await supabase.from("comprobantes").insert({
-            orden_id: orden.id,
-            usuario_id: user.id,
-            archivo_url: nombreArchivo,
-            metodo_pago: metodoPago,
-            codigo_operacion: codigoOperacion,
-          });
-        }
+      if (!resultadoStock.ok) {
+        setMensaje(resultadoStock.message);
+        setCargando(false);
+        return;
       }
+
+      window.dispatchEvent(
+        new CustomEvent("gamehub-stock-updated", {
+          detail: { productos: resultadoStock.productosActualizados },
+        }),
+      );
+
+      window.dispatchEvent(new Event("stockActualizado"));
 
       const carritoParaBoleta = [...carrito];
 
@@ -457,6 +504,7 @@ function CheckoutModal({ abierto, cerrar, setMostrarLogin }) {
     } catch {
       setMensaje("Error en el proceso de compra");
       setCargando(false);
+      setProcesando(false);
     }
   };
 

@@ -31,7 +31,7 @@ function FiltroConsolas({ productos, filtros, setFiltros }) {
         sticky
         top-5
         bg-zinc-900
-        text-white
+        text-[#86E1FF]
         p-6
         rounded-2xl
       "
