@@ -1,13 +1,30 @@
 @import "tailwindcss";
 
+@theme {
 
+  --font-jura: 'Jura', sans-serif;
+
+  --font-slackey: 'Slackey', cursive;
+
+}
 @layer base {
-  body {
-    @apply bg-black m-0 font-sans antialiased;
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    @apply font-jura;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-slackey;
+  }
+  p  {
+    @apply font-jura text-white;
   }
 
   code {
-    @apply font-mono;
+    @apply font-slackey text-[#86e1ff] bg-slate-950 px-1 rounded;
   }
 }
 

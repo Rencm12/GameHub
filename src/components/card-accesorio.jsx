@@ -3,36 +3,42 @@ import { CarritoContext } from "../context/CarritoContext.jsx";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../supabase/client";
+import { CircleCheck, CircleX, TriangleAlert } from "lucide-react";
 
-function CardAccesorio({ producto }) {
+function CardAccesorio({ producto, addToast }) {
   const { t } = useTranslation();
 
   const { agregarAlCarrito } = useContext(CarritoContext);
 
-  const { imagen, nombre, descripcion, precio } = producto;
-
+  const [productoSupabase, setProductoSupabase] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [stock, setStock] = useState(producto.stock ?? undefined);
+  const productoActual = productoSupabase
+    ? { ...producto, ...productoSupabase }
+    : producto;
+  const { imagen, descripcion, precio, consola } = productoActual;
+  const nombre = productoActual.titulo || productoActual.nombre || "Accesorio";
 
   useEffect(() => {
-    const obtenerStock = async () => {
+    const obtenerAccesorio = async () => {
       if (!producto?.id) return;
 
       const { data, error } = await supabase
         .from("accesorios")
-        .select("stock")
+        .select("*")
         .eq("id", producto.id)
         .single();
 
       if (error) {
-        console.error("Error al obtener stock de accesorio:", error);
+        console.error("Error al obtener accesorio de Supabase:", error);
         return;
       }
 
+      setProductoSupabase(data);
       setStock(data?.stock ?? 0);
     };
 
-    obtenerStock();
+    obtenerAccesorio();
   }, [producto?.id]);
 
   useEffect(() => {
@@ -51,6 +57,30 @@ function CardAccesorio({ producto }) {
     return () =>
       window.removeEventListener("gamehub-stock-updated", actualizarStock);
   }, [producto?.id]);
+
+  const handleCarrito = async (data) => {
+    const productoConStock = {
+      ...data,
+      nombre,
+      stock: stock ?? data.stock ?? 0,
+    };
+
+    const agregado = await agregarAlCarrito({
+      ...productoConStock,
+      tipo: "accesorio",
+    });
+
+    if (!addToast) return;
+
+    if (agregado) {
+      addToast(
+        `${nombre} ${t("common.addedToCart")}`,
+        productoConStock.id,
+      );
+    } else {
+      addToast(t("common.noMoreUnits"), productoConStock.id);
+    }
+  };
 
   return (
     <>
@@ -92,17 +122,40 @@ function CardAccesorio({ producto }) {
           </h3>
 
           <p className="text-gray-400 mt-2 h-12 overflow-hidden">
-            {descripcion}
+            {consola || descripcion}
           </p>
 
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
 
+          {stock !== undefined && (
+            <div className="mt-2 mb-4 flex justify-center gap-2">
+              {stock > 5 && (
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                  <CircleCheck size={14} />
+                  {t("common.available")}
+                </span>
+              )}
+
+              {stock > 0 && stock <= 5 && (
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                  <TriangleAlert size={14} />
+                  {t("common.lastUnits")}
+                </span>
+              )}
+
+              {stock === 0 && (
+                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                  <CircleX size={14} />
+                  {t("common.soldOut")}
+                </span>
+              )}
+            </div>
+          )}
+
           <button
             disabled={stock === 0 || stock === undefined}
-            onClick={() =>
-              agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })
-            }
-            className="
+            onClick={() => handleCarrito(productoActual)}
+            className={`
               w-full
               mt-4
               bg-[#86E1FF]
@@ -111,9 +164,8 @@ function CardAccesorio({ producto }) {
               rounded-lg
               font-bold
               transition
-              hover:bg-[#5C7CFA]
-              hover:text-white
-            "
+              ${stock === 0 || stock === undefined ? "opacity-60 cursor-not-allowed" : "hover:bg-[#5C7CFA] hover:text-white"}
+            `}
           >
             {stock === 0
               ? t("common.noStock")
@@ -145,6 +197,7 @@ function CardAccesorio({ producto }) {
 
       {mostrarModal && (
         <div
+          onClick={() => setMostrarModal(false)}
           className="
             fixed
             inset-0
@@ -157,6 +210,7 @@ function CardAccesorio({ producto }) {
           "
         >
           <div
+            onClick={(e) => e.stopPropagation()}
             className="
               bg-[#111827]
               w-full
@@ -198,7 +252,34 @@ function CardAccesorio({ producto }) {
                 {nombre}
               </h2>
 
+              {consola && <p className="text-cyan-400 mt-2">{consola}</p>}
+
               <p className="text-gray-400 mt-4 leading-7">{descripcion}</p>
+
+              {stock !== undefined && (
+                <div className="mt-4 flex justify-center gap-2">
+                  {stock > 5 && (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/20 border border-green-400 text-green-400 text-xs font-semibold">
+                      <CircleCheck size={14} />
+                      {t("common.available")}
+                    </span>
+                  )}
+
+                  {stock > 0 && stock <= 5 && (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-xs font-semibold">
+                      <TriangleAlert size={14} />
+                      {t("common.lastUnits")}
+                    </span>
+                  )}
+
+                  {stock === 0 && (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-500/20 border border-red-400 text-red-400 text-xs font-semibold">
+                      <CircleX size={14} />
+                      {t("common.soldOut")}
+                    </span>
+                  )}
+                </div>
+              )}
 
               <p
                 className="
@@ -213,10 +294,8 @@ function CardAccesorio({ producto }) {
 
               <button
                 disabled={stock === 0 || stock === undefined}
-                onClick={() =>
-                  agregarAlCarrito({ ...producto, stock, tipo: "accesorio" })
-                }
-                className="
+                onClick={() => handleCarrito(productoActual)}
+                className={`
                   mt-6
                   w-full
                   bg-[#86E1FF]
@@ -224,12 +303,9 @@ function CardAccesorio({ producto }) {
                   py-3
                   rounded-xl
                   font-bold
-                  hover:bg-[#5C7CFA]
-                  hover:text-white
                   transition
-                  disabled:opacity-60
-                  disabled:cursor-not-allowed
-                "
+                  ${stock === 0 || stock === undefined ? "bg-gray-500 cursor-not-allowed text-white" : "hover:bg-[#5C7CFA] hover:text-white"}
+                `}
               >
                 {stock === 0
                   ? t("common.noStock")

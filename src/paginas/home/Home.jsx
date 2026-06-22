@@ -88,7 +88,11 @@ function Home() {
 
         <HomeCardsCarousel>
           {accesoriosDestacados.map((producto) => (
-            <CardAccesorio key={producto.id} producto={producto} />
+            <CardAccesorio
+              key={producto.id}
+              producto={producto}
+              addToast={addToast}
+            />
           ))}
         </HomeCardsCarousel>
       </section>

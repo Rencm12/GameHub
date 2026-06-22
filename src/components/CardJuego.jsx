@@ -4,6 +4,17 @@ import { FavoritosContext } from "../context/FavoritosContext";
 import { X, Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+function formatearEstrellas(valor) {
+  const numero = Number(valor);
+
+  if (Number.isFinite(numero)) {
+    const cantidad = Math.min(5, Math.max(0, Math.round(numero)));
+    return "⭐".repeat(cantidad) + "☆".repeat(5 - cantidad);
+  }
+
+  return valor || "☆☆☆☆☆";
+}
+
 function CardJuego({ juego, addToast }) {
   const { t } = useTranslation();
   const [mostrarModal, setMostrarModal] = useState(false);
@@ -79,7 +90,9 @@ function CardJuego({ juego, addToast }) {
         </p>
 
         {/* ESTRELLAS */}
-        <div className="mt-2 text-yellow-400 text-lg">{juego.estrellas}</div>
+        <div className="mt-2 text-yellow-400 text-lg">
+          {formatearEstrellas(juego.estrellas)}
+        </div>
 
         {/* PRECIO */}
         <p className="text-[#86E1FF] text-lg md:text-xl font-bold mt-2">
