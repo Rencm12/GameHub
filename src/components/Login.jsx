@@ -23,7 +23,7 @@ export default function Login({ onClose }) {
     setMensajeAuth("");
   };
 
-  useEffect(() => {
+useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
@@ -35,6 +35,7 @@ export default function Login({ onClose }) {
     return () => {
       listener.subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // LOGIN CORRECTO

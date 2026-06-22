@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { CarritoContext } from "../../context/CarritoContext";
 import { useTranslation } from "react-i18next";
-import { X, Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
+import { Heart, CircleCheck, TriangleAlert, CircleX } from "lucide-react";
 import { FavoritosContext } from "../../context/FavoritosContext";
 
 function Card({ producto, addToast }) {

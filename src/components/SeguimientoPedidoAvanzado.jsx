@@ -112,6 +112,7 @@ function SeguimientoPedidoAvanzado({
       suscripcion.unsubscribe();
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ordenId]);
 
   useEffect(() => {
@@ -388,8 +389,6 @@ function SeguimientoPedidoAvanzado({
                   ) + 1,
                 )
                 .includes(est);
-
-              const ubicacionEste = ubicaciones.find((u) => u.estado === est);
 
               return (
                 <div key={est} className="flex gap-4 relative z-10">
