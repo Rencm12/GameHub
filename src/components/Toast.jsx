@@ -1,4 +1,4 @@
-import { ShoppingCart, TriangleAlert, CheckCircle } from "lucide-react";
+import { TriangleAlert, CheckCircle } from "lucide-react";
 
 function Toast({ toasts = [] }) {
   if (!toasts.length) return null;

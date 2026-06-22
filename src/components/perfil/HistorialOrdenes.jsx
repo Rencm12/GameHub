@@ -6,8 +6,9 @@ function HistorialOrdenes({ usuarioId, onVerDetalles }) {
   const [ordenes, setOrdenes] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
     cargarOrdenes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
 
   const cargarOrdenes = async () => {

@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Truck,
   Package,
-  MapPin,
   Send,
   Star,
   Phone,
@@ -45,7 +44,6 @@ function SeguimientoPedidoAvanzado({
   const [cargando, setCargando] = useState(true);
   const [posicionActual, setPosicionActual] = useState(null);
   const [progreso, setProgreso] = useState(0);
-  const [eta, setEta] = useState(null);
   const chatRef = useRef(null);
 
   const estadosInfo = {
@@ -114,6 +112,7 @@ function SeguimientoPedidoAvanzado({
       suscripcion.unsubscribe();
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ordenId]);
 
   useEffect(() => {
@@ -390,8 +389,6 @@ function SeguimientoPedidoAvanzado({
                   ) + 1,
                 )
                 .includes(est);
-
-              const ubicacionEste = ubicaciones.find((u) => u.estado === est);
 
               return (
                 <div key={est} className="flex gap-4 relative z-10">

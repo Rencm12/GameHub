@@ -14,7 +14,7 @@ export function FavoritosProvider({ children }) {
         ...it,
         tipo: it.tipo ?? (it.nombre ? "juego" : "consola"),
       }));
-    } catch (e) {
+    } catch {
       return [];
     }
   });

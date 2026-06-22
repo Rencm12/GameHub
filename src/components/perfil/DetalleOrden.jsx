@@ -17,8 +17,9 @@ function DetalleOrden({ orden, onVolver }) {
   const [comprobante, setComprobante] = useState(null);
   const [cargando, setCargando] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
     cargarDetalles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orden.id]);
 
   const cargarDetalles = async () => {

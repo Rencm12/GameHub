@@ -62,6 +62,7 @@ export function CarritoProvider({ children }) {
     } else {
       setCarrito([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
 
   const migrarCarritoASupabase = async () => {
