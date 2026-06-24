@@ -175,8 +175,8 @@ function Card({ producto, addToast }) {
         />
 
         <div className="p-4">
-          <h3 className="text-white text-xl font-bold">{titulo}</h3>
-          <p className="text-cyan-400">{consola}</p>
+          <h3 className="text-[#86E1FF] text-xl font-bold">{titulo}</h3>
+          <p className="text-gray-300">{consola}</p>
           <p className="text-[#86E1FF] text-2xl font-bold mt-2">S/ {precio}</p>
 
           <button

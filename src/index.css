@@ -4,7 +4,7 @@
 
   --font-jura: 'Jura', sans-serif;
 
-  --font-slackey: 'Slackey', cursive;
+  --font-zen-dots: 'Zen Dots', cursive;
 
 }
 @layer base {
@@ -17,14 +17,14 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-slackey;
+    @apply font-zen-dots text-white;
   }
   p  {
     @apply font-jura text-white;
   }
 
   code {
-    @apply font-slackey text-[#86e1ff] bg-slate-950 px-1 rounded;
+    @apply font-zen-dots text-[#86e1ff] bg-slate-950 px-1 rounded;
   }
 }
 

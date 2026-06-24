@@ -39,16 +39,7 @@ function Card({ producto, addToast }) {
   return (
     <>
       <div
-        className="
-         relative
-         bg-[#1a1a1a]
-         p-4
-         rounded-xl
-         text-center
-         transition
-         hover:scale-105
-         hover:shadow-[0_0_15px_#86E1FF]
-        "
+        className="relative bg-[#1a1a1a] p-3 md:p-4 rounded-xl text-center transition hover:scale-105 hover:shadow-[0_0_15px_#86E1FF] flex flex-col h-full"
       >
         {/* FAVORITOS */}
         <button
@@ -137,11 +128,10 @@ function Card({ producto, addToast }) {
              rounded-lg
              font-bold
              transition
-    ${
-      stock === 0
-        ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-        : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
-    }
+    ${stock === 0
+                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
+              }
   `}
           >
             {stock === 0 ? t("common.noStock") : t("common.addToCart")}
@@ -220,11 +210,10 @@ function Card({ producto, addToast }) {
     rounded-xl
     font-bold
     transition
-    ${
-      stock === 0
-        ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-        : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
-    }
+    ${stock === 0
+                    ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                    : "bg-[#86E1FF] text-black hover:bg-[#5C7CFA] hover:text-white"
+                  }
   `}
               >
                 {stock === 0 ? t("common.noStock") : t("common.addToCart")}

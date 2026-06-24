@@ -130,7 +130,7 @@ function Accesorios() {
           {t("accessories.title")}
         </h1>
 
-        <div className="max-w-[1400px] mx-auto mb-10 bg-[#151921] p-3 rounded-2xl flex flex-col xl:flex-row items-center gap-4 shadow-lg border border-gray-800">
+        <div className="w-full mx-auto mb-10 bg-[#151921] p-3 rounded-2xl flex flex-col xl:flex-row items-center gap-4 shadow-lg border border-gray-800">
           <div className="w-full xl:flex-1">
             <input
               type="text"
@@ -201,7 +201,7 @@ function Accesorios() {
           </div>
         </div>
 
-        <main className="max-w-[1400px] mx-auto">
+        <main className="w-full mx-auto">
           {productosProcesados.length === 0 ? (
             <div className="text-center py-20 bg-[#151921] rounded-3xl border border-gray-800">
               <p className="text-gray-400 text-xl mb-4">
@@ -220,7 +220,7 @@ function Accesorios() {
                 {t("accessories.showing")} {productosProcesados.length}{" "}
                 {t("accessories.results")}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {productosPaginados.map((item) => (
                   <Card key={item.id} producto={item} addToast={addToast} />
                 ))}
